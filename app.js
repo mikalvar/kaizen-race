@@ -268,12 +268,11 @@ async function cargarDatosTablero() {
         const { data, error } = await supabaseClient
             .from('ideas')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('fecha_creacion', { ascending: false });
 
         if (error) throw error;
 
-        // Calcular contadores del usuario actual
-        const misKaizens = data.filter(k => k.autor_ci === usuarioActual.ci);
+        const misKaizens = data.filter(k => k.usuario_ci === usuarioActual.ci);
         const totalMias = misKaizens.length;
         const abiertasMias = misKaizens.filter(k => k.estado === 'ABIERTO').length;
         const cerradasMias = misKaizens.filter(k => k.estado === 'CERRADO').length;
@@ -282,7 +281,6 @@ async function cargarDatosTablero() {
         document.getElementById('countAbiertas').textContent = abiertasMias;
         document.getElementById('countCerradas').textContent = cerradasMias;
 
-        // Filtrar según pestaña activa (Mis acciones / Todas) y Estado seleccionado
         let listaFiltrada = filtroIdeasActual === 'mias' ? misKaizens : data;
 
         if (filtroEstadoActual !== 'TODOS') {
