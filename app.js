@@ -433,5 +433,110 @@ async function cargarPista() {
         `;
     });
 
+
+let filtroEstadoActual = 'TODOS'; // Nuevo control para filtrar por estado al hacer clic en los cuadros
+
+function cambiarFiltroIdeas(filtro) {
+    filtroIdeasActual = filtro;
+    filtroEstadoActual = 'TODOS'; // Resetea el filtro de estado al cambiar entre Mis Ideas y Todas
+    
+    const sliderBg = document.getElementById('filterSliderBg');
+    const tabMias = document.getElementById('tabMiasBtn');
+    const tabTodas = document.getElementById('tabTodasBtn');
+
+    if (filtro === 'mias') {
+        sliderBg.classList.remove('right');
+        sliderBg.classList.add('left');
+        tabMias.classList.add('active');
+        tabTodas.classList.remove('active');
+    } else {
+        sliderBg.classList.remove('left');
+        sliderBg.classList.add('right');
+        tabTodas.classList.add('active');
+        tabMias.classList.remove('active');
+    }
+    cargarIdeas();
+}
+
+function filtrarPorEstado(estado) {
+    filtroEstadoActual = estado;
+    cargarIdeas();
+}
+
+async function cargarIdeas() {
+    const contenedor = document.getElementById('listaIdeas');
+    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280; padding: 20px;">Cargando ideas...</p>';
+
+    let query = dbSupabase.from('ideas').select('*');
+    if (filtroIdeasActual === 'mias') {
+        query = query.eq('usuario_ci', usuarioLogueado.ci);
+    }
+
+    const { data: ideas, error } = await query.order('fecha_creacion', { ascending: false });
+
+    if (error) {
+        contenedor.innerHTML = '<p style="text-align:center; color:#ef4444; padding: 20px;">Error al cargar ideas.</p>';
+        return;
+    }
+
+    // Filtrar adicionalmente por estado si se hizo clic en los cuadros superiores
+    let ideasFiltradas = ideas;
+    if (filtroEstadoActual !== 'TODOS') {
+        ideasFiltradas = ideas.filter(i => {
+            const est = (i.estado || 'ABIERTO').toUpperCase();
+            return est === filtroEstadoActual;
+        });
+    }
+
+    if (!ideasFiltradas || ideasFiltradas.length === 0) {
+        contenedor.innerHTML = `
+            <div style="text-align:center; padding: 30px; color: var(--text-muted);">
+                <span style="font-size: 32px;">📭</span>
+                <h3 style="margin-top: 8px; font-size: 16px;">No hay propuestas aquí</h3>
+                <p style="font-size: 13px;">No se encontraron registros con este filtro.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    ideasFiltradas.forEach(idea => {
+        const esMio = idea.usuario_ci === usuarioLogueado.ci;
+        const estado = (idea.estado || 'ABIERTO').toUpperCase();
+        const badgeClass = estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
+        const nombrePiloto = idea.usuario_nombre || 'Piloto';
+        const fechaFormateada = idea.fecha_creacion ? new Date(idea.fecha_creacion).toLocaleDateString() : '';
+
+        // Botón reversible: si está cerrado muestra "Abrir", si está abierto muestra "Cerrar"
+        const textoBotonEstado = estado === 'CERRADO' ? 'Abrir' : 'Cerrar';
+        const colorBotonEstado = estado === 'CERRADO' ? 'var(--primary)' : 'var(--success)';
+        const nuevoEstadoDestino = estado === 'CERRADO' ? 'ABIERTO' : 'CERRADO';
+
+        html += `
+            <div class="idea-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <span class="status-badge ${badgeClass}">${estado}</span>
+                        <h3 style="margin-top: 6px; font-size: 16px; color: var(--text-main);">${idea.titulo}</h3>
+                    </div>
+                </div>
+                <p style="margin-top: 8px; font-size: 14px; color: #4b5563;">${idea.descripcion}</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${idea.tipo || 'Quick'}</span>
+                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${idea.area || 'General'}</span>
+                    <span>Por: ${nombrePiloto}</span>
+                    <span style="margin-left: auto;">${fechaFormateada}</span>
+                </div>
+                ${esMio ? `
+                    <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+                        <button onclick="abrirModalEditar('${idea.id}', '${encodeURIComponent(idea.titulo)}', '${encodeURIComponent(idea.area)}', '${idea.tipo}', '${encodeURIComponent(idea.descripcion)}')" style="background-color: var(--warning); padding: 6px 12px; font-size: 12px; width: auto;">Editar</button>
+                        <button onclick="cambiarEstadoIdea('${idea.id}', '${nuevoEstadoDestino}')" style="background-color: ${colorBotonEstado}; padding: 6px 12px; font-size: 12px; width: auto;">${textoBotonEstado}</button>
+                        <button onclick="eliminarIdea('${idea.id}')" style="background-color: var(--danger); padding: 6px 12px; font-size: 12px; width: auto;">Eliminar</button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+
     contenedor.innerHTML = html;
 }
