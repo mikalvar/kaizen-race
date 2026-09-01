@@ -34,18 +34,23 @@ async function registrarUsuario() {
         return;
     }
 
-    const { error } = await supabaseClient
-        .from("usuarios")
-        .insert([
-            {
-                nombre,
-                apellido,
-                ci,
-                rol: "usuario"
-            }
-        ]);
+const { error } = await supabaseClient
+    .from("usuarios")
+    .insert([
+        {
+            nombre,
+            apellido,
+            ci,
+            rol: "usuario"
+        }
+    ]);
 
-    alert("Usuario registrado correctamente");
+if (error) {
+    alert(error.message);
+    return;
+}
+
+alert("Usuario registrado correctamente");
 }
 
 /*
