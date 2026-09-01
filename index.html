@@ -407,6 +407,65 @@
             top: -6px;
             font-size: 14px;
         }
+
+/* Estilo del contenedor deslizante para Mis Ideas / Todas */
+.auth-switch-container.filter-switch {
+    position: relative;
+    display: flex;
+    background: #e2e8f0;
+    border-radius: 20px;
+    padding: 3px;
+    width: 200px;
+    margin-left: auto;
+}
+
+.auth-switch-container.filter-switch button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 2;
+    color: var(--text-main);
+    transition: color 0.3s ease;
+    text-align: center;
+}
+
+.auth-switch-container.filter-switch button.active {
+    color: #fff;
+}
+
+.auth-slider-bg.filter-slider {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    width: 50%;
+    background: var(--primary);
+    border-radius: 17px;
+    transition: transform 0.3s ease;
+    z-index: 1;
+}
+
+.auth-slider-bg.filter-slider.left {
+    transform: translateX(0%);
+}
+
+.auth-slider-bg.filter-slider.right {
+    transform: translateX(100%);
+}
+
+/* Cursor pointer para los contadores superiores */
+.stat-card-clickable {
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.stat-card-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+        
     </style>
 </head>
 <body>
