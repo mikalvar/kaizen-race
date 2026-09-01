@@ -4,31 +4,45 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
-let filtroActual = 'todas'; // 'todas' o 'mias'
+let filtroIdeasActual = 'mias'; // 'mias' por defecto en la pestaña Mis Ideas
 let ideasGlobales = [];
 let editIdActual = null;
 
-// Validar sesión persistente al cargar
+// Validar sesión al cargar
 window.addEventListener('DOMContentLoaded', () => {
     const sesionGuardada = sessionStorage.getItem("usuario");
     if (sesionGuardada) {
         currentUser = JSON.parse(sesionGuardada);
         document.getElementById("loginArea").classList.add("hidden");
         document.getElementById("appArea").classList.remove("hidden");
-        document.getElementById("usuarioActual").textContent = `${currentUser.nombre} ${currentUser.apellido || ""}`;
+        document.getElementById("usuarioActual").textContent = `${currentUser.nombre} ${currentUser.apellido || ""}`.toUpperCase();
         cargarIdeas();
     }
 });
 
 /* =================================
-   CONTROL DE PESTAÑAS
+   CONTROL DE PESTAÑAS (INFERIOR)
 ================================= */
 function cambiarPestana(tabId, btnElement) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
 
     document.getElementById(tabId).classList.add('active');
     btnElement.classList.add('active');
+}
+
+/* =================================
+   SELECTOR TIPO KAIZEN (UI)
+================================= */
+function seleccionarTipoKaizen(tipo) {
+    document.getElementById("tipo").value = tipo;
+    if (tipo === 'Quick') {
+        document.getElementById("typeQuickCard").classList.add("selected");
+        document.getElementById("typeStandardCard").classList.remove("selected");
+    } else {
+        document.getElementById("typeStandardCard").classList.add("selected");
+        document.getElementById("typeQuickCard").classList.remove("selected");
+    }
 }
 
 /* =================================
@@ -51,7 +65,7 @@ async function registrarUsuario() {
         return;
     }
 
-    alert("Usuario registrado correctamente. Ahora puedes iniciar sesión.");
+    alert("Piloto registrado correctamente. Ahora puedes iniciar sesión.");
     document.getElementById("nombreInput").value = "";
     document.getElementById("apellidoInput").value = "";
     document.getElementById("ciRegistroInput").value = "";
@@ -84,7 +98,7 @@ async function loginUsuario() {
 
     document.getElementById("loginArea").classList.add("hidden");
     document.getElementById("appArea").classList.remove("hidden");
-    document.getElementById("usuarioActual").textContent = `${data.nombre} ${data.apellido || ""}`;
+    document.getElementById("usuarioActual").textContent = `${data.nombre} ${data.apellido || ""}`.toUpperCase();
 
     cargarIdeas();
 }
@@ -104,14 +118,14 @@ function logoutUsuario() {
 ================================= */
 async function guardarIdea() {
     const titulo = document.getElementById("titulo").value.trim();
-    const area = document.getElementById("area").value.trim();
+    const area = document.getElementById("area").value.trim() || "General";
     const tipo = document.getElementById("tipo").value;
     const descripcion = document.getElementById("descripcion").value.trim();
 
     const usuario = JSON.parse(sessionStorage.getItem("usuario"));
 
-    if (!titulo || !area || !descripcion) {
-        alert("Completa todos los campos");
+    if (!titulo || !descripcion) {
+        alert("Completa al menos el título y la descripción");
         return;
     }
 
@@ -133,16 +147,23 @@ async function guardarIdea() {
         return;
     }
 
-    alert("Idea registrada con éxito");
+    alert("¡Propuesta registrada con éxito!");
     document.getElementById("titulo").value = "";
     document.getElementById("area").value = "";
     document.getElementById("descripcion").value = "";
+
+    // Cambiar automáticamente a la pestaña Mis Ideas para ver la propuesta recién creada
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('tabMisIdeas').classList.add('active');
+    // Seleccionar el segundo botón del nav (Mis ideas)
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
 
     cargarIdeas();
 }
 
 /* =================================
-   LISTAR IDEAS Y FILTROS
+   CARGAR Y RENDERIZAR IDEAS
 ================================= */
 async function cargarIdeas() {
     const { data, error } = await supabaseClient
@@ -156,54 +177,92 @@ async function cargarIdeas() {
     }
 
     ideasGlobales = data || [];
-    renderizarIdeasFiltradas();
-    actualizarDashboard(ideasGlobales);
-    cargarRanking(ideasGlobales);
+    actualizarContadoresGenerales(ideasGlobales);
+    renderizarIdeas();
+    actualizarPistaYRanking(ideasGlobales);
 }
 
-function filtrarIdeas(tipoFiltro) {
-    filtroActual = tipoFiltro;
-    document.getElementById("filterTodas").classList.toggle("active", tipoFiltro === 'todas');
-    document.getElementById("filterMis").classList.toggle("active", tipoFiltro === 'mias');
-    renderizarIdeasFiltradas();
+function actualizarContadoresGenerales(ideas) {
+    const total = ideas.length;
+    const abiertas = ideas.filter(i => i.estado === "ABIERTO").length;
+    const cerradas = ideas.filter(i => i.estado === "CERRADO").length;
+
+    // Contadores de la pestaña Registrar
+    document.getElementById("countTotal").textContent = total;
+    document.getElementById("countAbiertas").textContent = abiertas;
+    document.getElementById("countCerradas").textContent = cerradas;
+
+    // Contadores de la pestaña Mis Ideas (filtrados por el usuario actual)
+    if (currentUser) {
+        const misIdeas = ideas.filter(i => i.usuario_ci === currentUser.ci);
+        document.getElementById("countMisTotal").textContent = misIdeas.length;
+        document.getElementById("countMisAbiertas").textContent = misIdeas.filter(i => i.estado === "ABIERTO").length;
+        document.getElementById("countMisCerradas").textContent = misIdeas.filter(i => i.estado === "CERRADO").length;
+    }
 }
 
-function renderizarIdeasFiltradas() {
+function cambiarFiltroIdeas(filtro) {
+    filtroIdeasActual = filtro;
+    if (filtro === 'mias') {
+        document.getElementById("btnFiltroMias").classList.add("active");
+        document.getElementById("btnFiltroTodas").classList.remove("active");
+    } else {
+        document.getElementById("btnFiltroTodas").classList.add("active");
+        document.getElementById("btnFiltroMias").classList.remove("active");
+    }
+    renderizarIdeas();
+}
+
+function renderizarIdeas() {
     const lista = document.getElementById("listaIdeas");
     lista.innerHTML = "";
 
     let ideasAMostrar = ideasGlobales;
-    if (filtroActual === 'mias' && currentUser) {
+    if (filtroIdeasActual === 'mias' && currentUser) {
         ideasAMostrar = ideasGlobales.filter(idea => idea.usuario_ci === currentUser.ci);
     }
 
     if (ideasAMostrar.length === 0) {
-        lista.innerHTML = `<div class="card" style="text-align: center; color: #64748b;">No hay ideas para mostrar en este filtro.</div>`;
+        lista.innerHTML = `<div class="idea-card" style="text-align: center; color: #64748b;">No hay propuestas para mostrar en esta vista.</div>`;
         return;
     }
 
     ideasAMostrar.forEach(idea => {
         const card = document.createElement("div");
-        card.className = "card";
+        card.className = "idea-card";
 
         const esAdmin = currentUser && currentUser.rol === "admin";
-        // Permitir también editar/cerrar si el usuario actual es el autor dueño de la idea
         const esDueno = currentUser && idea.usuario_ci === currentUser.ci;
+        const estaCerrado = idea.estado === "CERRADO";
+
+        // Formatear fecha
+        let fechaFormateada = "";
+        if (idea.fecha_creacion) {
+            const fechaObj = new Date(idea.fecha_creacion);
+            fechaFormateada = fechaObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
 
         card.innerHTML = `
-            <h3 style="margin-top:0; color: #1e293b;">${idea.titulo}</h3>
-            <p><b>Área:</b> ${idea.area}</p>
-            <p><b>Tipo:</b> ${idea.tipo}</p>
-            <p><b>Estado:</b> <span style="color: ${idea.estado === 'ABIERTO' ? '#16a34a' : '#dc2626'}">${idea.estado}</span></p>
-            <p><b>Autor:</b> ${idea.usuario_nombre || "Sin nombre"}</p>
-            <p style="background: #f8fafc; padding: 10px; border-radius: 6px;">${idea.descripcion}</p>
+            <div class="idea-card-header">
+                <h3>${idea.titulo}</h3>
+                <span class="status-badge ${estaCerrado ? 'status-cerrado' : 'status-abierto'}">
+                    • ${idea.estado}
+                </span>
+            </div>
+            <p>${idea.descripcion}</p>
+            <div class="idea-tags">
+                <span class="tag-type">${idea.tipo}</span>
+                <span class="tag-meta">${idea.area || 'General'}</span>
+                <span style="font-size: 11px; color: #64748b; margin-left: 6px;">Por: ${idea.usuario_nombre || 'Piloto'}</span>
+                <span class="idea-date">${fechaFormateada}</span>
+            </div>
             ${
                 esAdmin || esDueno
                 ? `
-                <div style="display: flex; gap: 8px; margin-top: 10px;">
-                    <button onclick="abrirModalEditar(${idea.id})" style="background: #f59e0b; padding: 6px 12px; font-size: 13px;">Editar</button>
-                    ${idea.estado !== 'CERRADO' ? `<button onclick="cerrarIdea(${idea.id})" style="background: #0284c7; padding: 6px 12px; font-size: 13px;">Cerrar</button>` : ''}
-                    <button onclick="eliminarIdea(${idea.id})" style="background: #ef4444; padding: 6px 12px; font-size: 13px;">Eliminar</button>
+                <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid #f1f5f9; paddingTop: 10px;">
+                    <button onclick="abrirModalEditar(${idea.id})" style="background: #f59e0b; padding: 6px 12px; font-size: 12px; width: auto;">Editar</button>
+                    ${!estaCerrado ? `<button onclick="cerrarIdea(${idea.id})" style="background: #0284c7; padding: 6px 12px; font-size: 12px; width: auto;">Cerrar</button>` : ''}
+                    <button onclick="eliminarIdea(${idea.id})" style="background: #ef4444; padding: 6px 12px; font-size: 12px; width: auto;">Eliminar</button>
                 </div>
                 `
                 : ""
@@ -217,7 +276,7 @@ function renderizarIdeasFiltradas() {
    ACCIONES SOBRE IDEAS
 ================================= */
 async function cerrarIdea(id) {
-    if (!confirm("¿Deseas cerrar esta idea?")) return;
+    if (!confirm("¿Deseas cerrar esta propuesta?")) return;
 
     const { error } = await supabaseClient
         .from("ideas")
@@ -232,7 +291,7 @@ async function cerrarIdea(id) {
 }
 
 async function eliminarIdea(id) {
-    if (!confirm("¿Deseas eliminar esta idea?")) return;
+    if (!confirm("¿Deseas eliminar esta propuesta?")) return;
 
     const { error } = await supabaseClient.from("ideas").delete().eq("id", id);
 
@@ -243,8 +302,7 @@ async function eliminarIdea(id) {
     cargarIdeas();
 }
 
-// Modal de Edición visual integrado
-async function abrirModalEditar(id) {
+function abrirModalEditar(id) {
     const idea = ideasGlobales.find(i => i.id === id);
     if (!idea) return;
 
@@ -267,8 +325,8 @@ document.getElementById("guardarEdicion").addEventListener("click", async () => 
     const nuevoTipo = document.getElementById("editTipo").value;
     const nuevaDescripcion = document.getElementById("editDescripcion").value.trim();
 
-    if (!nuevoTitulo || !nuevaArea || !nuevaDescripcion) {
-        alert("Completa todos los campos");
+    if (!nuevoTitulo || !nuevaDescripcion) {
+        alert("Completa el título y la descripción");
         return;
     }
 
@@ -282,38 +340,16 @@ document.getElementById("guardarEdicion").addEventListener("click", async () => 
         return;
     }
 
-    alert("Idea actualizada correctamente");
+    alert("Propuesta actualizada correctamente");
     document.getElementById("editModal").classList.add("hidden");
     cargarIdeas();
 });
 
 /* =================================
-   DASHBOARD & RANKING
+   VISTA PISTA Y RANKING
 ================================= */
-function actualizarDashboard(ideas) {
-    const total = ideas.length;
-    const quick = ideas.filter(i => i.tipo === "Quick").length;
-    const standard = ideas.filter(i => i.tipo === "Standard").length;
-    const abiertas = ideas.filter(i => i.estado === "ABIERTO").length;
-    const cerradas = ideas.filter(i => i.estado === "CERRADO").length;
-
-    // Puntos: Standard = 3 pts, Quick = 1 pt (solo ideas cerradas)
-    let puntosTotales = 0;
-    ideas.forEach(i => {
-        if (i.estado === "CERRADO") {
-            puntosTotales += (i.tipo === "Standard" ? 3 : 1);
-        }
-    });
-
-    document.getElementById("dashTotal").textContent = total;
-    document.getElementById("dashQuick").textContent = quick;
-    document.getElementById("dashStandard").textContent = standard;
-    document.getElementById("dashAbiertas").textContent = abiertas;
-    document.getElementById("dashCerradas").textContent = cerradas;
-    document.getElementById("dashPuntos").textContent = puntosTotales;
-}
-
-function cargarRanking(ideas) {
+function actualizarPistaYRanking(ideas) {
+    // Agrupar kaizents cerrados por usuario (puntos: Standard = 3 pts o cerrados totales)
     const ranking = {};
 
     ideas.forEach(idea => {
@@ -323,23 +359,77 @@ function cargarRanking(ideas) {
         ranking[nombre] = (ranking[nombre] || 0) + puntos;
     });
 
-    const resultado = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
-    const contenedor = document.getElementById("ranking");
-
-    if (!resultado.length) {
-        contenedor.innerHTML = `<div class="card" style="text-align: center; color: #64748b;">No hay ideas cerradas todavía para puntuar en el ranking.</div>`;
-        return;
+    // Si el usuario actual no tiene cerrados pero está logueado, asegurarlo en la lista con 0
+    if (currentUser) {
+        const nombreCompleto = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim();
+        if (!ranking[nombreCompleto]) {
+            // Buscar si hay alguno por nombre parcial
+            const encontrado = Object.keys(ranking).some(k => k.toLowerCase().includes(currentUser.nombre.toLowerCase()));
+            if (!encontrado && Object.keys(ranking).length === 0) {
+                // Inicializar vacío si nadie tiene cerrados
+            }
+        }
     }
 
-    contenedor.innerHTML = resultado.map((item, index) => `
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <span style="font-size: 18px; margin-right: 10px;">🏆</span>
-                <b>${index + 1}. ${item[0]}</b>
+    // Convertir a array y ordenar por puntos descendente
+    const pilotosOrdenados = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
+
+    // Si no hay ningún cerrado registrado en absoluto, mostrar al usuario actual con 0
+    if (pilotosOrdenados.length === 0 && currentUser) {
+        const nombreCompleto = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim();
+        pilotosOrdenados.push([nombreCompleto, 0]);
+    }
+
+    // Calcular kaizens cerrados del usuario actual para la tarjeta superior de pista
+    let misCerradosCount = 0;
+    if (currentUser) {
+        const nombreActual = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim().toLowerCase();
+        ideas.forEach(i => {
+            if (i.usuario_ci === currentUser.ci && i.estado === "CERRADO") {
+                misCerradosCount++;
+            }
+        });
+    }
+    document.getElementById("misKaizensCerradosNum").textContent = misCerradosCount;
+
+    // Encontrar posición del usuario actual
+    let miPosicion = 1;
+    if (currentUser) {
+        const nombreActual = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim();
+        const indexUser = pilotosOrdenados.findIndex(p => p[0].toLowerCase() === nombreActual.toLowerCase());
+        if (indexUser !== -1) {
+            miPosicion = indexUser + 1;
+        }
+    }
+    document.getElementById("posicionTexto").textContent = `${miPosicion} / ${Math.max(pilotosOrdenados.length, 1)}`;
+
+    // Renderizar tarjetas de la pista
+    const container = document.getElementById("pistaPilotosContainer");
+    container.innerHTML = "";
+
+    pilotosOrdenados.forEach((piloto, index) => {
+        const nombrePiloto = piloto[0];
+        const cerradosCount = piloto[1];
+        const esUserActual = currentUser && nombrePiloto.toLowerCase().includes(currentUser.nombre.toLowerCase());
+
+        const racerCard = document.createElement("div");
+        racerCard.className = "racer-card";
+
+        // Calcular posición visual del auto en la línea punteada (máximo 80% para que no pase la bandera)
+        let carPositionPercent = Math.min(10 + (cerradosCount * 25), 78);
+
+        racerCard.innerHTML = `
+            <div class="racer-info">
+                <span class="racer-name">${index + 1}. ${nombrePiloto} ${esUserActual ? '<span style="color:#0284c7; font-weight:normal;">(tú)</span>' : ''}</span>
+                <span class="racer-score"><b>${cerradosCount}</b> cerrados</span>
             </div>
-            <span style="background: #eff6ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-weight: bold;">${item[1]} pts</span>
-        </div>
-    `).join("");
+            <div class="racer-track-line">
+                <span class="racer-car-icon" style="left: ${carPositionPercent}%;">🏎️</span>
+                <span class="racer-flag-icon">🏁</span>
+            </div>
+        `;
+        container.appendChild(racerCard);
+    });
 }
 
 /* =================================
