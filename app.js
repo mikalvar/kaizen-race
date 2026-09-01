@@ -7,7 +7,6 @@ const dbSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let usuarioLogueado = null;
 let filtroIdeasActual = 'mias';
 let idIdeaEditando = null;
-let tipoKaizenSeleccionado = 'Quick';
 
 function obtenerNombreCompleto(usuario) {
     if (!usuario) return 'Piloto Anónimo';
@@ -43,20 +42,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCancelarEdicion) btnCancelarEdicion.addEventListener('click', cerrarModalEdicion);
 });
 
-function seleccionarTipoKaizen(tipo) {
-    tipoKaizenSeleccionado = tipo;
-    const selectTipo = document.getElementById('tipo');
-    if (selectTipo) selectTipo.value = tipo;
+// --- FUNCIÓN PARA EL BOTÓN DESLIZANTE DE LOGIN / REGISTRO ---
+function cambiarModoAuth(modo) {
+    const sliderBg = document.getElementById('authSliderBg');
+    const tabLogin = document.getElementById('tabLoginBtn');
+    const tabRegister = document.getElementById('tabRegisterBtn');
+    const formLogin = document.getElementById('formLogin');
+    const formRegister = document.getElementById('formRegister');
 
-    const quickCard = document.getElementById('typeQuickCard');
-    const standardCard = document.getElementById('typeStandardCard');
-
-    if (tipo === 'Quick') {
-        quickCard.classList.add('selected');
-        standardCard.classList.remove('selected');
+    if (modo === 'login') {
+        sliderBg.classList.remove('right');
+        sliderBg.classList.add('left');
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        formLogin.classList.add('active');
+        formRegister.classList.remove('active');
     } else {
-        standardCard.classList.add('selected');
-        quickCard.classList.remove('selected');
+        sliderBg.classList.remove('left');
+        sliderBg.classList.add('right');
+        tabRegister.classList.add('active');
+        tabLogin.classList.remove('active');
+        formRegister.classList.add('active');
+        formLogin.classList.remove('active');
     }
 }
 
@@ -106,6 +113,7 @@ async function registrarPiloto() {
 
     alert('¡Registro exitoso! Ya puedes ingresar.');
     document.getElementById('ciInput').value = ci;
+    cambiarModoAuth('login'); // Cambia automáticamente a la pestaña de iniciar sesión
 }
 
 function cerrarSesion() {
@@ -141,11 +149,15 @@ function cambiarFiltroIdeas(filtro) {
     const btnTodas = document.getElementById('btnFiltroTodas');
 
     if (filtro === 'mias') {
-        btnMias.classList.add('active');
-        btnTodas.classList.remove('active');
+        btnMias.style.background = 'var(--primary)';
+        btnMias.style.color = '#fff';
+        btnTodas.style.background = '#e2e8f0';
+        btnTodas.style.color = 'var(--text-main)';
     } else {
-        btnTodas.classList.add('active');
-        btnMias.classList.remove('active');
+        btnTodas.style.background = 'var(--primary)';
+        btnTodas.style.color = '#fff';
+        btnMias.style.background = '#e2e8f0';
+        btnMias.style.color = 'var(--text-main)';
     }
     cargarIdeas();
 }
@@ -218,7 +230,7 @@ async function guardarPropuesta() {
 
 async function cargarIdeas() {
     const contenedor = document.getElementById('listaIdeas');
-    contenedor.innerHTML = '<p style="text-align:center; color:white;">Cargando ideas...</p>';
+    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280; padding: 20px;">Cargando ideas...</p>';
 
     let query = dbSupabase.from('ideas').select('*');
     if (filtroIdeasActual === 'mias') {
@@ -228,16 +240,16 @@ async function cargarIdeas() {
     const { data: ideas, error } = await query.order('fecha_creacion', { ascending: false });
 
     if (error) {
-        contenedor.innerHTML = '<p style="text-align:center; color:white;">Error al cargar ideas.</p>';
+        contenedor.innerHTML = '<p style="text-align:center; color:#ef4444; padding: 20px;">Error al cargar ideas.</p>';
         return;
     }
 
     if (!ideas || ideas.length === 0) {
         contenedor.innerHTML = `
-            <div class="empty-state">
-                <span>📭</span>
-                <h3>No hay propuestas aquí</h3>
-                <p>Comienza registrando una nueva mejora en la pestaña Registrar.</p>
+            <div style="text-align:center; padding: 30px; color: var(--text-muted);">
+                <span style="font-size: 32px;">📭</span>
+                <h3 style="margin-top: 8px; font-size: 16px;">No hay propuestas aquí</h3>
+                <p style="font-size: 13px;">Comienza registrando una nueva mejora.</p>
             </div>
         `;
         return;
@@ -253,24 +265,24 @@ async function cargarIdeas() {
 
         html += `
             <div class="idea-card">
-                <div class="idea-card-header">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
                         <span class="status-badge ${badgeClass}">${estado}</span>
-                        <h3 style="margin-top: 6px;">${idea.titulo}</h3>
+                        <h3 style="margin-top: 6px; font-size: 16px; color: var(--text-main);">${idea.titulo}</h3>
                     </div>
                 </div>
-                <p>${idea.descripcion}</p>
-                <div class="idea-tags">
-                    <span class="tag-type">${idea.tipo || 'Quick'}</span>
-                    <span class="tag-meta">${idea.area || 'General'}</span>
-                    <span class="tag-meta">Por: ${nombrePiloto}</span>
-                    <span class="idea-date">${fechaFormateada}</span>
+                <p style="margin-top: 8px; font-size: 14px; color: #4b5563;">${idea.descripcion}</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${idea.tipo || 'Quick'}</span>
+                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${idea.area || 'General'}</span>
+                    <span>Por: ${nombrePiloto}</span>
+                    <span style="margin-left: auto;">${fechaFormateada}</span>
                 </div>
                 ${esMio ? `
                     <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-                        <button onclick="abrirModalEditar('${idea.id}', '${encodeURIComponent(idea.titulo)}', '${encodeURIComponent(idea.area)}', '${idea.tipo}', '${encodeURIComponent(idea.descripcion)}')" style="background-color: var(--warning); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Editar</button>
-                        ${estado.toUpperCase() === 'ABIERTO' ? `<button onclick="cambiarEstadoIdea('${idea.id}', 'CERRADO')" style="background-color: var(--success); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Cerrar</button>` : ''}
-                        <button onclick="eliminarIdea('${idea.id}')" style="background-color: var(--danger); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Eliminar</button>
+                        <button onclick="abrirModalEditar('${idea.id}', '${encodeURIComponent(idea.titulo)}', '${encodeURIComponent(idea.area)}', '${idea.tipo}', '${encodeURIComponent(idea.descripcion)}')" style="background-color: var(--warning); padding: 6px 12px; font-size: 12px; width: auto;">Editar</button>
+                        ${estado.toUpperCase() === 'ABIERTO' ? `<button onclick="cambiarEstadoIdea('${idea.id}', 'CERRADO')" style="background-color: var(--success); padding: 6px 12px; font-size: 12px; width: auto;">Cerrar</button>` : ''}
+                        <button onclick="eliminarIdea('${idea.id}')" style="background-color: var(--danger); padding: 6px 12px; font-size: 12px; width: auto;">Eliminar</button>
                     </div>
                 ` : ''}
             </div>
@@ -340,13 +352,13 @@ async function confirmarEdicion() {
 
 async function cargarPista() {
     const contenedor = document.getElementById('pistaPilotosContainer');
-    contenedor.innerHTML = '<p style="text-align:center; color:white;">Calculando posiciones...</p>';
+    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280; padding: 20px;">Calculando posiciones...</p>';
 
     const { data: usuarios, error: errUsuarios } = await dbSupabase.from('usuarios').select('*');
     const { data: ideas, error: errIdeas } = await dbSupabase.from('ideas').select('*');
 
     if (errUsuarios || errIdeas) {
-        contenedor.innerHTML = '<p style="text-align:center; color:white;">Error al cargar la pista.</p>';
+        contenedor.innerHTML = '<p style="text-align:center; color:#ef4444; padding: 20px;">Error al cargar la pista.</p>';
         return;
     }
 
@@ -380,8 +392,8 @@ async function cargarPista() {
         html += `
             <div class="racer-card">
                 <div class="racer-info">
-                    <span class="racer-name">${idx + 1}. ${nombreCompleto} ${esMio ? '(tú)' : ''}</span>
-                    <span class="racer-score">${usuario.cerrados} cerrados</span>
+                    <span style="color: var(--text-main);">${idx + 1}. ${nombreCompleto} ${esMio ? '(tú)' : ''}</span>
+                    <span style="color: var(--primary);">${usuario.cerrados} cerrados</span>
                 </div>
                 <div class="racer-track-line">
                     <div class="racer-car-icon" style="left: ${porcentajeAvance}%;">🏎️</div>
