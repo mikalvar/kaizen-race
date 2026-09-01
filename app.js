@@ -1,441 +1,409 @@
-const SUPABASE_URL = "https://vmminpanvxxdczzmopua.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU";
+// --- CONFIGURACIÓN DE SUPABASE ---
+const SUPABASE_URL = 'https://tu-proyecto.supabase.co'; // Asegúrate de conservar tus credenciales originales si ya las tenías configuradas
+const SUPABASE_KEY = 'tu-anon-key';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Variables de sesión y estado
+let usuarioLogueado = null;
+let filtroIdeasActual = 'mias';
+let idIdeaEditando = null;
+let tipoKaizenSeleccionado = 'Quick';
 
-let currentUser = null;
-let filtroIdeasActual = 'mias'; // 'mias' por defecto en la pestaña Mis Ideas
-let ideasGlobales = [];
-let editIdActual = null;
+// Función auxiliar para formatear el nombre completo sin mostrar "null"
+function obtenerNombreCompleto(piloto) {
+    if (!piloto) return 'Piloto Anónimo';
+    let nombre = piloto.nombre || '';
+    let apellido = piloto.apellido || '';
+    let completo = `${nombre} ${apellido}`.replace(/null/g, '').trim();
+    return completo !== '' ? completo : 'Piloto';
+}
 
-// Validar sesión al cargar
-window.addEventListener('DOMContentLoaded', () => {
-    const sesionGuardada = sessionStorage.getItem("usuario");
-    if (sesionGuardada) {
-        currentUser = JSON.parse(sesionGuardada);
-        document.getElementById("loginArea").classList.add("hidden");
-        document.getElementById("appArea").classList.remove("hidden");
-        document.getElementById("usuarioActual").textContent = `${currentUser.nombre} ${currentUser.apellido || ""}`.toUpperCase();
-        cargarIdeas();
+document.addEventListener('DOMContentLoaded', () => {
+    // Verificar si hay sesión guardada en localStorage
+    const savedUser = localStorage.getItem('kaizen_user');
+    if (savedUser) {
+        usuarioLogueado = JSON.parse(savedUser);
+        mostrarApp();
     }
+
+    // Botones de autenticación
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) loginBtn.addEventListener('click', iniciarSesion);
+
+    const registerBtn = document.getElementById('registerBtn');
+    if (registerBtn) registerBtn.addEventListener('click', registrarPiloto);
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) logoutBtn.addEventListener('click', cerrarSesion);
+
+    // Botón guardar idea
+    const guardarBtn = document.getElementById('guardarIdea');
+    if (guardarBtn) guardarBtn.addEventListener('click', guardarPropuesta);
+
+    // Modal de edición
+    const btnGuardarEdicion = document.getElementById('guardarEdicion');
+    if (btnGuardarEdicion) btnGuardarEdicion.addEventListener('click', confirmarEdicion);
+
+    const btnCancelarEdicion = document.getElementById('cancelarEdicion');
+    if (btnCancelarEdicion) btnCancelarEdicion.addEventListener('click', cerrarModalEdicion);
 });
 
-/* =================================
-   CONTROL DE PESTAÑAS (INFERIOR)
-================================= */
-function cambiarPestana(tabId, btnElement) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-
-    document.getElementById(tabId).classList.add('active');
-    btnElement.classList.add('active');
-}
-
-/* =================================
-   SELECTOR TIPO KAIZEN (UI)
-================================= */
+// Selector visual de tipo de kaizen
 function seleccionarTipoKaizen(tipo) {
-    document.getElementById("tipo").value = tipo;
+    tipoKaizenSeleccionado = tipo;
+    const selectTipo = document.getElementById('tipo');
+    if (selectTipo) selectTipo.value = tipo;
+
+    const quickCard = document.getElementById('typeQuickCard');
+    const standardCard = document.getElementById('typeStandardCard');
+
     if (tipo === 'Quick') {
-        document.getElementById("typeQuickCard").classList.add("selected");
-        document.getElementById("typeStandardCard").classList.remove("selected");
+        quickCard.classList.add('selected');
+        standardCard.classList.remove('selected');
     } else {
-        document.getElementById("typeStandardCard").classList.add("selected");
-        document.getElementById("typeQuickCard").classList.remove("selected");
+        standardCard.classList.add('selected');
+        quickCard.classList.remove('selected');
     }
 }
 
-/* =================================
-   REGISTRO
-================================= */
-async function registrarUsuario() {
-    const nombre = document.getElementById("nombreInput").value.trim();
-    const apellido = document.getElementById("apellidoInput").value.trim();
-    const ci = document.getElementById("ciRegistroInput").value.trim();
-
-    if (!nombre || !apellido || !ci) {
-        alert("Completa nombre, apellido y cédula");
-        return;
-    }
-
-    const { error } = await supabaseClient.from("usuarios").insert([{ nombre, apellido, ci, rol: "usuario" }]);
-
-    if (error) {
-        alert(error.message);
-        return;
-    }
-
-    alert("Piloto registrado correctamente. Ahora puedes iniciar sesión.");
-    document.getElementById("nombreInput").value = "";
-    document.getElementById("apellidoInput").value = "";
-    document.getElementById("ciRegistroInput").value = "";
-}
-
-/* =================================
-   LOGIN
-================================= */
-async function loginUsuario() {
-    const ci = document.getElementById("ciInput").value.trim();
-
+// --- LOGIN Y REGISTRO ---
+async function iniciarSesion() {
+    const ci = document.getElementById('ciInput').value.trim();
     if (!ci) {
-        alert("Ingresa tu cédula");
+        alert('Por favor ingresa tu cédula');
         return;
     }
 
-    const { data, error } = await supabaseClient
-        .from("usuarios")
-        .select("*")
-        .eq("ci", ci)
+    const { data, error } = await supabase
+        .from('pilotos')
+        .select('*')
+        .eq('ci', ci)
         .single();
 
     if (error || !data) {
-        alert("Usuario no encontrado");
+        alert('Cédula no encontrada. Por favor regístrate primero.');
         return;
     }
 
-    currentUser = data;
-    sessionStorage.setItem("usuario", JSON.stringify(data));
-
-    document.getElementById("loginArea").classList.add("hidden");
-    document.getElementById("appArea").classList.remove("hidden");
-    document.getElementById("usuarioActual").textContent = `${data.nombre} ${data.apellido || ""}`.toUpperCase();
-
-    cargarIdeas();
+    usuarioLogueado = data;
+    localStorage.setItem('kaizen_user', JSON.stringify(data));
+    mostrarApp();
 }
 
-/* =================================
-   LOGOUT
-================================= */
-function logoutUsuario() {
-    currentUser = null;
-    sessionStorage.removeItem("usuario");
-    document.getElementById("loginArea").classList.remove("hidden");
-    document.getElementById("appArea").classList.add("hidden");
-}
+async function registrarPiloto() {
+    const nombre = document.getElementById('nombreInput').value.trim();
+    const apellido = document.getElementById('apellidoInput').value.trim();
+    const ci = document.getElementById('ciRegistroInput').value.trim();
 
-/* =================================
-   CREAR IDEA
-================================= */
-async function guardarIdea() {
-    const titulo = document.getElementById("titulo").value.trim();
-    const area = document.getElementById("area").value.trim() || "General";
-    const tipo = document.getElementById("tipo").value;
-    const descripcion = document.getElementById("descripcion").value.trim();
-
-    const usuario = JSON.parse(sessionStorage.getItem("usuario"));
-
-    if (!titulo || !descripcion) {
-        alert("Completa al menos el título y la descripción");
+    if (!nombre || !apellido || !ci) {
+        alert('Completa todos los campos para registrarte.');
         return;
     }
 
-    const { error } = await supabaseClient.from("ideas").insert([
-        {
-            titulo,
-            descripcion,
-            area,
-            tipo,
-            estado: "ABIERTO",
-            usuario_ci: usuario.ci,
-            usuario_nombre: `${usuario.nombre} ${usuario.apellido || ""}`.trim(),
-            fecha_creacion: new Date().toISOString()
-        }
-    ]);
+    const { data, error } = await supabase
+        .from('pilotos')
+        .insert([{ nombre, apellido, ci }])
+        .select()
+        .single();
 
     if (error) {
-        alert(error.message);
+        alert('Error al registrar: ' + error.message);
         return;
     }
 
-    alert("¡Propuesta registrada con éxito!");
-    document.getElementById("titulo").value = "";
-    document.getElementById("area").value = "";
-    document.getElementById("descripcion").value = "";
-
-    // Cambiar automáticamente a la pestaña Mis Ideas para ver la propuesta recién creada
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    document.getElementById('tabMisIdeas').classList.add('active');
-    // Seleccionar el segundo botón del nav (Mis ideas)
-    document.querySelectorAll('.nav-item')[1].classList.add('active');
-
-    cargarIdeas();
+    alert('¡Registro exitoso! Ya puedes ingresar.');
+    document.getElementById('ciInput').value = ci;
 }
 
-/* =================================
-   CARGAR Y RENDERIZAR IDEAS
-================================= */
-async function cargarIdeas() {
-    const { data, error } = await supabaseClient
-        .from("ideas")
-        .select("*")
-        .order("fecha_creacion", { ascending: false });
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    ideasGlobales = data || [];
-    actualizarContadoresGenerales(ideasGlobales);
-    renderizarIdeas();
-    actualizarPistaYRanking(ideasGlobales);
+function cerrarSesion() {
+    localStorage.removeItem('kaizen_user');
+    usuarioLogueado = null;
+    document.getElementById('appArea').classList.add('hidden');
+    document.getElementById('loginArea').classList.remove('hidden');
 }
 
-function actualizarContadoresGenerales(ideas) {
-    const total = ideas.length;
-    const abiertas = ideas.filter(i => i.estado === "ABIERTO").length;
-    const cerradas = ideas.filter(i => i.estado === "CERRADO").length;
+function mostrarApp() {
+    document.getElementById('loginArea').classList.add('hidden');
+    document.getElementById('appArea').classList.remove('hidden');
+    
+    const nombreCompleto = obtenerNombreCompleto(usuarioLogueado);
+    document.getElementById('usuarioActual').textContent = nombreCompleto.toUpperCase();
+    
+    cargarDatosApp();
+}
 
-    // Contadores de la pestaña Registrar
-    document.getElementById("countTotal").textContent = total;
-    document.getElementById("countAbiertas").textContent = abiertas;
-    document.getElementById("countCerradas").textContent = cerradas;
+// --- NAVEGACIÓN ENTRE PESTAÑAS ---
+function cambiarPestana(idTab, elementoBoton) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
 
-    // Contadores de la pestaña Mis Ideas (filtrados por el usuario actual)
-    if (currentUser) {
-        const misIdeas = ideas.filter(i => i.usuario_ci === currentUser.ci);
-        document.getElementById("countMisTotal").textContent = misIdeas.length;
-        document.getElementById("countMisAbiertas").textContent = misIdeas.filter(i => i.estado === "ABIERTO").length;
-        document.getElementById("countMisCerradas").textContent = misIdeas.filter(i => i.estado === "CERRADO").length;
-    }
+    document.getElementById(idTab).classList.add('active');
+    elementoBoton.classList.add('active');
+
+    cargarDatosApp();
 }
 
 function cambiarFiltroIdeas(filtro) {
     filtroIdeasActual = filtro;
+    const btnMias = document.getElementById('btnFiltroMias');
+    const btnTodas = document.getElementById('btnFiltroTodas');
+
     if (filtro === 'mias') {
-        document.getElementById("btnFiltroMias").classList.add("active");
-        document.getElementById("btnFiltroTodas").classList.remove("active");
+        btnMias.classList.add('active');
+        btnTodas.classList.remove('active');
     } else {
-        document.getElementById("btnFiltroTodas").classList.add("active");
-        document.getElementById("btnFiltroMias").classList.remove("active");
-    }
-    renderizarIdeas();
-}
-
-function renderizarIdeas() {
-    const lista = document.getElementById("listaIdeas");
-    lista.innerHTML = "";
-
-    let ideasAMostrar = ideasGlobales;
-    if (filtroIdeasActual === 'mias' && currentUser) {
-        ideasAMostrar = ideasGlobales.filter(idea => idea.usuario_ci === currentUser.ci);
-    }
-
-    if (ideasAMostrar.length === 0) {
-        lista.innerHTML = `<div class="idea-card" style="text-align: center; color: #64748b;">No hay propuestas para mostrar en esta vista.</div>`;
-        return;
-    }
-
-    ideasAMostrar.forEach(idea => {
-        const card = document.createElement("div");
-        card.className = "idea-card";
-
-        const esAdmin = currentUser && currentUser.rol === "admin";
-        const esDueno = currentUser && idea.usuario_ci === currentUser.ci;
-        const estaCerrado = idea.estado === "CERRADO";
-
-        // Formatear fecha
-        let fechaFormateada = "";
-        if (idea.fecha_creacion) {
-            const fechaObj = new Date(idea.fecha_creacion);
-            fechaFormateada = fechaObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-        card.innerHTML = `
-            <div class="idea-card-header">
-                <h3>${idea.titulo}</h3>
-                <span class="status-badge ${estaCerrado ? 'status-cerrado' : 'status-abierto'}">
-                    • ${idea.estado}
-                </span>
-            </div>
-            <p>${idea.descripcion}</p>
-            <div class="idea-tags">
-                <span class="tag-type">${idea.tipo}</span>
-                <span class="tag-meta">${idea.area || 'General'}</span>
-                <span style="font-size: 11px; color: #64748b; margin-left: 6px;">Por: ${idea.usuario_nombre || 'Piloto'}</span>
-                <span class="idea-date">${fechaFormateada}</span>
-            </div>
-            ${
-                esAdmin || esDueno
-                ? `
-                <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid #f1f5f9; paddingTop: 10px;">
-                    <button onclick="abrirModalEditar(${idea.id})" style="background: #f59e0b; padding: 6px 12px; font-size: 12px; width: auto;">Editar</button>
-                    ${!estaCerrado ? `<button onclick="cerrarIdea(${idea.id})" style="background: #0284c7; padding: 6px 12px; font-size: 12px; width: auto;">Cerrar</button>` : ''}
-                    <button onclick="eliminarIdea(${idea.id})" style="background: #ef4444; padding: 6px 12px; font-size: 12px; width: auto;">Eliminar</button>
-                </div>
-                `
-                : ""
-            }
-        `;
-        lista.appendChild(card);
-    });
-}
-
-/* =================================
-   ACCIONES SOBRE IDEAS
-================================= */
-async function cerrarIdea(id) {
-    if (!confirm("¿Deseas cerrar esta propuesta?")) return;
-
-    const { error } = await supabaseClient
-        .from("ideas")
-        .update({ estado: "CERRADO", fecha_cierre: new Date().toISOString() })
-        .eq("id", id);
-
-    if (error) {
-        alert(error.message);
-        return;
+        btnTodas.classList.add('active');
+        btnMias.classList.remove('active');
     }
     cargarIdeas();
+}
+
+// --- CARGA DE DATOS GENERALES ---
+async function cargarDatosApp() {
+    await cargarContadores();
+    await cargarIdeas();
+    await cargarPista();
+}
+
+// --- CONTADORES ---
+async function cargarContadores() {
+    // Contadores generales de registrar
+    const { data: todas, error } = await supabase.from('ideas').select('*');
+    if (error) return;
+
+    const total = todas.length;
+    const abiertas = todas.filter(i => i.estado === 'Abierto' || !i.estado).length;
+    const cerradas = todas.filter(i => i.estado === 'Cerrado').length;
+
+    document.getElementById('countTotal').textContent = total;
+    document.getElementById('countAbiertas').textContent = abiertas;
+    document.getElementById('countCerradas').textContent = cerradas;
+
+    // Contadores de Mis Ideas (filtradas por el usuario actual)
+    const misIdeas = todas.filter(i => i.pilot_id === usuarioLogueado.id);
+    const misTotal = misIdeas.length;
+    const misAbiertas = misIdeas.filter(i => i.estado === 'Abierto' || !i.estado).length;
+    const misCerradas = misIdeas.filter(i => i.estado === 'Cerrado').length;
+
+    document.getElementById('countMisTotal').textContent = misTotal;
+    document.getElementById('countMisAbiertas').textContent = misAbiertas;
+    document.getElementById('countMisCerradas').textContent = misCerradas;
+}
+
+// --- GESTIÓN DE IDEAS ---
+async function guardarPropuesta() {
+    const titulo = document.getElementById('titulo').value.trim();
+    const area = document.getElementById('area').value.trim();
+    const descripcion = document.getElementById('descripcion').value.trim();
+    const tipo = document.getElementById('tipo').value;
+
+    if (!titulo || !descripcion) {
+        alert('El título y la descripción son obligatorios.');
+        return;
+    }
+
+    const { error } = await supabase.from('ideas').insert([{
+        titulo,
+        area: area || 'General',
+        descripcion,
+        tipo,
+        estado: 'Abierto',
+        pilot_id: usuarioLogueado.id
+    }]);
+
+    if (error) {
+        alert('Error al guardar: ' + error.message);
+        return;
+    }
+
+    alert('¡Propuesta registrada con éxito!');
+    document.getElementById('titulo').value = '';
+    document.getElementById('area').value = '';
+    document.getElementById('descripcion').value = '';
+
+    cargarDatosApp();
+    // Cambiar automáticamente a la pestaña de Mis Ideas
+    document.querySelectorAll('.nav-item')[1].click();
+}
+
+async function cargarIdeas() {
+    const contenedor = document.getElementById('listaIdeas');
+    contenedor.innerHTML = '<p style="text-align:center; color:white;">Cargando ideas...</p>';
+
+    let query = supabase.from('ideas').select('*, pilotos(nombre, apellido)');
+    if (filtroIdeasActual === 'mias') {
+        query = query.eq('pilot_id', usuarioLogueado.id);
+    }
+
+    const { data: ideas, error } = await query.order('created_at', { ascending: false });
+
+    if (error) {
+        contenedor.innerHTML = '<p style="text-align:center; color:white;">Error al cargar ideas.</p>';
+        return;
+    }
+
+    if (!ideas || ideas.length === 0) {
+        contenedor.innerHTML = `
+            <div class="empty-state">
+                <span>📭</span>
+                <h3>No hay propuestas aquí</h3>
+                <p>Comienza registrando una nueva mejora en la pestaña Registrar.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    ideas.forEach(idea => {
+        const esMio = idea.pilot_id === usuarioLogueado.id;
+        const estado = idea.estado || 'Abierto';
+        const badgeClass = estado === 'Cerrado' ? 'status-cerrado' : 'status-abierto';
+        const nombrePiloto = obtenerNombreCompleto(idea.pilotos);
+        const fechaFormateada = idea.created_at ? new Date(idea.created_at).toLocaleDateString() : '';
+
+        html += `
+            <div class="idea-card">
+                <div class="idea-card-header">
+                    <div>
+                        <span class="status-badge ${badgeClass}">${estado}</span>
+                        <h3 style="margin-top: 6px;">${idea.titulo}</h3>
+                    </div>
+                </div>
+                <p>${idea.descripcion}</p>
+                <div class="idea-tags">
+                    <span class="tag-type">${idea.tipo || 'Quick'}</span>
+                    <span class="tag-meta">${idea.area || 'General'}</span>
+                    <span class="tag-meta">Por: ${nombrePiloto}</span>
+                    <span class="idea-date">${fechaFormateada}</span>
+                </div>
+                ${esMio ? `
+                    <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
+                        <button onclick="abrirModalEditar('${idea.id}', '${encodeURIComponent(idea.titulo)}', '${encodeURIComponent(idea.area)}', '${idea.tipo}', '${encodeURIComponent(idea.descripcion)}')" style="background-color: var(--warning); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Editar</button>
+                        ${estado === 'Abierto' ? `<button onclick="cambiarEstadoIdea('${idea.id}', 'Cerrado')" style="background-color: var(--success); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Cerrar</button>` : ''}
+                        <button onclick="eliminarIdea('${idea.id}')" style="background-color: var(--danger); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Eliminar</button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+
+    contenedor.innerHTML = html;
+}
+
+async function cambiarEstadoIdea(id, nuevoEstado) {
+    const { error } = await supabase.from('ideas').update({ estado: nuevoEstado }).eq('id', id);
+    if (error) {
+        alert('Error al actualizar estado');
+        return;
+    }
+    cargarDatosApp();
 }
 
 async function eliminarIdea(id) {
-    if (!confirm("¿Deseas eliminar esta propuesta?")) return;
-
-    const { error } = await supabaseClient.from("ideas").delete().eq("id", id);
-
+    if (!confirm('¿Estás seguro de eliminar esta propuesta?')) return;
+    const { error } = await supabase.from('ideas').delete().eq('id', id);
     if (error) {
-        alert(error.message);
+        alert('Error al eliminar');
         return;
     }
-    cargarIdeas();
+    cargarDatosApp();
 }
 
-function abrirModalEditar(id) {
-    const idea = ideasGlobales.find(i => i.id === id);
-    if (!idea) return;
-
-    editIdActual = id;
-    document.getElementById("editTitulo").value = idea.titulo;
-    document.getElementById("editArea").value = idea.area;
-    document.getElementById("editTipo").value = idea.tipo;
-    document.getElementById("editDescripcion").value = idea.descripcion;
-
-    document.getElementById("editModal").classList.remove("hidden");
+// --- EDICIÓN ---
+function abrirModalEditar(id, titulo, area, tipo, descripcion) {
+    idIdeaEditando = id;
+    document.getElementById('editTitulo').value = decodeURIComponent(titulo);
+    document.getElementById('editArea').value = decodeURIComponent(area);
+    document.getElementById('editTipo').value = tipo;
+    document.getElementById('editDescripcion').value = decodeURIComponent(descripcion);
+    document.getElementById('editModal').classList.remove('hidden');
 }
 
-document.getElementById("cancelarEdicion").addEventListener("click", () => {
-    document.getElementById("editModal").classList.add("hidden");
-});
+function cerrarModalEdicion() {
+    idIdeaEditando = null;
+    document.getElementById('editModal').classList.add('hidden');
+}
 
-document.getElementById("guardarEdicion").addEventListener("click", async () => {
-    const nuevoTitulo = document.getElementById("editTitulo").value.trim();
-    const nuevaArea = document.getElementById("editArea").value.trim();
-    const nuevoTipo = document.getElementById("editTipo").value;
-    const nuevaDescripcion = document.getElementById("editDescripcion").value.trim();
+async function confirmarEdicion() {
+    if (!idIdeaEditando) return;
 
-    if (!nuevoTitulo || !nuevaDescripcion) {
-        alert("Completa el título y la descripción");
-        return;
-    }
+    const titulo = document.getElementById('editTitulo').value.trim();
+    const area = document.getElementById('editArea').value.trim();
+    const tipo = document.getElementById('editTipo').value;
+    const descripcion = document.getElementById('editDescripcion').value.trim();
 
-    const { error } = await supabaseClient
-        .from("ideas")
-        .update({ titulo: nuevoTitulo, area: nuevaArea, tipo: nuevoTipo, descripcion: nuevaDescripcion })
-        .eq("id", editIdActual);
+    const { error } = await supabase.from('ideas').update({
+        titulo, area, tipo, descripcion
+    }).eq('id', idIdeaEditando);
 
     if (error) {
-        alert(error.message);
+        alert('Error al actualizar');
         return;
     }
 
-    alert("Propuesta actualizada correctamente");
-    document.getElementById("editModal").classList.add("hidden");
-    cargarIdeas();
-});
+    cerrarModalEdicion();
+    cargarDatosApp();
+}
 
-/* =================================
-   VISTA PISTA Y RANKING
-================================= */
-function actualizarPistaYRanking(ideas) {
-    // Agrupar kaizents cerrados por usuario (puntos: Standard = 3 pts o cerrados totales)
-    const ranking = {};
+// --- PISTA DE CARRERAS ---
+async function cargarPista() {
+    const contenedor = document.getElementById('pistaPilotosContainer');
+    contenedor.innerHTML = '<p style="text-align:center; color:white;">Calculando posiciones...</p>';
 
-    ideas.forEach(idea => {
-        if (idea.estado !== "CERRADO") return;
-        const nombre = idea.usuario_nombre || "Sin nombre";
-        const puntos = idea.tipo === "Standard" ? 3 : 1;
-        ranking[nombre] = (ranking[nombre] || 0) + puntos;
+    // Obtener todos los pilotos y sus ideas cerradas
+    const { data: pilotos, error: errPilotos } = await supabase.from('pilotos').select('*');
+    const { data: ideas, error: errIdeas } = await supabase.from('ideas').select('*');
+
+    if (errPilotos || errIdeas) {
+        contenedor.innerHTML = '<p style="text-align:center; color:white;">Error al cargar la pista.</p>';
+        return;
+    }
+
+    // Calcular kaizens cerrados por piloto
+    let ranking = pilotos.map(piloto => {
+        const cerrados = ideas.filter(i => i.pilot_id === piloto.id && i.estado === 'Cerrado').length;
+        return {
+            ...piloto,
+            cerrados
+        };
     });
 
-    // Si el usuario actual no tiene cerrados pero está logueado, asegurarlo en la lista con 0
-    if (currentUser) {
-        const nombreCompleto = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim();
-        if (!ranking[nombreCompleto]) {
-            // Buscar si hay alguno por nombre parcial
-            const encontrado = Object.keys(ranking).some(k => k.toLowerCase().includes(currentUser.nombre.toLowerCase()));
-            if (!encontrado && Object.keys(ranking).length === 0) {
-                // Inicializar vacío si nadie tiene cerrados
-            }
-        }
-    }
-
-    // Convertir a array y ordenar por puntos descendente
-    const pilotosOrdenados = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
-
-    // Si no hay ningún cerrado registrado en absoluto, mostrar al usuario actual con 0
-    if (pilotosOrdenados.length === 0 && currentUser) {
-        const nombreCompleto = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim();
-        pilotosOrdenados.push([nombreCompleto, 0]);
-    }
-
-    // Calcular kaizens cerrados del usuario actual para la tarjeta superior de pista
-    let misCerradosCount = 0;
-    if (currentUser) {
-        const nombreActual = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim().toLowerCase();
-        ideas.forEach(i => {
-            if (i.usuario_ci === currentUser.ci && i.estado === "CERRADO") {
-                misCerradosCount++;
-            }
-        });
-    }
-    document.getElementById("misKaizensCerradosNum").textContent = misCerradosCount;
+    // Ordenar de mayor a menor según kaizens cerrados
+    ranking.sort((a, b) => b.cerrados - a.cerrados);
 
     // Encontrar posición del usuario actual
-    let miPosicion = 1;
-    if (currentUser) {
-        const nombreActual = `${currentUser.nombre} ${currentUser.apellido || ""}`.trim();
-        const indexUser = pilotosOrdenados.findIndex(p => p[0].toLowerCase() === nombreActual.toLowerCase());
-        if (indexUser !== -1) {
-            miPosicion = indexUser + 1;
-        }
-    }
-    document.getElementById("posicionTexto").textContent = `${miPosicion} / ${Math.max(pilotosOrdenados.length, 1)}`;
+    const indexUsuario = ranking.findIndex(p => p.id === usuarioLogueado.id);
+    const miPosicion = indexUsuario !== -1 ? indexUsuario + 1 : 1;
+    const misCerrados = indexUsuario !== -1 ? ranking[indexUsuario].cerrados : 0;
 
-    // Renderizar tarjetas de la pista
-    const container = document.getElementById("pistaPilotosContainer");
-    container.innerHTML = "";
+    document.getElementById('posicionTexto').textContent = `${miPosicion} / ${ranking.length}`;
+    document.getElementById('misKaizensCerradosNum').textContent = misCerrados;
 
-    pilotosOrdenados.forEach((piloto, index) => {
-        const nombrePiloto = piloto[0];
-        const cerradosCount = piloto[1];
-        const esUserActual = currentUser && nombrePiloto.toLowerCase().includes(currentUser.nombre.toLowerCase());
+    // Meta de la pista (ej. 10 kaizens para llegar al 100%, o dinámico si alguien supera los 10)
+    const metaPista = Math.max(10, ...ranking.map(r => r.cerrados));
 
-        const racerCard = document.createElement("div");
-        racerCard.className = "racer-card";
+    let html = '';
+    ranking.forEach((piloto, idx) => {
+        const esMio = piloto.id === usuarioLogueado.id;
+        const nombreCompleto = obtenerNombreCompleto(piloto);
+        
+        // Calcular porcentaje de avance en la pista (máximo 90% para que el auto no se pase de la bandera de meta)
+        let porcentajeAvance = (piloto.cerrados / metaPista) * 85;
+        if (porcentajeAvance > 88) porcentajeAvance = 88;
 
-        // Calcular posición visual del auto en la línea punteada (máximo 80% para que no pase la bandera)
-        let carPositionPercent = Math.min(10 + (cerradosCount * 25), 78);
-
-        racerCard.innerHTML = `
-            <div class="racer-info">
-                <span class="racer-name">${index + 1}. ${nombrePiloto} ${esUserActual ? '<span style="color:#0284c7; font-weight:normal;">(tú)</span>' : ''}</span>
-                <span class="racer-score"><b>${cerradosCount}</b> cerrados</span>
-            </div>
-            <div class="racer-track-line">
-                <span class="racer-car-icon" style="left: ${carPositionPercent}%;">🏎️</span>
-                <span class="racer-flag-icon">🏁</span>
+        html += `
+            <div class="racer-card">
+                <div class="racer-info">
+                    <span class="racer-name">${idx + 1}. ${nombreCompleto} ${esMio ? '(tú)' : ''}</span>
+                    <span class="racer-score">${piloto.cerrados} cerrados</span>
+                </div>
+                <div class="racer-track-line">
+                    <div class="racer-car-icon" style="left: ${porcentajeAvance}%;">🏎️</div>
+                    <div class="racer-flag-icon">🏁</div>
+                </div>
             </div>
         `;
-        container.appendChild(racerCard);
     });
-}
 
-/* =================================
-   EVENTOS PRINCIPALES
-================================= */
-document.getElementById("registerBtn").addEventListener("click", registrarUsuario);
-document.getElementById("loginBtn").addEventListener("click", loginUsuario);
-document.getElementById("logoutBtn").addEventListener("click", logoutUsuario);
-document.getElementById("guardarIdea").addEventListener("click", guardarIdea);
+    contenedor.innerHTML = html;
+}
