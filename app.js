@@ -2,7 +2,7 @@ const SUPABASE_URL =
 "https://vmminpanvxxdczzmopua.supabase.co";
 
 const SUPABASE_KEY =
-"TU_CLAVE_COMPLETA";
+"Tigresamtommy.24";
 
 const supabaseClient =
 window.supabase.createClient(
