@@ -226,40 +226,58 @@ async function cargarIdeas() {
             document.createElement("div");
 
         card.className = "card";
-        
-const esAdmin =
 
-currentUser &&
+        const esAdmin =
+            currentUser &&
+            currentUser.rol === "admin";
 
-currentUser.rol === "admin";
-        
-        card.inner**ML = `
-    <h**${idea.titulo}</h3>
+        card.innerHTML = `
+            <h3>${idea.titulo}</h3>
 
-**  <p>
-    <b>Área:</b>
-    ${idea**rea}
-    </**
+            <p>
+                <b>Área:</b>
+                ${idea.area}
+            </p>
 
-    <p>
-    <b>Tipo**/b>
-    ${idea.tipo}
-    </**
+            <p>
+                <b>Tipo:</b>
+                ${idea.tipo}
+            </p>
 
-   **p>
-    <b>Estado:</b>
-    ${idea.**tado}
-    </p**
-    <p>
-    <b>Autor:</b>
-**  ${idea.usuario_nombre}
-    </**
+            <p>
+                <b>Estado:</b>
+                ${idea.estado}
+            </p>
 
-    <p>
-   **{idea.descripcion}
-    </p>
-`;
+            <p>
+                <b>Autor:</b>
+                ${idea.usuario_nombre || "Sin nombre"}
+            </p>
 
+            <p>
+                ${idea.descripcion}
+            </p>
+
+            ${
+                esAdmin
+                ? `
+                <button onclick="cerrarIdea(${idea.id})">
+                    Cerrar Idea
+                </button>
+
+                <button onclick="eliminarIdea(${idea.id})">
+                    Eliminar Idea
+                </button>
+                `
+                : ""
+            }
+        `;
+
+        lista.appendChild(card);
+
+    });
+
+}   
 /*
 =================================
 EVENTOS
