@@ -308,6 +308,48 @@
         .nav-item span:first-child { font-size: 18px; }
         .nav-item.active { color: var(--primary); font-weight: 600; }
 
+        /* --- ESTILOS PARA LAS TARJETAS DE TIPO DE KAIZEN (SELECTOR VISUAL) --- */
+        .kaizen-type-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .kaizen-type-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .kaizen-type-card.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .kaizen-type-card .icon {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .kaizen-type-card .title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+
+        .kaizen-type-card .desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.2;
+        }
+
         .idea-card {
             background: #f8fafc;
             border: 1px solid var(--border);
@@ -425,9 +467,9 @@
             <button id="logoutBtn" class="btn-logout">Salir</button>
         </header>
 
-        <!-- Pestaña 1: Registrar -->
+        <!-- Pestaña 1: Registrar (Ahora actúa como panel principal con botón para abrir modal) -->
         <div id="tabRegistrar" class="tab-content active">
-            <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">REGISTRAR MEJORA</h2>
+            <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">PANEL DE CONTROL</h2>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Cada propuesta te acerca a la meta.</p>
             
             <div class="stats-grid">
@@ -445,26 +487,13 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="tipo">Tipo de Kaizen</label>
-                <select id="tipo">
-                    <option value="Quick">Quick (Mejora rápida y sencilla)</option>
-                    <option value="Standard">Standard (Mejora con análisis)</option>
-                </select>
+            <!-- Botón principal para abrir el modal de registro que me compartiste -->
+            <div style="text-align: center; padding: 30px 10px;">
+                <div style="font-size: 48px; margin-bottom: 12px;">⚡</div>
+                <h3 style="color: var(--text-main); margin-bottom: 8px; font-size: 18px;">¿Tienes una nueva mejora?</h3>
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px;">Registra tu propuesta de forma rápida y compite en la pista.</p>
+                <button onclick="abrirModalRegistro()" class="btn-primary" style="padding: 14px 24px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">Registrar Nueva Propuesta</button>
             </div>
-            <div class="form-group">
-                <label for="titulo">Título de la propuesta</label>
-                <input type="text" id="titulo" placeholder="Ej: Reubicar herramientas en línea 3">
-            </div>
-            <div class="form-group">
-                <label for="area">Área / línea (opcional)</label>
-                <input type="text" id="area" placeholder="Ej: Ensamblaje, Almacén...">
-            </div>
-            <div class="form-group">
-                <label for="descripcion">Descripción de la mejora</label>
-                <textarea id="descripcion" rows="4" placeholder="Describe la situación actual y tu propuesta..."></textarea>
-            </div>
-            <button id="guardarIdea" class="btn-primary">Registrar Propuesta</button>
         </div>
 
         <!-- Pestaña 2: Mis Ideas -->
@@ -525,6 +554,56 @@
                 <span>Pista</span>
             </button>
         </nav>
+    </div>
+
+    <!-- MODAL DE REGISTRO (Diseño exacto de la imagen que enviaste) -->
+    <div id="modalRegistro" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
+        <div style="background: white; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="color: var(--primary); font-size: 18px;">Nueva Propuesta Kaizen</h3>
+                <button onclick="cerrarModalRegistro()" style="background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; width: auto; padding: 4px;">✕</button>
+            </div>
+
+            <!-- Selección de Tipo con Tarjetas Visuales -->
+            <div class="form-group">
+                <label>Tipo de kaizen</label>
+                <div class="kaizen-type-container">
+                    <div id="cardQuick" class="kaizen-type-card selected" onclick="seleccionarTipoKaizen('Quick')">
+                        <div class="icon">⚡</div>
+                        <div class="title">Quick</div>
+                        <div class="desc">Mejora rápida y sencilla</div>
+                    </div>
+                    <div id="cardStandard" class="kaizen-type-card" onclick="seleccionarTipoKaizen('Standard')">
+                        <div class="icon">📋</div>
+                        <div class="title">Standard</div>
+                        <div class="desc">Mejora con más análisis</div>
+                    </div>
+                </div>
+                <!-- Campo oculto para guardar el valor seleccionado -->
+                <input type="hidden" id="tipo" value="Quick">
+            </div>
+
+            <div class="form-group">
+                <label for="titulo">Título de la propuesta</label>
+                <input type="text" id="titulo" placeholder="Ej: Reubicar herramientas en línea 3">
+            </div>
+
+            <div class="form-group">
+                <label for="area">Área / línea (opcional)</label>
+                <input type="text" id="area" placeholder="Ej: Ensamblaje, Almacén...">
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripción de la mejora</label>
+                <textarea id="descripcion" rows="3" placeholder="Describe la situación actual y tu propuesta de mejora..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="guardarIdea" class="btn-primary" style="flex: 2;">REGISTRAR PROPUESTA</button>
+                <button onclick="cerrarModalRegistro()" class="btn-logout" style="flex: 1; background: #cbd5e1; color: #334155;">Cancelar</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL DE EDICIÓN -->
