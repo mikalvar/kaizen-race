@@ -1,125 +1,89 @@
 // --- CONFIGURACIÓN DE SUPABASE ---
-const SUPABASE_URL = 'https://vmminpanvxxdczzmopua.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU';
+const SUPABASE_URL = 'AQUÍ_VA_TU_URL';
+const SUPABASE_ANON_KEY = 'AQUÍ_VA_TU_ANON_KEY';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const dbSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Variables de Estado Global
+let usuarioActual = null; // Ejemplo: { nombre: 'Mikaela', apellido: 'Alvarez', ci: '3992978', rol: 'admin' }
+let filtroIdeasActual = 'mias'; // 'mias' o 'todas'
+let filtroEstadoActual = 'TODOS'; // 'TODOS', 'ABIERTO', 'CERRADO'
+let kaizenEditandoId = null;
 
-let usuarioLogueado = null;
-let filtroIdeasActual = 'mias';
-let filtroEstadoActual = 'TODOS';
-let idIdeaEditando = null;
-
-function obtenerNombreCompleto(usuario) {
-    if (!usuario) return 'Piloto Anónimo';
-    let nombre = usuario.nombre || '';
-    let apellido = usuario.apellido || '';
-    let completo = `${nombre} ${apellido}`.replace(/null/g, '').trim();
-    return completo !== '' ? completo : 'Piloto';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const savedUser = localStorage.getItem('kaizen_user');
-    if (savedUser) {
-        usuarioLogueado = JSON.parse(savedUser);
-        mostrarApp();
+// Inicialización al cargar la ventana
+window.addEventListener('DOMContentLoaded', () => {
+    // Revisar si ya hay sesión guardada en localStorage
+    const sesionGuardada = localStorage.getItem('kaizen_user');
+    if (sesionGuardada) {
+        usuarioActual = JSON.parse(sesionGuardada);
+        // Forzar rol Admin si la cédula es 3992978
+        if (usuarioActual.ci === '3992978') {
+            usuarioActual.rol = 'admin';
+        }
+        mostrarAppPrincipal();
     }
-
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) loginBtn.addEventListener('click', iniciarSesion);
-
-    const registerBtn = document.getElementById('registerBtn');
-    if (registerBtn) registerBtn.addEventListener('click', registrarPiloto);
-
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.addEventListener('click', cerrarSesion);
-
-    const guardarBtn = document.getElementById('guardarIdea');
-    if (guardarBtn) guardarBtn.addEventListener('click', guardarPropuesta);
-
-    const btnGuardarEdicion = document.getElementById('guardarEdicion');
-    if (btnGuardarEdicion) btnGuardarEdicion.addEventListener('click', confirmarEdicion);
-
-    const btnCancelarEdicion = document.getElementById('cancelarEdicion');
-    if (btnCancelarEdicion) btnCancelarEdicion.addEventListener('click', cerrarModalEdicion);
 });
 
-// --- FUNCIÓN PARA EL BOTÓN DESLIZANTE DE LOGIN / REGISTRO ---
+// --- AUTENTICACIÓN Y PESTAÑAS DE LOGIN ---
 function cambiarModoAuth(modo) {
-    const sliderBg = document.getElementById('authSliderBg');
-    const tabLogin = document.getElementById('tabLoginBtn');
-    const tabRegister = document.getElementById('tabRegisterBtn');
+    const slider = document.getElementById('authSliderBg');
+    const btnLogin = document.getElementById('tabLoginBtn');
+    const btnRegister = document.getElementById('tabRegisterBtn');
     const formLogin = document.getElementById('formLogin');
     const formRegister = document.getElementById('formRegister');
 
     if (modo === 'login') {
-        sliderBg.classList.remove('right');
-        sliderBg.classList.add('left');
-        tabLogin.classList.add('active');
-        tabRegister.classList.remove('active');
+        slider.className = 'auth-slider-bg left';
+        btnLogin.classList.add('active');
+        btnRegister.classList.remove('active');
         formLogin.classList.add('active');
         formRegister.classList.remove('active');
     } else {
-        sliderBg.classList.remove('left');
-        sliderBg.classList.add('right');
-        tabRegister.classList.add('active');
-        tabLogin.classList.remove('active');
+        slider.className = 'auth-slider-bg right';
+        btnRegister.classList.add('active');
+        btnLogin.classList.remove('active');
         formRegister.classList.add('active');
         formLogin.classList.remove('active');
     }
 }
 
-// --- FUNCIÓN PARA EL BOTÓN DESLIZANTE DE MIS IDEAS / TODAS ---
-function cambiarFiltroIdeas(filtro) {
-    filtroIdeasActual = filtro;
-    filtroEstadoActual = 'TODOS';
-    
-    const sliderBg = document.getElementById('filterSliderBg');
-    const tabMias = document.getElementById('tabMiasBtn');
-    const tabTodas = document.getElementById('tabTodasBtn');
-
-    if (filtro === 'mias') {
-        sliderBg.classList.remove('right');
-        sliderBg.classList.add('left');
-        tabMias.classList.add('active');
-        tabTodas.classList.remove('active');
-    } else {
-        sliderBg.classList.remove('left');
-        sliderBg.classList.add('right');
-        tabTodas.classList.add('active');
-        tabMias.classList.remove('active');
-    }
-    cargarIdeas();
-}
-
-function filtrarPorEstado(estado) {
-    filtroEstadoActual = estado;
-    cargarIdeas();
-}
-
-async function iniciarSesion() {
+// Botón de Iniciar Sesión
+document.getElementById('loginBtn')?.addEventListener('click', async () => {
     const ci = document.getElementById('ciInput').value.trim();
     if (!ci) {
-        alert('Por favor ingresa tu cédula');
+        alert('Por favor ingresa tu Cédula de Identidad');
         return;
     }
 
-    const { data, error } = await dbSupabase
-        .from('usuarios')
-        .select('*')
-        .eq('ci', ci)
-        .single();
+    try {
+        // Consultar en la tabla de usuarios de Supabase
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('*')
+            .eq('ci', ci)
+            .single();
 
-    if (error || !data) {
-        alert('Cédula no encontrada. Por favor regístrate primero.');
-        return;
+        if (error || !data) {
+            alert('Cédula no encontrada. Por favor regístrate primero.');
+            return;
+        }
+
+        usuarioActual = data;
+
+        // Regla específica solicitada: cédula 3992978 es Administrador
+        if (usuarioActual.ci === '3992978') {
+            usuarioActual.rol = 'admin';
+        }
+
+        localStorage.setItem('kaizen_user', JSON.stringify(usuarioActual));
+        mostrarAppPrincipal();
+    } catch (err) {
+        console.error(err);
+        alert('Error al conectar con la base de datos');
     }
+});
 
-    usuarioLogueado = data;
-    localStorage.setItem('kaizen_user', JSON.stringify(data));
-    mostrarApp();
-}
-
-async function registrarPiloto() {
+// Botón de Registro de Nuevo Piloto
+document.getElementById('registerBtn')?.addEventListener('click', async () => {
     const nombre = document.getElementById('nombreInput').value.trim();
     const apellido = document.getElementById('apellidoInput').value.trim();
     const ci = document.getElementById('ciRegistroInput').value.trim();
@@ -129,327 +93,365 @@ async function registrarPiloto() {
         return;
     }
 
-    const { data, error } = await dbSupabase
-        .from('usuarios')
-        .insert([{ nombre, apellido, ci, rol: 'usuario' }])
-        .select()
-        .single();
+    try {
+        // Definir rol inicial (Admin automático si es 3992978)
+        const rol = (ci === '3992978') ? 'admin' : 'usuario';
 
-    if (error) {
-        alert('Error al registrar: ' + error.message);
-        return;
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .insert([{ nombre, apellido, ci, rol }])
+            .select()
+            .single();
+
+        if (error) {
+            alert('Error al registrar: ' + error.message);
+            return;
+        }
+
+        usuarioActual = data;
+        localStorage.setItem('kaizen_user', JSON.stringify(usuarioActual));
+        alert('¡Registro exitoso!');
+        mostrarAppPrincipal();
+    } catch (err) {
+        console.error(err);
+        alert('Ocurrió un error en el registro.');
     }
-
-    alert('¡Registro exitoso! Ya puedes ingresar.');
-    document.getElementById('ciInput').value = ci;
-    cambiarModoAuth('login');
-}
+});
 
 function cerrarSesion() {
     localStorage.removeItem('kaizen_user');
-    usuarioLogueado = null;
+    usuarioActual = null;
     document.getElementById('appArea').classList.add('hidden');
     document.getElementById('loginArea').classList.remove('hidden');
 }
 
-function mostrarApp() {
+// --- TRANSICIÓN A LA APP PRINCIPAL ---
+function mostrarAppPrincipal() {
     document.getElementById('loginArea').classList.add('hidden');
     document.getElementById('appArea').classList.remove('hidden');
-    
-    const nombreCompleto = obtenerNombreCompleto(usuarioLogueado);
-    document.getElementById('usuarioActual').textContent = nombreCompleto.toUpperCase();
-    
-    cargarDatosApp();
+
+    // Actualizar datos en la cinta superior (Header)
+    const tituloRol = document.getElementById('tituloPrincipalRol');
+    const spanUsuario = document.getElementById('usuarioActual');
+    const roleBadge = document.getElementById('roleBadge');
+
+    // Título grande superior
+    tituloRol.textContent = "PILOTO DE MEJORA";
+
+    // Nombre y cédula pequeño abajo (ej: mikaelaalvarez3992978 o con espacios legibles)
+    const nombreCompleto = `${usuarioActual.nombre || ''} ${usuarioActual.apellido || ''}`.trim();
+    spanUsuario.textContent = `${nombreCompleto} (${usuarioActual.ci})`;
+
+    // Ajustar Indicador de Rol (Admin o Usuario)
+    if (usuarioActual.ci === '3992978' || usuarioActual.rol === 'admin') {
+        roleBadge.textContent = "Admin";
+        roleBadge.style.background = "#eff6ff";
+        roleBadge.style.color = "#1d4ed8";
+        roleBadge.style.borderColor = "#bfdbfe";
+    } else {
+        roleBadge.textContent = "Usuario";
+        roleBadge.style.background = "#f1f5f9";
+        roleBadge.style.color = "var(--text-muted)";
+        roleBadge.style.borderColor = "var(--border-card)";
+    }
+
+    // Cargar datos iniciales de la app
+    cargarDatosTablero();
 }
 
-function cambiarPestana(idTab, elementoBoton) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-
+// --- NAVEGACIÓN ENTRE PESTAÑAS ---
+function cambiarPestana(idTab, elementoBtn) {
+    // Ocultar todas las pestañas
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    // Mostrar la seleccionada
     document.getElementById(idTab).classList.add('active');
-    elementoBoton.classList.add('active');
 
-    cargarDatosApp();
+    // Actualizar botones de la barra inferior
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    if (elementoBtn) {
+        elementoBtn.classList.add('active');
+    }
+
+    if (idTab === 'tabIdeas') {
+        cargarDatosTablero();
+    } else if (idTab === 'tabPista') {
+        cargarPistaCarreras();
+    }
 }
 
-async function cargarDatosApp() {
-    await cargarContadores();
-    await cargarIdeas();
-    await cargarPista();
-}
-
-async function cargarContadores() {
-    const { data: todas, error } = await dbSupabase.from('ideas').select('*');
-    if (error) return;
-
-    const total = todas.length;
-    const abiertas = todas.filter(i => (i.estado || 'ABIERTO').toUpperCase() === 'ABIERTO').length;
-    const cerradas = todas.filter(i => (i.estado || 'ABIERTO').toUpperCase() === 'CERRADO').length;
-
-    document.getElementById('countTotal').textContent = total;
-    document.getElementById('countAbiertas').textContent = abiertas;
-    document.getElementById('countCerradas').textContent = cerradas;
-
-    const misIdeas = todas.filter(i => i.usuario_ci === usuarioLogueado.ci);
-    const misTotal = misIdeas.length;
-    const misAbiertas = misIdeas.filter(i => (i.estado || 'ABIERTO').toUpperCase() === 'ABIERTO').length;
-    const misCerradas = misIdeas.filter(i => (i.estado || 'ABIERTO').toUpperCase() === 'CERRADO').length;
-
-    // Si también tienes estos elementos en tu HTML (opcional)
-    if (document.getElementById('countMisTotal')) document.getElementById('countMisTotal').textContent = misTotal;
-    if (document.getElementById('countMisAbiertas')) document.getElementById('countMisAbiertas').textContent = misAbiertas;
-    if (document.getElementById('countMisCerradas')) document.getElementById('countMisCerradas').textContent = misCerradas;
-}
-
+// --- MODAL DE NUEVO KAIZEN ---
 function abrirModalRegistro() {
-    const modal = document.getElementById('modalRegistro');
-    if (modal) modal.classList.remove('hidden');
+    document.getElementById('modalRegistro').classList.remove('hidden');
 }
 
 function cerrarModalRegistro() {
-    const modal = document.getElementById('modalRegistro');
-    if (modal) modal.classList.add('hidden');
+    document.getElementById('modalRegistro').classList.add('hidden');
+    document.getElementById('titulo').value = '';
+    document.getElementById('area').value = '';
+    document.getElementById('descripcion').value = '';
 }
 
 function seleccionarTipoKaizen(tipo) {
     document.getElementById('tipo').value = tipo;
-    const cardQuick = document.getElementById('cardQuick');
-    const cardStandard = document.getElementById('cardStandard');
-
     if (tipo === 'Quick') {
-        cardQuick.classList.add('selected');
-        cardStandard.classList.remove('selected');
+        document.getElementById('cardQuick').classList.add('selected');
+        document.getElementById('cardStandard').classList.remove('selected');
     } else {
-        cardStandard.classList.add('selected');
-        cardQuick.classList.remove('selected');
+        document.getElementById('cardStandard').classList.add('selected');
+        document.getElementById('cardQuick').classList.remove('selected');
     }
 }
 
-async function guardarPropuesta() {
+// Guardar nueva propuesta
+document.getElementById('guardarIdea')?.addEventListener('click', async () => {
     const titulo = document.getElementById('titulo').value.trim();
     const area = document.getElementById('area').value.trim();
     const descripcion = document.getElementById('descripcion').value.trim();
     const tipo = document.getElementById('tipo').value;
 
     if (!titulo || !descripcion) {
-        alert('El título y la descripción son obligatorios.');
+        alert('Por favor completa al menos el título y la descripción.');
         return;
     }
 
-    const nombreCompleto = obtenerNombreCompleto(usuarioLogueado);
+    try {
+        const { error } = await supabaseClient.from('kaizens').insert([{
+            titulo,
+            area: area || 'General',
+            descripcion,
+            tipo,
+            estado: 'ABIERTO',
+            autor_ci: usuarioActual.ci,
+            autor_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido}`
+        }]);
 
-    const { error } = await dbSupabase.from('ideas').insert([{
-        titulo,
-        area: area || 'General',
-        descripcion,
-        tipo,
-        estado: 'ABIERTO',
-        usuario_ci: usuarioLogueado.ci,
-        usuario_nombre: nombreCompleto,
-        fecha_creacion: new Date().toISOString()
-    }]);
+        if (error) throw error;
 
-    if (error) {
-        alert('Error al guardar: ' + error.message);
-        return;
+        alert('¡Propuesta registrada con éxito!');
+        cerrarModalRegistro();
+        cambiarPestana('tabIdeas', document.querySelectorAll('.bottom-nav .nav-item')[1]);
+    } catch (err) {
+        console.error(err);
+        alert('Error al registrar la propuesta.');
     }
+});
 
-    alert('¡Propuesta registrada con éxito!');
-    document.getElementById('titulo').value = '';
-    document.getElementById('area').value = '';
-    document.getElementById('descripcion').value = '';
+// --- GESTIÓN DE TAREAS / IDEAS ---
+function cambiarFiltroIdeas(filtro) {
+    filtroIdeasActual = filtro;
+    const slider = document.getElementById('filterSliderBg');
+    const btnMias = document.getElementById('tabMiasBtn');
+    const btnTodas = document.getElementById('tabTodasBtn');
 
-    cerrarModalRegistro();
-    cargarDatosApp();
-    document.querySelectorAll('.nav-item')[1].click();
+    if (filtro === 'mias') {
+        slider.className = 'auth-slider-bg filter-slider left';
+        btnMias.classList.add('active');
+        btnTodas.classList.remove('active');
+    } else {
+        slider.className = 'auth-slider-bg filter-slider right';
+        btnTodas.classList.add('active');
+        btnMias.classList.remove('active');
+    }
+    cargarDatosTablero();
 }
 
-async function cargarIdeas() {
+function filtrarPorEstado(estado) {
+    filtroEstadoActual = estado;
+    cargarDatosTablero();
+}
+
+async function cargarDatosTablero() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('kaizens')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Calcular contadores del usuario actual
+        const misKaizens = data.filter(k => k.autor_ci === usuarioActual.ci);
+        const totalMias = misKaizens.length;
+        const abiertasMias = misKaizens.filter(k => k.estado === 'ABIERTO').length;
+        const cerradasMias = misKaizens.filter(k => k.estado === 'CERRADO').length;
+
+        document.getElementById('countTotal').textContent = totalMias;
+        document.getElementById('countAbiertas').textContent = abiertasMias;
+        document.getElementById('countCerradas').textContent = cerradasMias;
+
+        // Filtrar según pestaña activa (Mis acciones / Todas) y Estado seleccionado
+        let listaFiltrada = filtroIdeasActual === 'mias' ? misKaizens : data;
+
+        if (filtroEstadoActual !== 'TODOS') {
+            listaFiltrada = listaFiltrada.filter(k => k.estado === filtroEstadoActual);
+        }
+
+        renderizarListaIdeas(listaFiltrada);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function renderizarListaIdeas(kaizens) {
     const contenedor = document.getElementById('listaIdeas');
-    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280; padding: 20px;">Cargando ideas...</p>';
+    contenedor.innerHTML = '';
 
-    let query = dbSupabase.from('ideas').select('*');
-    if (filtroIdeasActual === 'mias') {
-        query = query.eq('usuario_ci', usuarioLogueado.ci);
-    }
-
-    const { data: ideas, error } = await query.order('fecha_creacion', { ascending: false });
-
-    if (error) {
-        contenedor.innerHTML = '<p style="text-align:center; color:#ef4444; padding: 20px;">Error al cargar ideas.</p>';
+    if (kaizens.length === 0) {
+        contenedor.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">No hay propuestas registradas con este filtro.</p>`;
         return;
     }
 
-    let ideasFiltradas = ideas;
-    if (filtroEstadoActual !== 'TODOS') {
-        ideasFiltradas = ideas.filter(i => {
-            const est = (i.estado || 'ABIERTO').toUpperCase();
-            return est === filtroEstadoActual;
-        });
-    }
+    kaizens.forEach(k => {
+        const esAdmin = (usuarioActual.ci === '3992978' || usuarioActual.rol === 'admin');
+        const esPropio = (k.autor_ci === usuarioActual.ci);
+        const estadoClase = k.estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
 
-    if (!ideasFiltradas || ideasFiltradas.length === 0) {
-        contenedor.innerHTML = `
-            <div style="text-align:center; padding: 30px; color: var(--text-muted);">
-                <span style="font-size: 32px;">📭</span>
-                <h3 style="margin-top: 8px; font-size: 16px;">No hay propuestas aquí</h3>
-                <p style="font-size: 13px;">No se encontraron registros con este filtro.</p>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-    ideasFiltradas.forEach(idea => {
-        const esMio = idea.usuario_ci === usuarioLogueado.ci;
-        const estado = (idea.estado || 'ABIERTO').toUpperCase();
-        const badgeClass = estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
-        const nombrePiloto = idea.usuario_nombre || 'Piloto';
-        const fechaFormateada = idea.fecha_creacion ? new Date(idea.fecha_creacion).toLocaleDateString() : '';
-
-        const textoBotonEstado = estado === 'CERRADO' ? 'Abrir' : 'Cerrar';
-        const colorBotonEstado = estado === 'CERRADO' ? 'var(--primary)' : 'var(--success)';
-        const nuevoEstadoDestino = estado === 'CERRADO' ? 'ABIERTO' : 'CERRADO';
-
-        html += `
-            <div class="idea-card">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <span class="status-badge ${badgeClass}">${estado}</span>
-                        <h3 style="margin-top: 6px; font-size: 16px; color: var(--text-main);">${idea.titulo}</h3>
-                    </div>
+        let htmlBotonesAccion = '';
+        if (esAdmin || esPropio) {
+            htmlBotonesAccion = `
+                <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);">
+                    <button onclick="abrirEdicion('${k.id}')" style="background: var(--warning); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">Editar</button>
+                    <button onclick="cambiarEstadoKaizen('${k.id}', '${k.estado === 'ABIERTO' ? 'CERRADO' : 'ABIERTO'}')" style="background: var(--primary-light); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">
+                        ${k.estado === 'ABIERTO' ? 'Marcar Cerrado' : 'Marcar Abierto'}
+                    </button>
+                    <button onclick="eliminarKaizen('${k.id}')" style="background: var(--danger); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">Eliminar</button>
                 </div>
-                <p style="margin-top: 8px; font-size: 14px; color: #4b5563;">${idea.descripcion}</p>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 12px; color: var(--text-muted);">
-                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${idea.tipo || 'Quick'}</span>
-                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${idea.area || 'General'}</span>
-                    <span>Por: ${nombrePiloto}</span>
-                    <span style="margin-left: auto;">${fechaFormateada}</span>
+            `;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'idea-card';
+        card.innerHTML = `
+            <div class="idea-header-row">
+                <div class="badges-group">
+                    <span class="status-badge ${estadoClase}">${k.estado}</span>
+                    <span class="status-badge badge-tipo">${k.tipo}</span>
+                    <span class="status-badge badge-tipo">${k.area}</span>
                 </div>
-                ${esMio ? `
-                    <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
-                        <button onclick="abrirModalEditar('${idea.id}', '${encodeURIComponent(idea.titulo)}', '${encodeURIComponent(idea.area)}', '${idea.tipo}', '${encodeURIComponent(idea.descripcion)}')" style="background-color: var(--warning); padding: 6px 12px; font-size: 12px; width: auto;">Editar</button>
-                        <button onclick="cambiarEstadoIdea('${idea.id}', '${nuevoEstadoDestino}')" style="background-color: ${colorBotonEstado}; padding: 6px 12px; font-size: 12px; width: auto;">${textoBotonEstado}</button>
-                        <button onclick="eliminarIdea('${idea.id}')" style="background-color: var(--danger); padding: 6px 12px; font-size: 12px; width: auto;">Eliminar</button>
-                    </div>
-                ` : ''}
             </div>
+            <h4 class="idea-title">${k.titulo}</h4>
+            <p class="idea-desc">${k.descripcion}</p>
+            <div class="idea-footer-row">
+                <span>Por: ${k.autor_nombre || 'Piloto'}</span>
+                <span>${new Date(k.created_at).toLocaleDateString()}</span>
+            </div>
+            ${htmlBotonesAccion}
         `;
+        contenedor.appendChild(card);
     });
-
-    contenedor.innerHTML = html;
 }
 
-async function cambiarEstadoIdea(id, nuevoEstado) {
-    const updateData = { estado: nuevoEstado };
-    if (nuevoEstado === 'CERRADO') {
-        updateData.fecha_cierre = new Date().toISOString();
+// --- ACCIONES DE MODIFICACIÓN DE TAREAS ---
+async function cambiarEstadoKaizen(id, nuevoEstado) {
+    try {
+        const { error } = await supabaseClient
+            .from('kaizens')
+            .update({ estado: nuevoEstado })
+            .eq('id', id);
+
+        if (error) throw error;
+        cargarDatosTablero();
+    } catch (err) {
+        console.error(err);
+        alert('No se pudo cambiar el estado.');
     }
-    const { error } = await dbSupabase.from('ideas').update(updateData).eq('id', id);
-    if (error) {
-        alert('Error al actualizar estado');
-        return;
-    }
-    cargarDatosApp();
 }
 
-async function eliminarIdea(id) {
+async function eliminarKaizen(id) {
     if (!confirm('¿Estás seguro de eliminar esta propuesta?')) return;
-    const { error } = await dbSupabase.from('ideas').delete().eq('id', id);
-    if (error) {
-        alert('Error al eliminar');
-        return;
+    try {
+        const { error } = await supabaseClient
+            .from('kaizens')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        cargarDatosTablero();
+    } catch (err) {
+        console.error(err);
+        alert('No se pudo eliminar la propuesta.');
     }
-    cargarDatosApp();
 }
 
-function abrirModalEditar(id, titulo, area, tipo, descripcion) {
-    idIdeaEditando = id;
-    document.getElementById('editTitulo').value = decodeURIComponent(titulo);
-    document.getElementById('editArea').value = decodeURIComponent(area);
-    document.getElementById('editTipo').value = tipo;
-    document.getElementById('editDescripcion').value = decodeURIComponent(descripcion);
-    document.getElementById('editModal').classList.remove('hidden');
-}
+// --- PESTAÑA PISTA / RANKING ---
+async function cargarPistaCarreras() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('kaizens')
+            .select('*');
 
-function cerrarModalEdicion() {
-    idIdeaEditando = null;
-    document.getElementById('editModal').classList.add('hidden');
-}
+        if (error) throw error;
 
-async function confirmarEdicion() {
-    if (!idIdeaEditando) return;
+        // Agrupar kaizens cerrados por autor
+        const rankingMap = {};
+        data.forEach(k => {
+            if (!rankingMap[k.autor_ci]) {
+                rankingMap[k.autor_ci] = {
+                    nombre: k.autor_nombre || 'Piloto',
+                    ci: k.autor_ci,
+                    cerrados: 0,
+                    total: 0
+                };
+            }
+            rankingMap[k.autor_ci].total++;
+            if (k.estado === 'CERRADO') {
+                rankingMap[k.autor_ci].cerrados++;
+            }
+        });
 
-    const titulo = document.getElementById('editTitulo').value.trim();
-    const area = document.getElementById('editArea').value.trim();
-    const tipo = document.getElementById('editTipo').value;
-    const descripcion = document.getElementById('editDescripcion').value.trim();
+        // Convertir a array y ordenar por cantidad de cerrados (descendente)
+        const rankingArray = Object.values(rankingMap).sort((a, b) => b.cerrados - a.cerrados);
 
-    const { error } = await dbSupabase.from('ideas').update({
-        titulo, area, tipo, descripcion
-    }).eq('id', idIdeaEditando);
+        // Actualizar estadísticas personales en la vista Pista
+        const misDatos = rankingArray.find(r => r.ci === usuarioActual.ci);
+        const misCerrados = misDatos ? misDatos.cerrados : 0;
+        document.getElementById('misKaizensCerradosNum').textContent = misCerrados;
 
-    if (error) {
-        alert('Error al actualizar');
-        return;
+        const miPosicionIndex = rankingArray.findIndex(r => r.ci === usuarioActual.ci);
+        document.getElementById('posicionTexto').textContent = miPosicionIndex !== -1 ? `#${miPosicionIndex + 1}` : '-';
+
+        renderizarPistaPilotos(rankingArray);
+    } catch (err) {
+        console.error(err);
     }
-
-    cerrarModalEdicion();
-    cargarDatosApp();
 }
 
-async function cargarPista() {
+function renderizarPistaPilotos(ranking) {
     const contenedor = document.getElementById('pistaPilotosContainer');
-    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280; padding: 20px;">Calculando posiciones...</p>';
+    contenedor.innerHTML = '';
 
-    const { data: usuarios, error: errUsuarios } = await dbSupabase.from('usuarios').select('*');
-    const { data: ideas, error: errIdeas } = await dbSupabase.from('ideas').select('*');
-
-    if (errUsuarios || errIdeas) {
-        contenedor.innerHTML = '<p style="text-align:center; color:#ef4444; padding: 20px;">Error al cargar la pista.</p>';
+    if (ranking.length === 0) {
+        contenedor.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">Aún no hay actividad en la pista.</p>`;
         return;
     }
 
-    let ranking = usuarios.map(usuario => {
-        const cerrados = ideas.filter(i => i.usuario_ci === usuario.ci && (i.estado === 'CERRADO' || i.estado === 'Cerrado')).length;
-        return {
-            ...usuario,
-            cerrados
-        };
-    });
+    // Máximo de cerrados para calcular el avance porcentual del auto en la pista
+    const maxCerrados = Math.max(...ranking.map(r => r.cerrados), 5);
 
-    ranking.sort((a, b) => b.cerrados - a.cerrados);
+    ranking.forEach((piloto, index) => {
+        let porcentaje = (piloto.cerrados / maxCerrados) * 85;
+        if (porcentaje > 88) porcentaje = 88; // Límite visual para que no cruce la bandera de llegada antes de tiempo
 
-    const indexUsuario = ranking.findIndex(u => u.ci === usuarioLogueado.ci);
-    const miPosicion = indexUsuario !== -1 ? indexUsuario + 1 : 1;
-    const misCerrados = indexUsuario !== -1 ? ranking[indexUsuario].cerrados : 0;
+        const esMiCarro = piloto.ci === usuarioActual.ci;
+        const card = document.createElement('div');
+        card.className = 'racer-card';
+        card.style.borderColor = esMiCarro ? 'var(--primary-light)' : 'var(--border-card)';
+        card.style.background = esMiCarro ? '#f8fafc' : '#ffffff';
 
-    document.getElementById('posicionTexto').textContent = `${miPosicion} / ${ranking.length}`;
-    document.getElementById('misKaizensCerradosNum').textContent = misCerrados;
-
-    const metaPista = Math.max(10, ...ranking.map(r => r.cerrados));
-
-    let html = '';
-    ranking.forEach((usuario, idx) => {
-        const esMio = usuario.ci === usuarioLogueado.ci;
-        const nombreCompleto = obtenerNombreCompleto(usuario);
-        
-        let porcentajeAvance = (usuario.cerrados / metaPista) * 85;
-        if (porcentajeAvance > 88) porcentajeAvance = 88;
-
-        html += `
-            <div class="racer-card">
-                <div class="racer-info">
-                    <span style="color: var(--text-main);">${idx + 1}. ${nombreCompleto} ${esMio ? '(tú)' : ''}</span>
-                    <span style="color: var(--primary);">${usuario.cerrados} cerrados</span>
-                </div>
-                <div class="racer-track-line">
-                    <div class="racer-car-icon" style="left: ${porcentajeAvance}%;">🏎️</div>
-                    <div class="racer-flag-icon">🏁</div>
-                </div>
+        card.innerHTML = `
+            <div class="racer-info">
+                <span>#${index + 1} ${piloto.nombre} ${esMiCarro ? '(Tú)' : ''}</span>
+                <span style="color: var(--success);">${piloto.cerrados} Cerrados</span>
+            </div>
+            <div class="racer-track-line">
+                <div class="racer-car-icon" style="left: ${porcentaje}%;">🏎️</div>
+                <div class="racer-flag-icon">🏁</div>
             </div>
         `;
+        contenedor.appendChild(card);
     });
-
-    contenedor.innerHTML = html;
 }
