@@ -226,39 +226,39 @@ async function cargarIdeas() {
             document.createElement("div");
 
         card.className = "card";
+        
+const esAdmin =
 
-        card.innerHTML = `
-            <h3>${idea.titulo}</h3>
+currentUser &&
 
-            <p>
-            <b>Área:</b>
-            ${idea.area}
-            </p>
+currentUser.rol === "admin";
+        
+        card.inner**ML = `
+    <h**${idea.titulo}</h3>
 
-            <p>
-            <b>Tipo:</b>
-            ${idea.tipo}
-            </p>
+**  <p>
+    <b>Área:</b>
+    ${idea**rea}
+    </**
 
-            <p>
-            <b>Estado:</b>
-            ${idea.estado}
-            </p>
+    <p>
+    <b>Tipo**/b>
+    ${idea.tipo}
+    </**
 
-            <p>
-            <b>Autor:</b>
-            ${idea.usuario_nombre}
-            </p>
+   **p>
+    <b>Estado:</b>
+    ${idea.**tado}
+    </p**
+    <p>
+    <b>Autor:</b>
+**  ${idea.usuario_nombre}
+    </**
 
-            <p>
-            ${idea.descripcion}
-            </p>
-        `;
-
-        lista.appendChild(card);
-    });
-
-}
+    <p>
+   **{idea.descripcion}
+    </p>
+`;
 
 /*
 =================================
