@@ -23,11 +23,14 @@ async function registrarUsuario() {
     const nombre =
         document.getElementById("nombreInput").value.trim();
 
+    const apellido =
+        document.getElementById("apellidoInput").value.trim();
+
     const ci =
         document.getElementById("ciRegistroInput").value.trim();
 
-    if (!nombre || !ci) {
-        alert("Completa nombre y cédula");
+    if (!nombre || !apellido || !ci) {
+        alert("Completa nombre, apellido y cédula");
         return;
     }
 
@@ -36,14 +39,11 @@ async function registrarUsuario() {
         .insert([
             {
                 nombre,
-                ci
+                apellido,
+                ci,
+                rol: "usuario"
             }
         ]);
-
-    if (error) {
-        alert(error.message);
-        return;
-    }
 
     alert("Usuario registrado correctamente");
 }
