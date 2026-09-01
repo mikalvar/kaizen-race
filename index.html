@@ -1,779 +1,555 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kaizen Race</title>
-<style>
-:root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-light: #eff6ff;
-    --bg-app: #f8fafc;
-    --card-bg: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border: #f1f5f9;
-    --border-card: #e2e8f0;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
-}
-
-body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-    color: #ffffff;
-    max-width: 720px;
-    margin: auto;
-    padding: 20px 16px 90px 16px;
-    box-sizing: border-box;
-    min-height: 100vh;
-}
-
-#loginArea {
-    background: var(--card-bg);
-    color: var(--text-main);
-    padding: 35px 24px;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    margin-top: 50px;
-    max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
-    backdrop-filter: blur(10px);
-}
-
-#loginArea h2 {
-    margin-top: 0;
-    color: var(--primary);
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-}
-
-input, textarea, select {
-    width: 100%;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-    border: 1.5px solid var(--border-card);
-    border-radius: var(--radius-md);
-    box-sizing: border-box;
-    font-size: 14px;
-    background: #f8fafc;
-    color: var(--text-main);
-    transition: all 0.25s ease;
-}
-
-input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-}
-
-button {
-    width: 100%;
-    padding: 14px;
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-}
-
-button:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-1px);
-}
-
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 8px 4px;
-}
-
-.pilot-info {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.pilot-avatar {
-    font-size: 28px;
-    background: rgba(255, 255, 255, 0.2);
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 16px;
-    backdrop-filter: blur(5px);
-}
-
-.pilot-name {
-    font-weight: 800;
-    font-size: 16px;
-    letter-spacing: -0.3px;
-    margin: 0;
-}
-
-.pilot-role {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    margin: 2px 0 0 0;
-    font-weight: 500;
-}
-
-.logout-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    width: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    box-shadow: none;
-}
-
-.logout-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: none;
-}
-
-.page-title-box {
-    margin-bottom: 20px;
-    padding: 0 4px;
-}
-
-.page-title-box h1 {
-    font-size: 24px;
-    font-weight: 900;
-    margin: 0 0 4px 0;
-    letter-spacing: -0.5px;
-}
-
-.page-title-box p {
-    font-size: 14px;
-    margin: 0;
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 400;
-}
-
-.counters-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.counter-card {
-    background: var(--card-bg);
-    color: var(--text-main);
-    padding: 16px 10px;
-    border-radius: var(--radius-md);
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.counter-card .number {
-    font-size: 24px;
-    font-weight: 900;
-    color: var(--primary);
-    display: block;
-    letter-spacing: -0.5px;
-}
-
-.counter-card .label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    margin-top: 4px;
-    display: block;
-    letter-spacing: 0.5px;
-}
-
-.kaizen-type-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.type-card {
-    background: #f8fafc;
-    color: var(--text-main);
-    border: 2px solid var(--border-card);
-    border-radius: var(--radius-md);
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.type-card.selected {
-    border-color: var(--primary);
-    background: var(--primary-light);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.type-card h4 {
-    margin: 0 0 4px 0;
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-main);
-}
-
-.type-card p {
-    margin: 0;
-    font-size: 11px;
-    color: var(--text-muted);
-    line-height: 1.3;
-}
-
-.form-box {
-    background: var(--card-bg);
-    color: var(--text-main);
-    padding: 24px 20px;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-}
-
-.form-label {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    display: block;
-    color: var(--text-main);
-    letter-spacing: -0.2px;
-}
-
-.idea-card {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(0,0,0,0.04);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.idea-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.idea-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-    gap: 10px;
-}
-
-.idea-card h3 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 800;
-    color: var(--text-main);
-    letter-spacing: -0.3px;
-}
-
-.status-badge {
-    font-size: 10px;
-    font-weight: 800;
-    padding: 5px 10px;
-    border-radius: 30px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-abierto {
-    background: #fef3c7;
-    color: #b45309;
-}
-
-.status-cerrado {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.idea-card p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0 0 16px 0;
-    line-height: 1.5;
-}
-
-.idea-tags {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-}
-
-.tag-type {
-    background: #e0f2fe;
-    color: #0369a1;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 8px;
-    text-transform: uppercase;
-}
-
-.tag-meta {
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 8px;
-}
-
-.idea-date {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-left: auto;
-    font-weight: 500;
-}
-
-.filter-toggle-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 4px;
-    border-radius: var(--radius-md);
-    margin-bottom: 20px;
-    backdrop-filter: blur(5px);
-}
-
-.filter-toggle-btn {
-    background: transparent;
-    border: none;
-    color: white;
-    padding: 10px;
-    font-weight: 700;
-    font-size: 13px;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: none;
-    transition: all 0.2s ease;
-}
-
-.filter-toggle-btn.active {
-    background: white;
-    color: var(--primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.track-position-card {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 20px;
-    backdrop-filter: blur(10px);
-}
-
-.track-position-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.track-position-header span:first-child {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.8);
-    letter-spacing: 0.5px;
-}
-
-.track-position-header span:last-child {
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.track-position-numbers {
-    font-size: 32px;
-    font-weight: 900;
-    letter-spacing: -1px;
-}
-
-.racer-card {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-radius: var(--radius-lg);
-    padding: 18px;
-    margin-bottom: 14px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(0,0,0,0.04);
-}
-
-.racer-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.racer-name {
-    font-weight: 800;
-    font-size: 15px;
-    letter-spacing: -0.2px;
-}
-
-.racer-score {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-muted);
-    background: #f1f5f9;
-    padding: 4px 10px;
-    border-radius: 20px;
-}
-
-.racer-track-line {
-    border-top: 2.5px dashed #cbd5e1;
-    position: relative;
-    height: 35px;
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-}
-
-.racer-car-icon {
-    position: absolute;
-    left: 0%;
-    font-size: 22px;
-    transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform: translateX(-50%);
-}
-
-.racer-flag-icon {
-    position: absolute;
-    right: 0px;
-    font-size: 20px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    background: var(--card-bg);
-    border-radius: var(--radius-lg);
-    color: var(--text-main);
-    box-shadow: var(--shadow-sm);
-}
-.empty-state span {
-    font-size: 40px;
-    display: block;
-    margin-bottom: 12px;
-}
-.empty-state h3 {
-    margin: 0 0 6px 0;
-    font-size: 16px;
-    font-weight: 800;
-}
-.empty-state p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0 16px 0;
-    z-index: 100;
-    box-sizing: border-box;
-    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.05);
-}
-
-.nav-item {
-    background: transparent;
-    border: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #94a3b8;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 4px 16px;
-    width: auto;
-    margin: 0;
-    box-shadow: none;
-    transition: color 0.2s ease;
-}
-
-.nav-item span.nav-icon {
-    font-size: 20px;
-    margin-bottom: 4px;
-    transition: transform 0.2s ease;
-}
-
-.nav-item.active {
-    color: var(--primary);
-}
-
-.nav-item.active span.nav-icon {
-    transform: scale(1.1);
-}
-
-.tab-content {
-    display: none;
-    animation: fadeIn 0.3s ease;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.hidden {
-    display: none !important;
-}
-
-#editModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-}
-#editModal.hidden {
-    display: none;
-}
-#editModal .edit-card {
-    background: white;
-    color: var(--text-main);
-    width: 90%;
-    max-width: 420px;
-    padding: 24px;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes scaleUp {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaizen Race</title>
+    <!-- Carga de Supabase desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #1e3a8a;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- LOGIN & REGISTRO --- */
+        .login-container {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .login-header h2 {
+            color: var(--primary);
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        /* Botón deslizante (Switch de pestañas) */
+        .auth-switch-container {
+            position: relative;
+            display: flex;
+            background-color: #f1f3f5;
+            border-radius: 30px;
+            padding: 4px;
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .auth-slider-bg {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            width: 50%;
+            background-color: var(--primary);
+            border-radius: 24px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .auth-slider-bg.left {
+            transform: translateX(0);
+        }
+
+        .auth-slider-bg.right {
+            transform: translateX(100%);
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            cursor: pointer;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .auth-tab-btn.active {
+            color: #ffffff;
+        }
+
+        .auth-form-section {
+            display: none;
+            animation: fadeInAuth 0.3s ease-in-out;
+        }
+
+        .auth-form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeInAuth {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary { background-color: var(--primary); }
+        .btn-success { background-color: var(--success); }
+
+        /* --- APLICACIÓN PRINCIPAL --- */
+        #appArea {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            min-height: 85vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: #f8fafc;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            font-size: 28px;
+            background: #e2e8f0;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .user-details h3 {
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .user-details span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-logout {
+            background-color: #64748b;
+            padding: 6px 14px;
+            font-size: 13px;
+            width: auto;
+            border-radius: 6px;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 90px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card h4 {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-card span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Navegación inferior tipo app móvil */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            width: auto;
+            padding: 4px 16px;
+        }
+
+        .nav-item span:first-child {
+            font-size: 20px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Tarjetas de ideas y pista */
+        .idea-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-abierto { background-color: #dbeafe; color: #1e40af; }
+        .status-cerrado { background-color: #d1fae5; color: #065f46; }
+
+        .racer-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+
+        .racer-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .racer-track-line {
+            position: relative;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .racer-car-icon {
+            position: absolute;
+            top: -10px;
+            font-size: 16px;
+            transition: left 0.5s ease;
+        }
+
+        .racer-flag-icon {
+            position: absolute;
+            right: 4px;
+            top: -6px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
 
-<div id="loginArea">
-    <h2>🏎️ Kaizen Race</h2>
-    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px; line-height: 1.4;">Ingresa tu cédula para registrar y acelerar tus mejoras continuas.</p>
-    
-    <label class="form-label">Cédula de Identidad</label>
-    <input id="ciInput" placeholder="Ej: 1234567">
-    <button id="loginBtn">Ingresar al Sistema</button>
-    
-    <hr style="border: 0; border-top: 1px solid var(--border-card); margin: 28px 0;">
-    
-    <h3 style="font-size: 15px; color: var(--text-main); margin-bottom: 14px; font-weight: 700;">¿Nuevo Piloto? Regístrate</h3>
-    <input id="nombreInput" placeholder="Nombre">
-    <input id="apellidoInput" placeholder="Apellido">
-    <input id="ciRegistroInput" placeholder="Cédula">
-    <button id="registerBtn" style="background-color: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">Registrar Piloto</button>
-</div>
+    <!-- ÁREA DE INICIO DE SESIÓN / REGISTRO -->
+    <div id="loginArea" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>🏎️ Kaizen Race</h2>
+                <p>Acelera tus mejoras continuas</p>
+            </div>
 
-<div id="appArea" class="hidden">
-    <div class="app-header">
-        <div class="pilot-info">
-            <div class="pilot-avatar">🏎️</div>
-            <div>
-                <h3 id="usuarioActual" class="pilot-name">MIKAELA ALVAREZ</h3>
-                <p class="pilot-role">Piloto de mejora</p>
+            <!-- Botón deslizante -->
+            <div class="auth-switch-container">
+                <div id="authSliderBg" class="auth-slider-bg left"></div>
+                <button type="button" id="tabLoginBtn" class="auth-tab-btn active" onclick="cambiarModoAuth('login')">Iniciar Sesión</button>
+                <button type="button" id="tabRegisterBtn" class="auth-tab-btn" onclick="cambiarModoAuth('register')">Registrarse</button>
+            </div>
+
+            <!-- Formulario Iniciar Sesión -->
+            <div id="formLogin" class="auth-form-section active">
+                <div class="form-group">
+                    <label for="ciInput">Cédula de Identidad</label>
+                    <input type="text" id="ciInput" placeholder="Ej: 3992978">
+                </div>
+                <button id="loginBtn" class="btn-primary">Ingresar al Sistema</button>
+            </div>
+
+            <!-- Formulario Registro -->
+            <div id="formRegister" class="auth-form-section">
+                <div class="form-group">
+                    <label for="nombreInput">Nombre</label>
+                    <input type="text" id="nombreInput" placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label for="apellidoInput">Apellido</label>
+                    <input type="text" id="apellidoInput" placeholder="Tu apellido">
+                </div>
+                <div class="form-group">
+                    <label for="ciRegistroInput">Cédula de Identidad</label>
+                    <input type="text" id="ciRegistroInput" placeholder="Tu número de cédula">
+                </div>
+                <button id="registerBtn" class="btn-success">Registrar Piloto</button>
             </div>
         </div>
-        <button id="logoutBtn" class="logout-btn">
-            🚪 Salir
-        </button>
     </div>
 
-    <div id="tabRegistrar" class="tab-content active">
-        <div class="page-title-box">
-            <h1>REGISTRAR MEJORA</h1>
-            <p>Cada propuesta te acerca a la meta.</p>
-        </div>
-
-        <div class="counters-grid">
-            <div class="counter-card">
-                <span class="number" id="countTotal">0</span>
-                <span class="label">Total</span>
-            </div>
-            <div class="counter-card">
-                <span class="number" id="countAbiertas">0</span>
-                <span class="label">Abiertas</span>
-            </div>
-            <div class="counter-card">
-                <span class="number" id="countCerradas">0</span>
-                <span class="label">Cerradas</span>
-            </div>
-        </div>
-
-        <div class="form-box">
-            <label class="form-label">Tipo de kaizen</label>
-            <div class="kaizen-type-container">
-                <div class="type-card selected" id="typeQuickCard" onclick="seleccionarTipoKaizen('Quick')">
-                    <h4>⚡ Quick</h4>
-                    <p>Mejora rápida y sencilla</p>
-                </div>
-                <div class="type-card" id="typeStandardCard" onclick="seleccionarTipoKaizen('Standard')">
-                    <h4>📋 Standard</h4>
-                    <p>Mejora con más análisis</p>
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="appArea" class="hidden">
+        <header class="app-header">
+            <div class="user-info">
+                <div class="user-avatar">🏎️</div>
+                <div class="user-details">
+                    <h3 id="usuarioActual">PILOTO</h3>
+                    <span>Piloto de mejora</span>
                 </div>
             </div>
-            <select id="tipo" class="hidden">
-                <option value="Quick" selected>Quick</option>
-                <option value="Standard">Standard</option>
-            </select>
+            <button id="logoutBtn" class="btn-logout">Salir</button>
+        </header>
 
-            <label class="form-label">Título de la propuesta</label>
-            <input id="titulo" placeholder="Ej: Reubicar herramientas en línea 3">
+        <!-- Pestaña 1: Registrar -->
+        <div id="tabRegistrar" class="tab-content active">
+            <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">REGISTRAR MEJORA</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Cada propuesta te acerca a la meta.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4 id="countTotal">0</h4>
+                    <span>Total</span>
+                </div>
+                <div class="stat-card">
+                    <h4 id="countAbiertas">0</h4>
+                    <span>Abiertas</span>
+                </div>
+                <div class="stat-card">
+                    <h4 id="countCerradas">0</h4>
+                    <span>Cerradas</span>
+                </div>
+            </div>
 
-            <label class="form-label">Área / línea (opcional)</label>
-            <input id="area" placeholder="Ej: Ensamblaje, Almacén...">
+            <div class="form-group">
+                <label for="tipo">Tipo de Kaizen</label>
+                <select id="tipo">
+                    <option value="Quick">Quick (Mejora rápida y sencilla)</option>
+                    <option value="Standard">Standard (Mejora con análisis)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="titulo">Título de la propuesta</label>
+                <input type="text" id="titulo" placeholder="Ej: Reubicar herramientas en línea 3">
+            </div>
+            <div class="form-group">
+                <label for="area">Área / línea (opcional)</label>
+                <input type="text" id="area" placeholder="Ej: Ensamblaje, Almacén...">
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción de la mejora</label>
+                <textarea id="descripcion" rows="4" placeholder="Describe la situación actual y tu propuesta..."></textarea>
+            </div>
+            <button id="guardarIdea" class="btn-primary">Registrar Propuesta</button>
+        </div>
 
-            <label class="form-label">Descripción de la mejora</label>
-            <textarea id="descripcion" placeholder="Describe la situación actual y tu propuesta de mejora..." rows="4"></textarea>
+        <!-- Pestaña 2: Mis Ideas -->
+        <div id="tabIdeas" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="font-size: 20px; color: var(--primary);">MIS PROPUESTAS</h2>
+                <div style="display: flex; gap: 6px;">
+                    <button id="btnFiltroMias" onclick="cambiarFiltroIdeas('mias')" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--primary);">Mis Ideas</button>
+                    <button id="btnFiltroTodas" onclick="cambiarFiltroIdeas('todas')" style="width: auto; padding: 6px 12px; font-size: 12px; background: #e2e8f0; color: var(--text-main);">Todas</button>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4 id="countMisTotal">0</h4>
+                    <span>Total</span>
+                </div>
+                <div class="stat-card">
+                    <h4 id="countMisAbiertas">0</h4>
+                    <span>Abiertas</span>
+                </div>
+                <div class="stat-card">
+                    <h4 id="countMisCerradas">0</h4>
+                    <span>Cerradas</span>
+                </div>
+            </div>
+            <div id="listaIdeas"></div>
+        </div>
 
-            <button id="guardarIdea">REGISTRAR PROPUESTA</button>
+        <!-- Pestaña 3: Pista -->
+        <div id="tabPista" class="tab-content">
+            <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">PISTA DE CARRERAS</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Ranking general de pilotos de mejora.</p>
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <div class="stat-card" style="flex:1;">
+                    <h4 id="posicionTexto">-</h4>
+                    <span>Tu Posición</span>
+                </div>
+                <div class="stat-card" style="flex:1;">
+                    <h4 id="misKaizensCerradosNum">0</h4>
+                    <span>Kaizens Cerrados</span>
+                </div>
+            </div>
+            <div id="pistaPilotosContainer"></div>
+        </div>
+
+        <!-- Barra de navegación inferior -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
+                <span>⚡</span>
+                <span>Registrar</span>
+            </button>
+            <button class="nav-item" onclick="cambiarPestana('tabIdeas', this)">
+                <span>📋</span>
+                <span>Mis Ideas</span>
+            </button>
+            <button class="nav-item" onclick="cambiarPestana('tabPista', this)">
+                <span>🏎️</span>
+                <span>Pista</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL DE EDICIÓN -->
+    <div id="editModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+        <div style="background: white; width: 100%; max-width: 440px; padding: 24px; border-radius: 16px;">
+            <h3 style="margin-bottom: 16px; color: var(--primary);">Editar Propuesta</h3>
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="editTitulo">
+            </div>
+            <div class="form-group">
+                <label>Área</label>
+                <input type="text" id="editArea">
+            </div>
+            <div class="form-group">
+                <label>Tipo</label>
+                <select id="editTipo">
+                    <option value="Quick">Quick</option>
+                    <option value="Standard">Standard</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="editDescripcion" rows="3"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="guardarEdicion" class="btn-success" style="flex:1;">Guardar</button>
+                <button id="cancelarEdicion" class="btn-logout" style="flex:1; background:#cbd5e1; color:#334155;">Cancelar</button>
+            </div>
         </div>
     </div>
 
-    <div id="tabMisIdeas" class="tab-content">
-        <div class="page-title-box">
-            <h1>MIS IDEAS</h1>
-            <p>Sigue el estado de cada propuesta.</p>
-        </div>
-
-        <div class="filter-toggle-container">
-            <button class="filter-toggle-btn active" id="btnFiltroMias" onclick="cambiarFiltroIdeas('mias')">MIS IDEAS</button>
-            <button class="filter-toggle-btn" id="btnFiltroTodas" onclick="cambiarFiltroIdeas('todas')">TODAS</button>
-        </div>
-
-        <div class="counters-grid">
-            <div class="counter-card">
-                <span class="number" id="countMisTotal">0</span>
-                <span class="label">Total</span>
-            </div>
-            <div class="counter-card">
-                <span class="number" id="countMisAbiertas">0</span>
-                <span class="label">Abiertas</span>
-            </div>
-            <div class="counter-card">
-                <span class="number" id="countMisCerradas">0</span>
-                <span class="label">Cerradas</span>
-            </div>
-        </div>
-
-        <div id="listaIdeas"></div>
-    </div>
-
-    <div id="tabPista" class="tab-content">
-        <div class="page-title-box">
-            <h1>LA PISTA</h1>
-            <p>Cada kaizen cerrado impulsa tu auto hacia la meta.</p>
-        </div>
-
-        <div class="track-position-card">
-            <div class="track-position-header">
-                <span>Tu Posición</span>
-                <span id="posicionTexto">1 / 1</span>
-            </div>
-            <div class="track-position-numbers">
-                <span id="misKaizensCerradosNum">0</span> <span style="font-size: 14px; font-weight: normal; opacity: 0.9;">kaizens cerrados</span>
-            </div>
-        </div>
-
-        <div id="pistaPilotosContainer"></div>
-    </div>
-
-    <nav class="bottom-nav">
-        <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
-            <span class="nav-icon">💡</span>
-            Registrar
-        </button>
-        <button class="nav-item" onclick="cambiarPestana('tabMisIdeas', this)">
-            <span class="nav-icon">📋</span>
-            Mis ideas
-        </button>
-        <button class="nav-item" onclick="cambiarPestana('tabPista', this)">
-            <span class="nav-icon">🏆</span>
-            Pista
-        </button>
-    </nav>
-</div>
-
-<div id="editModal" class="hidden">
-    <div class="edit-card">
-        <h2 style="margin-top:0; color: var(--primary); font-size: 20px; font-weight: 800;">Editar Propuesta</h2>
-        <label class="form-label">Título</label>
-        <input id="editTitulo" placeholder="Título">
-        
-        <label class="form-label">Área</label>
-        <input id="editArea" placeholder="Área">
-        
-        <label class="form-label">Tipo</label>
-        <select id="editTipo">
-            <option value="Quick">Quick</option>
-            <option value="Standard">Standard</option>
-        </select>
-        
-        <label class="form-label">Descripción</label>
-        <textarea id="editDescripcion" placeholder="Descripción" rows="3"></textarea>
-        
-        <div style="display: flex; gap: 10px; margin-top: 18px;">
-            <button id="guardarEdicion" style="background-color: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">Guardar Cambios</button>
-            <button id="cancelarEdicion" style="background-color: #64748b; box-shadow: none;">Cancelar</button>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
