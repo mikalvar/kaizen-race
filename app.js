@@ -134,8 +134,6 @@ async function guardarIdea() {
     const descripcion =
         document.getElementById("descripcion").value.trim();
 
-    console.log("Datos de la idea:");
-
     console.log({
         titulo,
         area,
@@ -147,8 +145,6 @@ async function guardarIdea() {
         JSON.parse(
             sessionStorage.getItem("usuario")
         );
-
-    console.log("Usuario logueado:");
 
     console.log(usuario);
 
@@ -168,7 +164,30 @@ async function guardarIdea() {
                 tipo,
                 estado: "ABIERTO",
                 usuario_ci: usuario.ci,
-                usuario_nombre
+                usuario_nombre:
+                    `${usuario.nombre} ${usuario.apellido || ""}`.trim(),
+                fecha_creacion:
+                    new Date().toISOString()
+            }
+        ]);
+
+    if (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+        return;
+    }
+
+    alert("Idea registrada");
+
+    document.getElementById("titulo").value = "";
+    document.getElementById("area").value = "";
+    document.getElementById("descripcion").value = "";
+
+    cargarIdeas();
+}
 /*
 =================================
 LISTAR IDEAS
