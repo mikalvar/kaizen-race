@@ -132,17 +132,26 @@ async function guardarIdea() {
         return;
     }
 
-    const { error } = await supabase
+    const usuario =
+        JSON.parse(
+            sessionStorage.getItem("usuario")
+        );
+
+    const { error } =
+        await supabaseClient
         .from("ideas")
         .insert([
             {
                 titulo,
+                descripcion,
                 area,
                 tipo,
-                descripcion,
                 estado: "ABIERTO",
-                usuario_ci: currentUser.ci,
-                usuario_nombre: currentUser.nombre
+                usuario_ci: usuario.ci,
+                usuario_nombre:
+                    `${usuario.nombre} ${usuario.apellido}`,
+                fecha_creacion:
+                    new Date().toISOString()
             }
         ]);
 
@@ -152,10 +161,6 @@ async function guardarIdea() {
     }
 
     alert("Idea registrada");
-
-    document.getElementById("titulo").value = "";
-    document.getElementById("area").value = "";
-    document.getElementById("descripcion").value = "";
 
     cargarIdeas();
 }
