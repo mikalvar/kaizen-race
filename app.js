@@ -11,6 +11,7 @@ window.supabase.createClient(
 );
 
 let currentUser = null;
+let editingId = null;
 
 /*
 =================================
