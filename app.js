@@ -112,6 +112,8 @@ function logoutUsuario() {
 
     currentUser = null;
 
+    sessionStorage.removeItem("usuario");
+
     document.getElementById("loginArea")
         .classList.remove("hidden");
 
