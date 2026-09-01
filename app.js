@@ -2,11 +2,8 @@
 const SUPABASE_URL = 'https://tu-proyecto.supabase.co'; // Tus credenciales originales
 const SUPABASE_KEY = 'tu-anon-key';
 
-// Inicialización segura sin colisiones de nombres
-if (!window.supabaseClient) {
-    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}
-const supabase = window.supabaseClient;
+// Inicialización utilizando un nombre único para evitar conflictos con la librería global
+const dbSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Variables de sesión y estado
 let usuarioLogueado = null;
@@ -73,7 +70,7 @@ async function iniciarSesion() {
         return;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await dbSupabase
         .from('pilotos')
         .select('*')
         .eq('ci', ci)
@@ -99,7 +96,7 @@ async function registrarPiloto() {
         return;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await dbSupabase
         .from('pilotos')
         .insert([{ nombre, apellido, ci }])
         .select()
@@ -163,7 +160,7 @@ async function cargarDatosApp() {
 }
 
 async function cargarContadores() {
-    const { data: todas, error } = await supabase.from('ideas').select('*');
+    const { data: todas, error } = await dbSupabase.from('ideas').select('*');
     if (error) return;
 
     const total = todas.length;
@@ -195,7 +192,7 @@ async function guardarPropuesta() {
         return;
     }
 
-    const { error } = await supabase.from('ideas').insert([{
+    const { error } = await dbSupabase.from('ideas').insert([{
         titulo,
         area: area || 'General',
         descripcion,
@@ -222,7 +219,7 @@ async function cargarIdeas() {
     const contenedor = document.getElementById('listaIdeas');
     contenedor.innerHTML = '<p style="text-align:center; color:white;">Cargando ideas...</p>';
 
-    let query = supabase.from('ideas').select('*, pilotos(nombre, apellido)');
+    let query = dbSupabase.from('ideas').select('*, pilotos(nombre, apellido)');
     if (filtroIdeasActual === 'mias') {
         query = query.eq('pilot_id', usuarioLogueado.id);
     }
@@ -283,7 +280,7 @@ async function cargarIdeas() {
 }
 
 async function cambiarEstadoIdea(id, nuevoEstado) {
-    const { error } = await supabase.from('ideas').update({ estado: nuevoEstado }).eq('id', id);
+    const { error } = await dbSupabase.from('ideas').update({ estado: nuevoEstado }).eq('id', id);
     if (error) {
         alert('Error al actualizar estado');
         return;
@@ -293,7 +290,7 @@ async function cambiarEstadoIdea(id, nuevoEstado) {
 
 async function eliminarIdea(id) {
     if (!confirm('¿Estás seguro de eliminar esta propuesta?')) return;
-    const { error } = await supabase.from('ideas').delete().eq('id', id);
+    const { error } = await dbSupabase.from('ideas').delete().eq('id', id);
     if (error) {
         alert('Error al eliminar');
         return;
@@ -323,7 +320,7 @@ async function confirmarEdicion() {
     const tipo = document.getElementById('editTipo').value;
     const descripcion = document.getElementById('editDescripcion').value.trim();
 
-    const { error } = await supabase.from('ideas').update({
+    const { error } = await dbSupabase.from('ideas').update({
         titulo, area, tipo, descripcion
     }).eq('id', idIdeaEditando);
 
@@ -340,8 +337,8 @@ async function cargarPista() {
     const contenedor = document.getElementById('pistaPilotosContainer');
     contenedor.innerHTML = '<p style="text-align:center; color:white;">Calculando posiciones...</p>';
 
-    const { data: pilotos, error: errPilotos } = await supabase.from('pilotos').select('*');
-    const { data: ideas, error: errIdeas } = await supabase.from('ideas').select('*');
+    const { data: pilotos, error: errPilotos } = await dbSupabase.from('pilotos').select('*');
+    const { data: ideas, error: errIdeas } = await dbSupabase.from('ideas').select('*');
 
     if (errPilotos || errIdeas) {
         contenedor.innerHTML = '<p style="text-align:center; color:white;">Error al cargar la pista.</p>';
