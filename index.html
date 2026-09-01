@@ -209,19 +209,17 @@
             min-width: 0;
         }
 
-        /* Icono minimalista en lugar de emoji realista */
+        /* Icono realista con mayor tamaño */
         .app-brand-icon {
-            width: 36px;
-            height: 36px;
+            width: 42px;
+            height: 42px;
             background: #f1f5f9;
             border: 1px solid var(--border-card);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary);
-            font-size: 14px;
-            font-weight: 700;
+            font-size: 20px;
             flex-shrink: 0;
         }
 
@@ -321,11 +319,11 @@
             border: 1px solid var(--border-card);
         }
         .stat-card-abiertas {
-            background: #fefce8; /* Fondo amarillo sutil */
+            background: #fefce8;
             border: 1px solid #fde047;
         }
         .stat-card-cerradas {
-            background: #f0fdf4; /* Fondo verde sutil */
+            background: #f0fdf4;
             border: 1px solid #bbf7d0;
         }
 
@@ -342,7 +340,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Barra de navegación inferior minimalista */
+        /* Barra de navegación inferior con iconos grandes */
         .bottom-nav {
             position: absolute;
             bottom: 0;
@@ -374,14 +372,12 @@
         }
 
         .nav-item .nav-icon {
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: -1px;
+            font-size: 18px; /* Icono realista ampliado */
         }
 
         .nav-item.active { color: var(--primary-light); font-weight: 700; }
 
-        /* Tarjetas de Tipo de Kaizen (Minimalistas) */
+        /* Tarjetas de Tipo de Kaizen con iconos realistas grandes */
         .kaizen-type-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -405,11 +401,8 @@
         }
 
         .kaizen-type-card .icon {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--primary-light);
+            font-size: 18px; /* Tamaño de icono ampliado */
             margin-bottom: 4px;
-            letter-spacing: -0.5px;
         }
 
         .kaizen-type-card .title {
@@ -458,7 +451,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Colores específicos solicitados para estados */
         .status-abierto { background-color: #fefce8; color: #a16207; border: 1px solid #fde047; }
         .status-cerrado { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
         .badge-tipo { background-color: #f1f5f9; color: #475569; border: 1px solid var(--border-card); }
@@ -489,7 +481,7 @@
             color: var(--text-muted);
         }
 
-        /* Tarjetas de Pista (Ranking) */
+        /* Tarjetas de Pista (Ranking) con coche grande */
         .racer-card {
             background: #ffffff;
             border: 1px solid var(--border-card);
@@ -509,28 +501,23 @@
 
         .racer-track-line {
             position: relative;
-            height: 6px;
+            height: 10px;
             background: #f1f5f9;
-            border-radius: 3px;
+            border-radius: 5px;
         }
 
-        /* Icono minimalista de vehículo en pista (bloques o guión) */
         .racer-car-icon {
             position: absolute;
-            top: -7px;
-            font-size: 10px;
-            font-weight: 900;
-            color: var(--primary-light);
+            top: -9px;
+            font-size: 16px; /* Coche grande */
             transition: left 0.5s ease;
         }
 
         .racer-flag-icon {
             position: absolute;
             right: 4px;
-            top: -6px;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--text-muted);
+            top: -3px;
+            font-size: 14px; /* Bandera grande */
         }
 
         .auth-switch-container.filter-switch {
@@ -631,7 +618,7 @@
     <div id="appArea" class="hidden">
         <header class="app-header">
             <div class="user-info">
-                <div class="app-brand-icon">KZ</div>
+                <div class="app-brand-icon">🏎️</div>
                 <div class="user-details">
                     <h3 id="tituloPrincipalRol">PILOTO DE MEJORA</h3>
                     <span id="usuarioActual" class="user-subtext">Cargando...</span>
@@ -643,7 +630,7 @@
         <!-- Pestaña 1: Registrar -->
         <div id="tabRegistrar" class="tab-content active">
             <div class="progress-card-container" style="text-align: center; padding: 36px 20px;">
-                <div style="font-size: 13px; font-weight: 700; color: var(--primary-light); margin-bottom: 10px; letter-spacing: 1px;">[ + NUEVA ]</div>
+                <div style="font-size: 24px; margin-bottom: 8px;">✨</div>
                 <h2 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Propuesta de Mejora</h2>
                 <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Registra tu iniciativa para optimizar los procesos.</p>
                 <button onclick="abrirModalRegistro()" class="btn-primary" style="padding: 12px 20px; font-size: 13px; border-radius: 12px;">Crear Propuesta</button>
@@ -655,7 +642,7 @@
             <div class="progress-card-container">
                 <div class="progress-title-row">
                     <span>ESTADÍSTICAS</span>
-                    <span style="font-size: 11px; color: var(--text-muted);">●</span>
+                    <span style="font-size: 14px;">📊</span>
                 </div>
                 <h2 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin-bottom: 14px;">Resumen operativo</h2>
                 
@@ -706,22 +693,22 @@
             <div id="pistaPilotosContainer"></div>
         </div>
 
-        <!-- Barra de navegación inferior minimalista -->
+        <!-- Barra de navegación inferior con iconos grandes -->
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
-                <span class="nav-icon">[+]</span>
+                <span class="nav-icon">➕</span>
                 <span>Nueva</span>
             </button>
             <button class="nav-item" onclick="cambiarPestana('tabIdeas', this)">
-                <span class="nav-icon">[≡]</span>
+                <span class="nav-icon">📋</span>
                 <span>Tareas</span>
             </button>
             <button class="nav-item" onclick="cambiarPestana('tabPista', this)">
-                <span class="nav-icon">[::]</span>
+                <span class="nav-icon">🏁</span>
                 <span>Informes</span>
             </button>
             <button class="nav-item" onclick="cerrarSesion()">
-                <span class="nav-icon">[→]</span>
+                <span class="nav-icon">🚪</span>
                 <span>Salir</span>
             </button>
         </nav>
@@ -740,12 +727,13 @@
                 <label>Tipo de kaizen</label>
                 <div class="kaizen-type-container">
                     <div id="cardQuick" class="kaizen-type-card selected" onclick="seleccionarTipoKaizen('Quick')">
-                        <div class="icon">⚡ QUICK</div>
+                        <div class="icon">⚡</div>
                         <div class="title">Rápida</div>
                         <div class="desc">Mejora directa</div>
                     </div>
                     <div id="cardStandard" class="kaizen-type-card" onclick="seleccionarTipoKaizen('Standard')">
-                        <div class="icon">📋 STANDARD</div>
+                        <seleccionarTipoKaizen('Standard')
+                        <div class="icon">📈</div>
                         <div class="title">Estándar</div>
                         <div class="desc">Con análisis</div>
                     </div>
