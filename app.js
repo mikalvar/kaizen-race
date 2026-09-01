@@ -198,6 +198,7 @@ async function guardarIdea() {
 
     cargarIdeas();
 }
+
 /*
 =================================
 LISTAR IDEAS
@@ -223,7 +224,7 @@ async function cargarIdeas() {
 
     lista.innerHTML = "";
 
-        data.forEach(idea => {
+    data.forEach(idea => {
 
         const card =
             document.createElement("div");
@@ -231,11 +232,11 @@ async function cargarIdeas() {
         card.className = "card";
 
         const esAdmin =
-    currentUser &&
-    currentUser.rol === "admin";
+            currentUser &&
+            currentUser.rol === "admin";
 
-console.log("Usuario actual:", currentUser);
-console.log("Es admin:", esAdmin);
+        console.log("Usuario actual:", currentUser);
+        console.log("Es admin:", esAdmin);
 
         card.innerHTML = `
             <h3>${idea.titulo}</h3>
@@ -264,23 +265,23 @@ console.log("Es admin:", esAdmin);
                 ${idea.descripcion}
             </p>
 
-${
-    esAdmin
-    ? `
-    <button onclick="editarIdea(${idea.id})">
-        Editar Idea
-    </button>
+        ${
+            esAdmin
+            ? `
+            <button onclick="editarIdea(${idea.id})">
+                Editar Idea
+            </button>
 
-    <button onclick="cerrarIdea(${idea.id})">
-        Cerrar Idea
-    </button>
+            <button onclick="cerrarIdea(${idea.id})">
+                Cerrar Idea
+            </button>
 
-    <button onclick="eliminarIdea(${idea.id})">
-        Eliminar Idea
-    </button>
-    `
-    : ""
-}
+            <button onclick="eliminarIdea(${idea.id})">
+                Eliminar Idea
+            </button>
+            `
+            : ""
+        }
         `;
 
         lista.appendChild(card);
@@ -288,10 +289,7 @@ ${
     });
 
     cargarRanking(data);
-
 }
-    
-} 
 
 async function cerrarIdea(id) {
 
