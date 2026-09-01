@@ -3,203 +3,368 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Kaizen Race</title>
-
 <style>
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --accent: #f59e0b;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+}
 
-body{
-    font-family: Arial, sans-serif;
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
     max-width: 900px;
-    margin:auto;
-    padding:20px;
+    margin: auto;
+    padding: 15px;
 }
 
-input,textarea,button,select{
-    width:100%;
-    padding:10px;
-    margin-bottom:10px;
+/* Auth Area */
+#loginArea {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    max-width: 450px;
+    margin: 60px auto;
 }
 
-.card{
-    border:1px solid #ddd;
-    padding:15px;
-    border-radius:8px;
-    margin-bottom:10px;
+#loginArea h2 {
+    margin-top: 0;
+    color: var(--primary);
 }
 
-.hidden{
-    display:none;
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
 }
 
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background-color: var(--primary-dark);
+}
+
+/* App Header Bar */
+.app-header {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.brand-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pilot-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.logout-btn-sm {
+    background: #ef4444;
+    width: auto;
+    padding: 6px 12px;
+    font-size: 12px;
+    margin: 0;
+}
+.logout-btn-sm:hover {
+    background: #dc2626;
+}
+
+/* Navigation Tabs Bar */
+.nav-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: #e2e8f0;
+    padding: 5px;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Tab Contents */
+.tab-content {
+    display: none;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Cards & Filters */
+.card {
+    border: 1px solid var(--border);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-btn {
+    background: #f1f5f9;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 15px;
+}
+
+.metric-card {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-card h3 {
+    margin: 0 0 5px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.metric-card span {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Modal */
+#editModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+#editModal.hidden {
+    display: none;
+}
+#editModal .card {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 20px;
+}
 </style>
-
-#editModal{
-
-    position:fixed;
-
-    top:0;
-    left:0;
-
-    width:100%;
-    height:100%;
-
-    background:rgba(0,0,0,.60);
-
-    display:flex;
-
-    justify-content:center;
-    align-items:center;
-
-    z-index:999;
-}
-
-#editModal.hidden{
-    display:none;
-}
-
-#editModal .card{
-
-    background:white;
-
-    width:90%;
-    max-width:500px;
-
-    padding:20px;
-}    
-    
 </head>
 <body>
 
-<h1>Kaizen Race</h1>
-
+<!-- ÁREA DE LOGIN / REGISTRO -->
 <div id="loginArea">
-
-<h2>Ingreso</h2>
-
-<input id="ciInput" placeholder="Cédula">
-
-<button id="loginBtn">
-Ingresar
-</button>
-
-<hr>
-
-<h2>Registro</h2>
-
-<input
-id="nombreInput"
-placeholder="Nombre">
-
-<input
-id="apellidoInput"
-placeholder="Apellido">
-
-<input
-id="ciRegistroInput"
-placeholder="Cédula">
-
-<button id="registerBtn">
-Registrar
-</button>
-
-</div>
-
-<div id="appArea" class="hidden">
-
-<h2 id="usuarioActual"></h2>
-
-<button id="logoutBtn">
-Cerrar sesión
-</button>
-
-<hr>
-
-<h2>Nueva idea</h2>
-
-<input
-id="titulo"
-placeholder="Título">
-
-<input
-id="area"
-placeholder="Área">
-
-<select id="tipo">
-
-<option value="Quick">
-Quick
-</option>
-
-<option value="Standard">
-Standard
-</option>
-
-</select>
-
-<textarea
-id="descripcion"
-placeholder="Descripción">
-</textarea>
-
-<button id="guardarIdea">
-Guardar Idea
-</button>
-
-<hr>
-
-<hr>
-
-<h2>🏆 Ranking Kaizen</h2>
-
-<div id="ranking"></div>
-
-<hr>
-
-<h2>Ideas</h2>
+    <h2>🏎️ Kaizen Race</h2>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Inicia sesión con tu número de cédula para acelerar tus ideas de mejora.</p>
     
-<div id="listaIdeas"></div>
+    <input id="ciInput" placeholder="Ingresa tu Cédula">
+    <button id="loginBtn">Ingresar al Sistema</button>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 25px 0;">
+    
+    <h3 style="font-size: 16px; margin-bottom: 10px;">¿Nuevo Piloto? Regístrate</h3>
+    <input id="nombreInput" placeholder="Nombre">
+    <input id="apellidoInput" placeholder="Apellido">
+    <input id="ciRegistroInput" placeholder="Cédula">
+    <button id="registerBtn" style="background-color: #059669;">Registrarse</button>
+</div>
+
+<!-- ÁREA PRINCIPAL DE LA APP -->
+<div id="appArea" class="hidden">
+    
+    <!-- CINTA SUPERIOR -->
+    <div class="app-header">
+        <div class="brand-title">
+            🏁 Kaizen Race
+        </div>
+        <div class="pilot-badge">
+            <span>🚗 Piloto de Mejora: <strong id="usuarioActual">Piloto</strong></span>
+        </div>
+        <button id="logoutBtn" class="logout-btn-sm">Cerrar sesión</button>
+    </div>
+
+    <!-- CINTA DE PESTAÑAS INDEPENDIENTES -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="cambiarPestana('nuevaIdeaTab', this)">➕ Nueva idea</button>
+        <button class="tab-btn" onclick="cambiarPestana('ideasTab', this)">💡 Ideas</button>
+        <button class="tab-btn" onclick="cambiarPestana('rankingTab', this)">🏆 Ranking</button>
+        <button class="tab-btn" onclick="cambiarPestana('dashboardTab', this)">📊 Dashboard</button>
+    </div>
+
+    <!-- 1. PESTAÑA NUEVA IDEA -->
+    <div id="nuevaIdeaTab" class="tab-content active">
+        <h3 style="margin-top:0;">Registrar Nueva Idea de Mejora</h3>
+        <input id="titulo" placeholder="Título de la idea">
+        <input id="area" placeholder="Área (Ej. Producción, Calidad, Logística)">
+        <select id="tipo">
+            <option value="Quick">Quick (Mejora Rápida)</option>
+            <option value="Standard">Standard (Mejora Estándar)</option>
+        </select>
+        <textarea id="descripcion" placeholder="Descripción detallada de la propuesta..." rows="4"></textarea>
+        <button id="guardarIdea">Guardar e Iniciar Idea</button>
+    </div>
+
+    <!-- 2. PESTAÑA IDEAS -->
+    <div id="ideasTab" class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin:0;">Listado de Ideas</h3>
+            <div class="filter-bar" style="margin:0;">
+                <button class="filter-btn active" id="filterTodas" onclick="filtrarIdeas('todas')">Todas</button>
+                <button class="filter-btn" id="filterMis" onclick="filtrarIdeas('mias')">Mis Ideas</button>
+            </div>
+        </div>
+        <div id="listaIdeas"></div>
+    </div>
+
+    <!-- 3. PESTAÑA RANKING -->
+    <div id="rankingTab" class="tab-content">
+        <h3 style="margin-top:0;">🏆 Ranking de Pilotos Kaizen</h3>
+        <div id="ranking"></div>
+    </div>
+
+    <!-- 4. PESTAÑA DASHBOARD -->
+    <div id="dashboardTab" class="tab-content">
+        <h3 style="margin-top:0;">📊 Indicadores Generales de Rendimiento</h3>
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <h3>Ideas Totales</h3>
+                <span id="dashTotal">0</span>
+            </div>
+            <div class="metric-card">
+                <h3>Quick</h3>
+                <span id="dashQuick">0</span>
+            </div>
+            <div class="metric-card">
+                <h3>Standard</h3>
+                <span id="dashStandard">0</span>
+            </div>
+            <div class="metric-card">
+                <h3>Abiertas</h3>
+                <span id="dashAbiertas">0</span>
+            </div>
+            <div class="metric-card">
+                <h3>Cerradas</h3>
+                <span id="dashCerradas">0</span>
+            </div>
+            <div class="metric-card">
+                <h3>Puntos</h3>
+                <span id="dashPuntos">0</span>
+            </div>
+        </div>
+    </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
-
+<!-- MODAL EDICIÓN -->
 <div id="editModal" class="hidden">
-
     <div class="card">
-
-        <h2>Editar Idea</h2>
-
-        <input
-            id="editTitulo"
-            placeholder="Título">
-
-        <input
-            id="editArea"
-            placeholder="Área">
-
+        <h2 style="margin-top:0;">Editar Idea</h2>
+        <input id="editTitulo" placeholder="Título">
+        <input id="editArea" placeholder="Área">
         <select id="editTipo">
             <option value="Quick">Quick</option>
             <option value="Standard">Standard</option>
         </select>
-
-        <textarea
-            id="editDescripcion"
-            placeholder="Descripción">
-        </textarea>
-
-        <button id="guardarEdicion">
-            Guardar Cambios
-        </button>
-
-        <button id="cancelarEdicion">
-            Cancelar
-        </button>
-
+        <textarea id="editDescripcion" placeholder="Descripción" rows="3"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button id="guardarEdicion" style="background-color: #059669;">Guardar Cambios</button>
+            <button id="cancelarEdicion" style="background-color: #64748b;">Cancelar</button>
+        </div>
     </div>
-
 </div>
-    
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
 </body>
 </html>
