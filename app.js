@@ -24,14 +24,12 @@ function obtenerNombreCompleto(piloto) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Verificar si hay sesión guardada en localStorage
     const savedUser = localStorage.getItem('kaizen_user');
     if (savedUser) {
         usuarioLogueado = JSON.parse(savedUser);
         mostrarApp();
     }
 
-    // Botones de autenticación
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) loginBtn.addEventListener('click', iniciarSesion);
 
@@ -41,11 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) logoutBtn.addEventListener('click', cerrarSesion);
 
-    // Botón guardar idea
     const guardarBtn = document.getElementById('guardarIdea');
     if (guardarBtn) guardarBtn.addEventListener('click', guardarPropuesta);
 
-    // Modal de edición
     const btnGuardarEdicion = document.getElementById('guardarEdicion');
     if (btnGuardarEdicion) btnGuardarEdicion.addEventListener('click', confirmarEdicion);
 
@@ -53,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCancelarEdicion) btnCancelarEdicion.addEventListener('click', cerrarModalEdicion);
 });
 
-// Selector visual de tipo de kaizen
 function seleccionarTipoKaizen(tipo) {
     tipoKaizenSeleccionado = tipo;
     const selectTipo = document.getElementById('tipo');
@@ -71,7 +66,6 @@ function seleccionarTipoKaizen(tipo) {
     }
 }
 
-// --- LOGIN Y REGISTRO ---
 async function iniciarSesion() {
     const ci = document.getElementById('ciInput').value.trim();
     if (!ci) {
@@ -137,7 +131,6 @@ function mostrarApp() {
     cargarDatosApp();
 }
 
-// --- NAVEGACIÓN ENTRE PESTAÑAS ---
 function cambiarPestana(idTab, elementoBoton) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
@@ -163,16 +156,13 @@ function cambiarFiltroIdeas(filtro) {
     cargarIdeas();
 }
 
-// --- CARGA DE DATOS GENERALES ---
 async function cargarDatosApp() {
     await cargarContadores();
     await cargarIdeas();
     await cargarPista();
 }
 
-// --- CONTADORES ---
 async function cargarContadores() {
-    // Contadores generales de registrar
     const { data: todas, error } = await supabase.from('ideas').select('*');
     if (error) return;
 
@@ -184,7 +174,6 @@ async function cargarContadores() {
     document.getElementById('countAbiertas').textContent = abiertas;
     document.getElementById('countCerradas').textContent = cerradas;
 
-    // Contadores de Mis Ideas (filtradas por el usuario actual)
     const misIdeas = todas.filter(i => i.pilot_id === usuarioLogueado.id);
     const misTotal = misIdeas.length;
     const misAbiertas = misIdeas.filter(i => i.estado === 'Abierto' || !i.estado).length;
@@ -195,7 +184,6 @@ async function cargarContadores() {
     document.getElementById('countMisCerradas').textContent = misCerradas;
 }
 
-// --- GESTIÓN DE IDEAS ---
 async function guardarPropuesta() {
     const titulo = document.getElementById('titulo').value.trim();
     const area = document.getElementById('area').value.trim();
@@ -227,7 +215,6 @@ async function guardarPropuesta() {
     document.getElementById('descripcion').value = '';
 
     cargarDatosApp();
-    // Cambiar automáticamente a la pestaña de Mis Ideas
     document.querySelectorAll('.nav-item')[1].click();
 }
 
@@ -314,7 +301,6 @@ async function eliminarIdea(id) {
     cargarDatosApp();
 }
 
-// --- EDICIÓN ---
 function abrirModalEditar(id, titulo, area, tipo, descripcion) {
     idIdeaEditando = id;
     document.getElementById('editTitulo').value = decodeURIComponent(titulo);
@@ -350,12 +336,10 @@ async function confirmarEdicion() {
     cargarDatosApp();
 }
 
-// --- PISTA DE CARRERAS ---
 async function cargarPista() {
     const contenedor = document.getElementById('pistaPilotosContainer');
     contenedor.innerHTML = '<p style="text-align:center; color:white;">Calculando posiciones...</p>';
 
-    // Obtener todos los pilotos y sus ideas cerradas
     const { data: pilotos, error: errPilotos } = await supabase.from('pilotos').select('*');
     const { data: ideas, error: errIdeas } = await supabase.from('ideas').select('*');
 
@@ -364,7 +348,6 @@ async function cargarPista() {
         return;
     }
 
-    // Calcular kaizens cerrados por piloto
     let ranking = pilotos.map(piloto => {
         const cerrados = ideas.filter(i => i.pilot_id === piloto.id && i.estado === 'Cerrado').length;
         return {
@@ -373,10 +356,8 @@ async function cargarPista() {
         };
     });
 
-    // Ordenar de mayor a menor según kaizens cerrados
     ranking.sort((a, b) => b.cerrados - a.cerrados);
 
-    // Encontrar posición del usuario actual
     const indexUsuario = ranking.findIndex(p => p.id === usuarioLogueado.id);
     const miPosicion = indexUsuario !== -1 ? indexUsuario + 1 : 1;
     const misCerrados = indexUsuario !== -1 ? ranking[indexUsuario].cerrados : 0;
@@ -384,7 +365,6 @@ async function cargarPista() {
     document.getElementById('posicionTexto').textContent = `${miPosicion} / ${ranking.length}`;
     document.getElementById('misKaizensCerradosNum').textContent = misCerrados;
 
-    // Meta de la pista (ej. 10 kaizens para llegar al 100%, o dinámico si alguien supera los 10)
     const metaPista = Math.max(10, ...ranking.map(r => r.cerrados));
 
     let html = '';
@@ -392,7 +372,6 @@ async function cargarPista() {
         const esMio = piloto.id === usuarioLogueado.id;
         const nombreCompleto = obtenerNombreCompleto(piloto);
         
-        // Calcular porcentaje de avance en la pista (máximo 90% para que el auto no se pase de la bandera de meta)
         let porcentajeAvance = (piloto.cerrados / metaPista) * 85;
         if (porcentajeAvance > 88) porcentajeAvance = 88;
 
