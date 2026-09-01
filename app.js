@@ -263,19 +263,23 @@ console.log("Es admin:", esAdmin);
                 ${idea.descripcion}
             </p>
 
-            ${
-                esAdmin
-                ? `
-                <button onclick="cerrarIdea(${idea.id})">
-                    Cerrar Idea
-                </button>
+${
+    esAdmin
+    ? `
+    <button onclick="editarIdea(${idea.id})">
+        Editar Idea
+    </button>
 
-                <button onclick="eliminarIdea(${idea.id})">
-                    Eliminar Idea
-                </button>
-                `
-                : ""
-            }
+    <button onclick="cerrarIdea(${idea.id})">
+        Cerrar Idea
+    </button>
+
+    <button onclick="eliminarIdea(${idea.id})">
+        Eliminar Idea
+    </button>
+    `
+    : ""
+}
         `;
 
         lista.appendChild(card);
