@@ -205,6 +205,4 @@ document.getElementById('guardarIdea')?.addEventListener('click', async () => {
 
     try {
         if (ideaEditandoId) {
-            const { error } = await supabaseClient
-                .from('ideas')
-                .update({ titulo, area
+            const { error } = await supabase
