@@ -123,5 +123,41 @@ Guardar Idea
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
 
+<div id="editModal" class="hidden">
+
+    <div class="card">
+
+        <h2>Editar Idea</h2>
+
+        <input
+            id="editTitulo"
+            placeholder="Título">
+
+        <input
+            id="editArea"
+            placeholder="Área">
+
+        <select id="editTipo">
+            <option value="Quick">Quick</option>
+            <option value="Standard">Standard</option>
+        </select>
+
+        <textarea
+            id="editDescripcion"
+            placeholder="Descripción">
+        </textarea>
+
+        <button id="guardarEdicion">
+            Guardar Cambios
+        </button>
+
+        <button id="cancelarEdicion">
+            Cancelar
+        </button>
+
+    </div>
+
+</div>
+    
 </body>
 </html>
