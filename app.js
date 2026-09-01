@@ -400,9 +400,7 @@ async function editarIdea(id) {
         .eq("id", id);
 
     if (error) {
-
         alert(error.message);
-
         return;
     }
 
