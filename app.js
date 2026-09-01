@@ -4,16 +4,18 @@ const SUPABASE_ANON_KEY = 'AQUÍ_VA_TU_ANON_KEY';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Variables de Estado Global
-let usuarioActual = null;
+let usuarioActual = null; // Ejemplo: { nombre: 'Mikaela', apellido: 'Alvarez', ci: '3992978', rol: 'admin' }
 let filtroIdeasActual = 'mias'; // 'mias' o 'todas'
 let filtroEstadoActual = 'TODOS'; // 'TODOS', 'ABIERTO', 'CERRADO'
-let ideaEditandoId = null;
+let kaizenEditandoId = null;
 
 // Inicialización al cargar la ventana
 window.addEventListener('DOMContentLoaded', () => {
+    // Revisar si ya hay sesión guardada en localStorage
     const sesionGuardada = localStorage.getItem('kaizen_user');
     if (sesionGuardada) {
         usuarioActual = JSON.parse(sesionGuardada);
+        // Forzar rol Admin si la cédula es 3992978
         if (usuarioActual.ci === '3992978') {
             usuarioActual.rol = 'admin';
         }
@@ -53,6 +55,7 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
     }
 
     try {
+        // Consultar en la tabla de usuarios de Supabase
         const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
@@ -66,6 +69,7 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
 
         usuarioActual = data;
 
+        // Regla específica solicitada: cédula 3992978 es Administrador
         if (usuarioActual.ci === '3992978') {
             usuarioActual.rol = 'admin';
         }
@@ -90,6 +94,7 @@ document.getElementById('registerBtn')?.addEventListener('click', async () => {
     }
 
     try {
+        // Definir rol inicial (Admin automático si es 3992978)
         const rol = (ci === '3992978') ? 'admin' : 'usuario';
 
         const { data, error } = await supabaseClient
@@ -125,15 +130,19 @@ function mostrarAppPrincipal() {
     document.getElementById('loginArea').classList.add('hidden');
     document.getElementById('appArea').classList.remove('hidden');
 
+    // Actualizar datos en la cinta superior (Header)
     const tituloRol = document.getElementById('tituloPrincipalRol');
     const spanUsuario = document.getElementById('usuarioActual');
     const roleBadge = document.getElementById('roleBadge');
 
+    // Título grande superior
     tituloRol.textContent = "PILOTO DE MEJORA";
 
+    // Nombre y cédula pequeño abajo (ej: mikaelaalvarez3992978 o con espacios legibles)
     const nombreCompleto = `${usuarioActual.nombre || ''} ${usuarioActual.apellido || ''}`.trim();
     spanUsuario.textContent = `${nombreCompleto} (${usuarioActual.ci})`;
 
+    // Ajustar Indicador de Rol (Admin o Usuario)
     if (usuarioActual.ci === '3992978' || usuarioActual.rol === 'admin') {
         roleBadge.textContent = "Admin";
         roleBadge.style.background = "#eff6ff";
@@ -146,16 +155,20 @@ function mostrarAppPrincipal() {
         roleBadge.style.borderColor = "var(--border-card)";
     }
 
+    // Cargar datos iniciales de la app
     cargarDatosTablero();
 }
 
 // --- NAVEGACIÓN ENTRE PESTAÑAS ---
 function cambiarPestana(idTab, elementoBtn) {
+    // Ocultar todas las pestañas
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
+    // Mostrar la seleccionada
     document.getElementById(idTab).classList.add('active');
 
+    // Actualizar botones de la barra inferior
     document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -193,7 +206,7 @@ function seleccionarTipoKaizen(tipo) {
     }
 }
 
-// Guardar nueva propuesta en la tabla 'ideas'
+// Guardar nueva propuesta
 document.getElementById('guardarIdea')?.addEventListener('click', async () => {
     const titulo = document.getElementById('titulo').value.trim();
     const area = document.getElementById('area').value.trim();
@@ -206,14 +219,14 @@ document.getElementById('guardarIdea')?.addEventListener('click', async () => {
     }
 
     try {
-        const { error } = await supabaseClient.from('ideas').insert([{
+        const { error } = await supabaseClient.from('kaizens').insert([{
             titulo,
             area: area || 'General',
             descripcion,
             tipo,
             estado: 'ABIERTO',
-            usuario_ci: usuarioActual.ci,
-            usuario_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido || ''}`.trim()
+            autor_ci: usuarioActual.ci,
+            autor_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido}`
         }]);
 
         if (error) throw error;
@@ -254,22 +267,24 @@ function filtrarPorEstado(estado) {
 async function cargarDatosTablero() {
     try {
         const { data, error } = await supabaseClient
-            .from('ideas')
+            .from('kaizens')
             .select('*')
-            .order('fecha_creacion', { ascending: false });
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        const misIdeas = data.filter(k => k.usuario_ci === usuarioActual.ci);
-        const totalMias = misIdeas.length;
-        const abiertasMias = misIdeas.filter(k => k.estado === 'ABIERTO').length;
-        const cerradasMias = misIdeas.filter(k => k.estado === 'CERRADO').length;
+        // Calcular contadores del usuario actual
+        const misKaizens = data.filter(k => k.autor_ci === usuarioActual.ci);
+        const totalMias = misKaizens.length;
+        const abiertasMias = misKaizens.filter(k => k.estado === 'ABIERTO').length;
+        const cerradasMias = misKaizens.filter(k => k.estado === 'CERRADO').length;
 
         document.getElementById('countTotal').textContent = totalMias;
         document.getElementById('countAbiertas').textContent = abiertasMias;
         document.getElementById('countCerradas').textContent = cerradasMias;
 
-        let listaFiltrada = filtroIdeasActual === 'mias' ? misIdeas : data;
+        // Filtrar según pestaña activa (Mis acciones / Todas) y Estado seleccionado
+        let listaFiltrada = filtroIdeasActual === 'mias' ? misKaizens : data;
 
         if (filtroEstadoActual !== 'TODOS') {
             listaFiltrada = listaFiltrada.filter(k => k.estado === filtroEstadoActual);
@@ -281,28 +296,29 @@ async function cargarDatosTablero() {
     }
 }
 
-function renderizarListaIdeas(ideas) {
+function renderizarListaIdeas(kaizens) {
     const contenedor = document.getElementById('listaIdeas');
     contenedor.innerHTML = '';
 
-    if (ideas.length === 0) {
+    if (kaizens.length === 0) {
         contenedor.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">No hay propuestas registradas con este filtro.</p>`;
         return;
     }
 
-    ideas.forEach(k => {
+    kaizens.forEach(k => {
         const esAdmin = (usuarioActual.ci === '3992978' || usuarioActual.rol === 'admin');
-        const esPropio = (k.usuario_ci === usuarioActual.ci);
+        const esPropio = (k.autor_ci === usuarioActual.ci);
         const estadoClase = k.estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
 
         let htmlBotonesAccion = '';
         if (esAdmin || esPropio) {
             htmlBotonesAccion = `
                 <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);">
-                    <button onclick="cambiarEstadoIdea('${k.id}', '${k.estado === 'ABIERTO' ? 'CERRADO' : 'ABIERTO'}')" style="background: var(--primary-light); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">
+                    <button onclick="abrirEdicion('${k.id}')" style="background: var(--warning); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">Editar</button>
+                    <button onclick="cambiarEstadoKaizen('${k.id}', '${k.estado === 'ABIERTO' ? 'CERRADO' : 'ABIERTO'}')" style="background: var(--primary-light); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">
                         ${k.estado === 'ABIERTO' ? 'Marcar Cerrado' : 'Marcar Abierto'}
                     </button>
-                    <button onclick="eliminarIdea('${k.id}')" style="background: var(--danger); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">Eliminar</button>
+                    <button onclick="eliminarKaizen('${k.id}')" style="background: var(--danger); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">Eliminar</button>
                 </div>
             `;
         }
@@ -320,8 +336,8 @@ function renderizarListaIdeas(ideas) {
             <h4 class="idea-title">${k.titulo}</h4>
             <p class="idea-desc">${k.descripcion}</p>
             <div class="idea-footer-row">
-                <span>Por: ${k.usuario_nombre || 'Piloto'}</span>
-                <span>${k.fecha_creacion ? new Date(k.fecha_creacion).toLocaleDateString() : ''}</span>
+                <span>Por: ${k.autor_nombre || 'Piloto'}</span>
+                <span>${new Date(k.created_at).toLocaleDateString()}</span>
             </div>
             ${htmlBotonesAccion}
         `;
@@ -329,19 +345,12 @@ function renderizarListaIdeas(ideas) {
     });
 }
 
-// --- ACCIONES DE MODIFICACIÓN ---
-async function cambiarEstadoIdea(id, nuevoEstado) {
+// --- ACCIONES DE MODIFICACIÓN DE TAREAS ---
+async function cambiarEstadoKaizen(id, nuevoEstado) {
     try {
-        const updateData = { estado: nuevoEstado };
-        if (nuevoEstado === 'CERRADO') {
-            updateData.fecha_cierre = new Date().toISOString();
-        } else {
-            updateData.fecha_cierre = null;
-        }
-
         const { error } = await supabaseClient
-            .from('ideas')
-            .update(updateData)
+            .from('kaizens')
+            .update({ estado: nuevoEstado })
             .eq('id', id);
 
         if (error) throw error;
@@ -352,11 +361,11 @@ async function cambiarEstadoIdea(id, nuevoEstado) {
     }
 }
 
-async function eliminarIdea(id) {
+async function eliminarKaizen(id) {
     if (!confirm('¿Estás seguro de eliminar esta propuesta?')) return;
     try {
         const { error } = await supabaseClient
-            .from('ideas')
+            .from('kaizens')
             .delete()
             .eq('id', id);
 
@@ -372,30 +381,32 @@ async function eliminarIdea(id) {
 async function cargarPistaCarreras() {
     try {
         const { data, error } = await supabaseClient
-            .from('ideas')
+            .from('kaizens')
             .select('*');
 
         if (error) throw error;
 
+        // Agrupar kaizens cerrados por autor
         const rankingMap = {};
         data.forEach(k => {
-            if (!k.usuario_ci) return;
-            if (!rankingMap[k.usuario_ci]) {
-                rankingMap[k.usuario_ci] = {
-                    nombre: k.usuario_nombre || 'Piloto',
-                    ci: k.usuario_ci,
+            if (!rankingMap[k.autor_ci]) {
+                rankingMap[k.autor_ci] = {
+                    nombre: k.autor_nombre || 'Piloto',
+                    ci: k.autor_ci,
                     cerrados: 0,
                     total: 0
                 };
             }
-            rankingMap[k.usuario_ci].total++;
+            rankingMap[k.autor_ci].total++;
             if (k.estado === 'CERRADO') {
-                rankingMap[k.usuario_ci].cerrados++;
+                rankingMap[k.autor_ci].cerrados++;
             }
         });
 
+        // Convertir a array y ordenar por cantidad de cerrados (descendente)
         const rankingArray = Object.values(rankingMap).sort((a, b) => b.cerrados - a.cerrados);
 
+        // Actualizar estadísticas personales en la vista Pista
         const misDatos = rankingArray.find(r => r.ci === usuarioActual.ci);
         const misCerrados = misDatos ? misDatos.cerrados : 0;
         document.getElementById('misKaizensCerradosNum').textContent = misCerrados;
@@ -418,11 +429,12 @@ function renderizarPistaPilotos(ranking) {
         return;
     }
 
+    // Máximo de cerrados para calcular el avance porcentual del auto en la pista
     const maxCerrados = Math.max(...ranking.map(r => r.cerrados), 5);
 
     ranking.forEach((piloto, index) => {
         let porcentaje = (piloto.cerrados / maxCerrados) * 85;
-        if (porcentaje > 88) porcentaje = 88;
+        if (porcentaje > 88) porcentaje = 88; // Límite visual para que no cruce la bandera de llegada antes de tiempo
 
         const esMiCarro = piloto.ci === usuarioActual.ci;
         const card = document.createElement('div');
