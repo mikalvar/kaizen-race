@@ -337,9 +337,7 @@ async function eliminarIdea(id) {
 async function editarIdea(id) {
 
     const idea =
-        prompt(
-            "Nuevo título:"
-        );
+        prompt("Nuevo título:");
 
     if (!idea) return;
 
@@ -352,9 +350,7 @@ async function editarIdea(id) {
         .eq("id", id);
 
     if (error) {
-
         alert(error.message);
-
         return;
     }
 
