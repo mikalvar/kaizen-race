@@ -280,6 +280,52 @@ async function cargarIdeas() {
     });
 
 } 
+
+async function cerrarIdea(id) {
+
+    const confirmar =
+        confirm("¿Deseas cerrar esta idea?");
+
+    if (!confirmar) return;
+
+    const { error } =
+        await supabaseClient
+        .from("ideas")
+        .update({
+            estado: "CERRADO",
+            fecha_cierre:
+                new Date().toISOString()
+        })
+        .eq("id", id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    cargarIdeas();
+}
+
+async function eliminarIdea(id) {
+
+    const confirmar =
+        confirm("¿Deseas eliminar esta idea?");
+
+    if (!confirmar) return;
+
+    const { error } =
+        await supabaseClient
+        .from("ideas")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    cargarIdeas();
+}
 /*
 =================================
 EVENTOS
