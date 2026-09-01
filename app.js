@@ -75,19 +75,24 @@ async function loginUsuario() {
         return;
     }
 
-    currentUser = data;
+currentUser = data;
 
-    document.getElementById("loginArea")
-        .classList.add("hidden");
+sessionStorage.setItem(
+    "usuario",
+    JSON.stringify(data)
+);
 
-    document.getElementById("appArea")
-        .classList.remove("hidden");
+document.getElementById("loginArea")
+.classList.add("hidden");
 
-    document.getElementById("usuarioActual")
-        .textContent =
-        `Bienvenido ${data.nombre}`;
+document.getElementById("appArea")
+.classList.remove("hidden");
 
-    cargarIdeas();
+document.getElementById("usuarioActual")
+.textContent =
+`Bienvenido ${data.nombre}`;
+
+cargarIdeas();
 }
 
 /*
