@@ -4,7 +4,7 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU";
 
-const supabase =
+const supabaseClient =
 window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
@@ -31,7 +31,7 @@ async function registrarUsuario() {
         return;
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from("usuarios")
         .insert([
             {
@@ -64,7 +64,7 @@ async function loginUsuario() {
         return;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from("usuarios")
         .select("*")
         .eq("ci", ci)
