@@ -240,6 +240,20 @@
             text-overflow: ellipsis;
         }
 
+        /* Estilo para el indicador de rol a la derecha de la cabecera */
+        .role-badge {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            border: 1px solid var(--border-card);
+        }
+
         /* Las pestañas manejan su propio scroll interno */
         .tab-content {
             display: none;
@@ -631,6 +645,8 @@
                     <h3 id="usuarioActual">PILOTO</h3>
                 </div>
             </div>
+            <!-- Indicador dinámico de rol (Admin / Usuario) -->
+            <div id="roleBadge" class="role-badge">Usuario</div>
         </header>
 
         <!-- Pestaña 1: Registrar (Acción de nueva mejora) -->
