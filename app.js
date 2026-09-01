@@ -329,6 +329,19 @@ async function eliminarIdea(id) {
 
     cargarIdeas();
 }
+
+<button onclick="editarIdea(${idea.id})">
+    Editar Idea
+</button>
+
+<button onclick="cerrarIdea(${idea.id})">
+    Cerrar Idea
+</button>
+
+<button onclick="eliminarIdea(${idea.id})">
+    Eliminar Idea
+</button>
+
 /*
 =================================
 EVENTOS
