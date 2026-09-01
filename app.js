@@ -113,7 +113,7 @@ async function registrarPiloto() {
 
     alert('¡Registro exitoso! Ya puedes ingresar.');
     document.getElementById('ciInput').value = ci;
-    cambiarModoAuth('login'); // Cambia automáticamente a la pestaña de iniciar sesión
+    cambiarModoAuth('login');
 }
 
 function cerrarSesion() {
@@ -190,6 +190,32 @@ async function cargarContadores() {
     document.getElementById('countMisCerradas').textContent = misCerradas;
 }
 
+// --- FUNCIONES PARA ABRIR Y CERRAR EL MODAL DE REGISTRO ---
+function abrirModalRegistro() {
+    const modal = document.getElementById('modalRegistro');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function cerrarModalRegistro() {
+    const modal = document.getElementById('modalRegistro');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Control visual de las tarjetas Quick y Standard dentro del modal
+function seleccionarTipoKaizen(tipo) {
+    document.getElementById('tipo').value = tipo;
+    const cardQuick = document.getElementById('cardQuick');
+    const cardStandard = document.getElementById('cardStandard');
+
+    if (tipo === 'Quick') {
+        cardQuick.classList.add('selected');
+        cardStandard.classList.remove('selected');
+    } else {
+        cardStandard.classList.add('selected');
+        cardQuick.classList.remove('selected');
+    }
+}
+
 async function guardarPropuesta() {
     const titulo = document.getElementById('titulo').value.trim();
     const area = document.getElementById('area').value.trim();
@@ -224,7 +250,11 @@ async function guardarPropuesta() {
     document.getElementById('area').value = '';
     document.getElementById('descripcion').value = '';
 
+    // Cierra el modal emergente tras guardar con éxito
+    cerrarModalRegistro();
+
     cargarDatosApp();
+    // Salta automáticamente a la pestaña de "Mis Ideas"
     document.querySelectorAll('.nav-item')[1].click();
 }
 
