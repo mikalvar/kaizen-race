@@ -206,7 +206,6 @@ function seleccionarTipoKaizen(tipo) {
     }
 }
 
-// Guardar nueva propuesta
 document.getElementById('guardarIdea')?.addEventListener('click', async () => {
     const titulo = document.getElementById('titulo').value.trim();
     const area = document.getElementById('area').value.trim();
@@ -225,8 +224,8 @@ document.getElementById('guardarIdea')?.addEventListener('click', async () => {
             descripcion,
             tipo,
             estado: 'ABIERTO',
-            autor_ci: usuarioActual.ci,
-            autor_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido}`
+            usuario_ci: usuarioActual.ci,
+            usuario_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido || ''}`.trim()
         }]);
 
         if (error) throw error;
