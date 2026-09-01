@@ -1,19 +1,119 @@
 <!DOCTYPE html>
-2
-<html>
-3
+<html lang="es">
 <head>
-4
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Kaizen Race</title>
-5
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin:auto;
+    padding:20px;
+}
+
+input,textarea,button,select{
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+}
+
+.card{
+    border:1px solid #ddd;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+
+.hidden{
+    display:none;
+}
+
+</style>
+
 </head>
-6
 <body>
-7
+
 <h1>Kaizen Race</h1>
-8
-<p>Aplicación en construcción.</p>
-9
+
+<div id="loginArea">
+
+<h2>Ingreso</h2>
+
+<input id="ciInput" placeholder="Cédula">
+
+<button id="loginBtn">
+Ingresar
+</button>
+
+<hr>
+
+<h2>Registro</h2>
+
+<input id="nombreInput" placeholder="Nombre">
+
+<input id="ciRegistroInput" placeholder="Cédula">
+
+<button id="registerBtn">
+Registrar
+</button>
+
+</div>
+
+<div id="appArea" class="hidden">
+
+<h2 id="usuarioActual"></h2>
+
+<button id="logoutBtn">
+Cerrar sesión
+</button>
+
+<hr>
+
+<h2>Nueva idea</h2>
+
+<input
+id="titulo"
+placeholder="Título">
+
+<input
+id="area"
+placeholder="Área">
+
+<select id="tipo">
+
+<option value="Quick">
+Quick
+</option>
+
+<option value="Standard">
+Standard
+</option>
+
+</select>
+
+<textarea
+id="descripcion"
+placeholder="Descripción">
+</textarea>
+
+<button id="guardarIdea">
+Guardar Idea
+</button>
+
+<hr>
+
+<h2>Ideas</h2>
+
+<div id="listaIdeas"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+.js"></script>
+
 </body>
-10
 </html>
