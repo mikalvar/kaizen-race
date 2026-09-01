@@ -219,7 +219,7 @@ document.getElementById('guardarIdea')?.addEventListener('click', async () => {
     }
 
     try {
-        const { error } = await supabaseClient.from('kaizens').insert([{
+        const { error } = await supabaseClient.from('ideas').insert([{
             titulo,
             area: area || 'General',
             descripcion,
@@ -349,7 +349,7 @@ function renderizarListaIdeas(kaizens) {
 async function cambiarEstadoKaizen(id, nuevoEstado) {
     try {
         const { error } = await supabaseClient
-            .from('kaizens')
+            .from('ideas')
             .update({ estado: nuevoEstado })
             .eq('id', id);
 
@@ -365,7 +365,7 @@ async function eliminarKaizen(id) {
     if (!confirm('¿Estás seguro de eliminar esta propuesta?')) return;
     try {
         const { error } = await supabaseClient
-            .from('kaizens')
+            .from('ideas')
             .delete()
             .eq('id', id);
 
@@ -381,7 +381,7 @@ async function eliminarKaizen(id) {
 async function cargarPistaCarreras() {
     try {
         const { data, error } = await supabaseClient
-            .from('kaizens')
+            .from('ideas')
             .select('*');
 
         if (error) throw error;
