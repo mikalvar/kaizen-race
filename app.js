@@ -304,7 +304,7 @@ function renderizarListaIdeas(kaizens) {
 
     kaizens.forEach(k => {
         const esAdmin = (usuarioActual.ci === '3992978' || usuarioActual.rol === 'admin');
-        const esPropio = (k.autor_ci === usuarioActual.ci);
+        const esPropio = (k.usuario_ci === usuarioActual.ci);
         const estadoClase = k.estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
 
         let htmlBotonesAccion = '';
