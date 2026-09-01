@@ -408,64 +408,63 @@
             font-size: 14px;
         }
 
-/* Estilo del contenedor deslizante para Mis Ideas / Todas */
-.auth-switch-container.filter-switch {
-    position: relative;
-    display: flex;
-    background: #e2e8f0;
-    border-radius: 20px;
-    padding: 3px;
-    width: 200px;
-    margin-left: auto;
-}
+        /* Estilo del contenedor deslizante para Mis Ideas / Todas */
+        .auth-switch-container.filter-switch {
+            position: relative;
+            display: flex;
+            background: #e2e8f0;
+            border-radius: 20px;
+            padding: 3px;
+            width: 200px;
+            margin-left: auto;
+        }
 
-.auth-switch-container.filter-switch button {
-    flex: 1;
-    background: transparent;
-    border: none;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    z-index: 2;
-    color: var(--text-main);
-    transition: color 0.3s ease;
-    text-align: center;
-}
+        .auth-switch-container.filter-switch button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 2;
+            color: var(--text-main);
+            transition: color 0.3s ease;
+            text-align: center;
+        }
 
-.auth-switch-container.filter-switch button.active {
-    color: #fff;
-}
+        .auth-switch-container.filter-switch button.active {
+            color: #fff;
+        }
 
-.auth-slider-bg.filter-slider {
-    position: absolute;
-    top: 3px;
-    bottom: 3px;
-    width: 50%;
-    background: var(--primary);
-    border-radius: 17px;
-    transition: transform 0.3s ease;
-    z-index: 1;
-}
+        .auth-slider-bg.filter-slider {
+            position: absolute;
+            top: 3px;
+            bottom: 3px;
+            width: 50%;
+            background: var(--primary);
+            border-radius: 17px;
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
 
-.auth-slider-bg.filter-slider.left {
-    transform: translateX(0%);
-}
+        .auth-slider-bg.filter-slider.left {
+            transform: translateX(0%);
+        }
 
-.auth-slider-bg.filter-slider.right {
-    transform: translateX(100%);
-}
+        .auth-slider-bg.filter-slider.right {
+            transform: translateX(100%);
+        }
 
-/* Cursor pointer para los contadores superiores */
-.stat-card-clickable {
-    cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-.stat-card-clickable:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-        
+        /* Cursor pointer para los contadores superiores */
+        .stat-card-clickable {
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .stat-card-clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -526,27 +525,28 @@
             <button id="logoutBtn" class="btn-logout">Salir</button>
         </header>
 
-        <!-- Pestaña 1: Registrar (Ahora actúa como panel principal con botón para abrir modal) -->
+        <!-- Pestaña 1: Registrar (Panel de control) -->
         <div id="tabRegistrar" class="tab-content active">
             <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">PANEL DE CONTROL</h2>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Cada propuesta te acerca a la meta.</p>
             
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h4 id="countTotal">0</h4>
-                    <span>Total</span>
+            <!-- Contadores interactivos -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('TODOS')">
+                    <span id="countTotal" style="font-size: 20px; font-weight: bold; display: block;">0</span>
+                    <span style="font-size: 12px; color: var(--text-muted);">TOTAL</span>
                 </div>
-                <div class="stat-card">
-                    <h4 id="countAbiertas">0</h4>
-                    <span>Abiertas</span>
+                <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('ABIERTO')">
+                    <span id="countAbiertas" style="font-size: 20px; font-weight: bold; color: var(--success); display: block;">0</span>
+                    <span style="font-size: 12px; color: var(--text-muted);">ABIERTAS</span>
                 </div>
-                <div class="stat-card">
-                    <h4 id="countCerradas">0</h4>
-                    <span>Cerradas</span>
+                <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('CERRADO')">
+                    <span id="countCerradas" style="font-size: 20px; font-weight: bold; color: var(--danger); display: block;">0</span>
+                    <span style="font-size: 12px; color: var(--text-muted);">CERRADAS</span>
                 </div>
             </div>
 
-            <!-- Botón principal para abrir el modal de registro que me compartiste -->
+            <!-- Botón principal para abrir el modal de registro -->
             <div style="text-align: center; padding: 30px 10px;">
                 <div style="font-size: 48px; margin-bottom: 12px;">⚡</div>
                 <h3 style="color: var(--text-main); margin-bottom: 8px; font-size: 18px;">¿Tienes una nueva mejora?</h3>
@@ -555,29 +555,18 @@
             </div>
         </div>
 
-        <!-- Pestaña 2: Mis Ideas -->
+        <!-- Pestaña 2: Mis Ideas / Propuestas -->
         <div id="tabIdeas" class="tab-content">
+            <!-- Selector deslizante Mis Ideas / Todas -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="font-size: 20px; color: var(--primary);">MIS PROPUESTAS</h2>
-                <div style="display: flex; gap: 6px;">
-                    <button id="btnFiltroMias" onclick="cambiarFiltroIdeas('mias')" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--primary);">Mis Ideas</button>
-                    <button id="btnFiltroTodas" onclick="cambiarFiltroIdeas('todas')" style="width: auto; padding: 6px 12px; font-size: 12px; background: #e2e8f0; color: var(--text-main);">Todas</button>
+                <h3 style="font-size: 16px; color: var(--text-main);">PROPUESTAS</h3>
+                <div class="auth-switch-container filter-switch">
+                    <div id="filterSliderBg" class="auth-slider-bg filter-slider left"></div>
+                    <button id="tabMiasBtn" type="button" class="active" onclick="cambiarFiltroIdeas('mias')">Mis Ideas</button>
+                    <button id="tabTodasBtn" type="button" onclick="cambiarFiltroIdeas('todas')">Todas</button>
                 </div>
             </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h4 id="countMisTotal">0</h4>
-                    <span>Total</span>
-                </div>
-                <div class="stat-card">
-                    <h4 id="countMisAbiertas">0</h4>
-                    <span>Abiertas</span>
-                </div>
-                <div class="stat-card">
-                    <h4 id="countMisCerradas">0</h4>
-                    <span>Cerradas</span>
-                </div>
-            </div>
+
             <div id="listaIdeas"></div>
         </div>
 
@@ -615,7 +604,7 @@
         </nav>
     </div>
 
-    <!-- MODAL DE REGISTRO (Diseño exacto de la imagen que enviaste) -->
+    <!-- MODAL DE REGISTRO -->
     <div id="modalRegistro" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
         <div style="background: white; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative;">
             
@@ -639,7 +628,6 @@
                         <div class="desc">Mejora con más análisis</div>
                     </div>
                 </div>
-                <!-- Campo oculto para guardar el valor seleccionado -->
                 <input type="hidden" id="tipo" value="Quick">
             </div>
 
@@ -665,33 +653,6 @@
         </div>
     </div>
 
-<!-- Contadores interactivos -->
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
-    <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('TODOS')">
-        <span id="countTotal" style="font-size: 20px; font-weight: bold;">0</span>
-        <span style="font-size: 12px; color: var(--text-muted);">TOTAL</span>
-    </div>
-    <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('ABIERTO')">
-        <span id="countAbiertas" style="font-size: 20px; font-weight: bold; color: var(--success);">0</span>
-        <span style="font-size: 12px; color: var(--text-muted);">ABIERTAS</span>
-    </div>
-    <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('CERRADO')">
-        <span id="countCerradas" style="font-size: 20px; font-weight: bold; color: var(--danger);">0</span>
-        <span style="font-size: 12px; color: var(--text-muted);">CERRADAS</span>
-    </div>
-</div>
-
-<!-- Selector deslizante Mis Ideas / Todas -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3 style="font-size: 16px; color: var(--text-main);">PROPUESTAS</h3>
-    <div class="auth-switch-container filter-switch">
-        <div id="filterSliderBg" class="auth-slider-bg filter-slider left"></div>
-        <button id="tabMiasBtn" type="button" class="active" onclick="cambiarFiltroIdeas('mias')">Mis Ideas</button>
-        <button id="tabTodasBtn" type="button" onclick="cambiarFiltroIdeas('todas')">Todas</button>
-    </div>
-</div>
-
-    
     <!-- MODAL DE EDICIÓN -->
     <div id="editModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
         <div style="background: white; width: 100%; max-width: 440px; padding: 24px; border-radius: 16px;">
