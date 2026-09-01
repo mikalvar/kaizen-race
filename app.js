@@ -383,20 +383,21 @@ async function cargarPistaCarreras() {
 
         if (error) throw error;
 
-        // Agrupar kaizens cerrados por autor
+        // Agrupar kaizens por usuario
         const rankingMap = {};
         data.forEach(k => {
-            if (!rankingMap[k.autor_ci]) {
-                rankingMap[k.autor_ci] = {
-                    nombre: k.autor_nombre || 'Piloto',
-                    ci: k.autor_ci,
+            if (!k.usuario_ci) return;
+            if (!rankingMap[k.usuario_ci]) {
+                rankingMap[k.usuario_ci] = {
+                    nombre: k.usuario_nombre || 'Piloto',
+                    ci: k.usuario_ci,
                     cerrados: 0,
                     total: 0
                 };
             }
-            rankingMap[k.autor_ci].total++;
+            rankingMap[k.usuario_ci].total++;
             if (k.estado === 'CERRADO') {
-                rankingMap[k.autor_ci].cerrados++;
+                rankingMap[k.usuario_ci].cerrados++;
             }
         });
 
