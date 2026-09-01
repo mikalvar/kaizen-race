@@ -120,6 +120,8 @@ CREAR IDEA
 
 async function guardarIdea() {
 
+    console.log("Entró en guardarIdea");
+
     const titulo =
         document.getElementById("titulo").value.trim();
 
@@ -132,15 +134,28 @@ async function guardarIdea() {
     const descripcion =
         document.getElementById("descripcion").value.trim();
 
-    if (!titulo || !area || !descripcion) {
-        alert("Completa todos los campos");
-        return;
-    }
+    console.log("Datos de la idea:");
+
+    console.log({
+        titulo,
+        area,
+        tipo,
+        descripcion
+    });
 
     const usuario =
         JSON.parse(
             sessionStorage.getItem("usuario")
         );
+
+    console.log("Usuario logueado:");
+
+    console.log(usuario);
+
+    if (!titulo || !area || !descripcion) {
+        alert("Completa todos los campos");
+        return;
+    }
 
     const { error } =
         await supabaseClient
@@ -153,23 +168,7 @@ async function guardarIdea() {
                 tipo,
                 estado: "ABIERTO",
                 usuario_ci: usuario.ci,
-                usuario_nombre:
-                    `${usuario.nombre} ${usuario.apellido}`,
-                fecha_creacion:
-                    new Date().toISOString()
-            }
-        ]);
-
-    if (error) {
-        alert(error.message);
-        return;
-    }
-
-    alert("Idea registrada");
-
-    cargarIdeas();
-}
-
+                usuario_nombre
 /*
 =================================
 LISTAR IDEAS
