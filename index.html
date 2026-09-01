@@ -255,22 +255,32 @@
         }
 
         .stat-card {
-            background: #f8fafc;
             padding: 12px 8px;
             border-radius: 10px;
             text-align: center;
-            border: 1px solid var(--border);
+        }
+
+        /* Estilos personalizados para los contadores */
+        .stat-card-total {
+            background: #f3f4f6; /* Gris claro */
+            border: 2px solid #6b7280; /* Gris oscuro */
+        }
+        .stat-card-abiertas {
+            background: #eff6ff; /* Azul muy claro */
+            border: 2px solid #2563eb; /* Azul */
+        }
+        .stat-card-cerradas {
+            background: #ecfdf5; /* Verde muy claro */
+            border: 2px solid #10b981; /* Verde */
         }
 
         .stat-card h4 {
             font-size: 20px;
-            color: var(--primary);
             margin-bottom: 2px;
         }
 
         .stat-card span {
             font-size: 10px;
-            color: var(--text-muted);
             font-weight: 600;
             text-transform: uppercase;
         }
@@ -525,41 +535,44 @@
             <button id="logoutBtn" class="btn-logout">Salir</button>
         </header>
 
-        <!-- Pestaña 1: Registrar (Panel de control) -->
+        <!-- Pestaña 1: Registrar (Panel de control original con el botón de nueva mejora) -->
         <div id="tabRegistrar" class="tab-content active">
             <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">PANEL DE CONTROL</h2>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Cada propuesta te acerca a la meta.</p>
-            
-            <!-- Contadores interactivos -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
-                <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('TODOS')">
-                    <span id="countTotal" style="font-size: 20px; font-weight: bold; display: block;">0</span>
-                    <span style="font-size: 12px; color: var(--text-muted);">TOTAL</span>
-                </div>
-                <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('ABIERTO')">
-                    <span id="countAbiertas" style="font-size: 20px; font-weight: bold; color: var(--success); display: block;">0</span>
-                    <span style="font-size: 12px; color: var(--text-muted);">ABIERTAS</span>
-                </div>
-                <div class="stat-card stat-card-clickable" onclick="filtrarPorEstado('CERRADO')">
-                    <span id="countCerradas" style="font-size: 20px; font-weight: bold; color: var(--danger); display: block;">0</span>
-                    <span style="font-size: 12px; color: var(--text-muted);">CERRADAS</span>
-                </div>
-            </div>
 
             <!-- Botón principal para abrir el modal de registro -->
-            <div style="text-align: center; padding: 30px 10px;">
-                <div style="font-size: 48px; margin-bottom: 12px;">⚡</div>
+            <div style="text-align: center; padding: 40px 10px;">
+                <div style="font-size: 56px; margin-bottom: 12px;">⚡</div>
                 <h3 style="color: var(--text-main); margin-bottom: 8px; font-size: 18px;">¿Tienes una nueva mejora?</h3>
                 <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px;">Registra tu propuesta de forma rápida y compite en la pista.</p>
                 <button onclick="abrirModalRegistro()" class="btn-primary" style="padding: 14px 24px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">Registrar Nueva Propuesta</button>
             </div>
         </div>
 
-        <!-- Pestaña 2: Mis Ideas / Propuestas -->
+        <!-- Pestaña 2: Mis Ideas / Propuestas (Con los contadores movidos aquí arriba) -->
         <div id="tabIdeas" class="tab-content">
+            <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">MIS PROPUESTAS</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Consulta el estado de tus iniciativas.</p>
+            
+            <!-- Contadores interactivos con los nuevos colores -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                <div class="stat-card stat-card-total stat-card-clickable" onclick="filtrarPorEstado('TODOS')">
+                    <span id="countTotal" style="font-size: 20px; font-weight: bold; color: #374151; display: block;">0</span>
+                    <span style="color: #4b5563;">TOTAL</span>
+                </div>
+                <div class="stat-card stat-card-abiertas stat-card-clickable" onclick="filtrarPorEstado('ABIERTO')">
+                    <span id="countAbiertas" style="font-size: 20px; font-weight: bold; color: #1d4ed8; display: block;">0</span>
+                    <span style="color: #1e40af;">ABIERTAS</span>
+                </div>
+                <div class="stat-card stat-card-cerradas stat-card-clickable" onclick="filtrarPorEstado('CERRADO')">
+                    <span id="countCerradas" style="font-size: 20px; font-weight: bold; color: #047857; display: block;">0</span>
+                    <span style="color: #065f46;">CERRADAS</span>
+                </div>
+            </div>
+
             <!-- Selector deslizante Mis Ideas / Todas -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="font-size: 16px; color: var(--text-main);">PROPUESTAS</h3>
+                <h3 style="font-size: 15px; color: var(--text-main);">LISTADO</h3>
                 <div class="auth-switch-container filter-switch">
                     <div id="filterSliderBg" class="auth-slider-bg filter-slider left"></div>
                     <button id="tabMiasBtn" type="button" class="active" onclick="cambiarFiltroIdeas('mias')">Mis Ideas</button>
@@ -575,13 +588,13 @@
             <h2 style="margin-bottom: 6px; font-size: 20px; color: var(--primary);">PISTA DE CARRERAS</h2>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Ranking general de pilotos de mejora.</p>
             <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                <div class="stat-card" style="flex:1;">
-                    <h4 id="posicionTexto">-</h4>
-                    <span>Tu Posición</span>
+                <div class="stat-card stat-card-total" style="flex:1;">
+                    <h4 id="posicionTexto" style="color: #374151;">-</h4>
+                    <span style="color: #4b5563;">Tu Posición</span>
                 </div>
-                <div class="stat-card" style="flex:1;">
-                    <h4 id="misKaizensCerradosNum">0</h4>
-                    <span>Kaizens Cerrados</span>
+                <div class="stat-card stat-card-cerradas" style="flex:1;">
+                    <h4 id="misKaizensCerradosNum" style="color: #047857;">0</h4>
+                    <span style="color: #065f46;">Kaizens Cerrados</span>
                 </div>
             </div>
             <div id="pistaPilotosContainer"></div>
