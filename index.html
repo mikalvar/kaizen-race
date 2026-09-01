@@ -11,9 +11,9 @@
         :root {
             --primary: #1e3a8a;
             --primary-light: #2563eb;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --danger: #475569;
             --bg-dark: #0f172a;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -29,13 +29,12 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Bloquea por completo el scroll y rebote de la página principal */
         html, body {
             width: 100%;
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
-            background-color: #1b3168;
+            background-color: #0f172a;
             color: var(--text-main);
             display: flex;
             align-items: center;
@@ -60,16 +59,18 @@
         .login-card {
             background: var(--card-bg);
             padding: 28px;
-            border-radius: 24px;
+            border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             width: 100%;
+            border: 1px solid var(--border-card);
         }
 
         .login-header h2 {
             color: var(--primary);
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             margin-bottom: 4px;
+            letter-spacing: -0.5px;
         }
 
         .login-header p {
@@ -78,12 +79,11 @@
             margin-bottom: 24px;
         }
 
-        /* Botón deslizante (Switch de pestañas) */
         .auth-switch-container {
             position: relative;
             display: flex;
             background-color: #f1f5f9;
-            border-radius: 30px;
+            border-radius: 20px;
             padding: 4px;
             margin-bottom: 24px;
         }
@@ -94,7 +94,7 @@
             bottom: 4px;
             width: 50%;
             background-color: var(--primary-light);
-            border-radius: 24px;
+            border-radius: 16px;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -134,8 +134,8 @@
 
         .form-group label {
             display: block;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 700;
             margin-bottom: 6px;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -147,10 +147,11 @@
             padding: 12px 14px;
             border: 1px solid var(--border-card);
             border-radius: 12px;
-            font-size: 15px;
+            font-size: 14px;
             outline: none;
             transition: border-color 0.2s;
-            background: #fafafa;
+            background: #f8fafc;
+            color: var(--text-main);
         }
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -163,7 +164,7 @@
             padding: 12px;
             border: none;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             color: white;
@@ -175,25 +176,26 @@
         .btn-primary { background-color: var(--primary-light); }
         .btn-success { background-color: var(--success); }
 
-        /* --- APLICACIÓN PRINCIPAL FIJA --- */
+        /* --- APLICACIÓN PRINCIPAL --- */
         #appArea {
             width: 100%;
             max-width: 480px;
             height: 94vh;
             height: 94dvh;
             background: #f8fafc;
-            border-radius: 28px;
+            border-radius: 24px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .app-header {
             background: #ffffff;
             padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-card);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -207,36 +209,37 @@
             min-width: 0;
         }
 
+        /* Icono minimalista en lugar de emoji realista */
         .app-brand-icon {
-            width: 38px;
-            height: 38px;
-            background: var(--primary);
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            background: #f1f5f9;
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 18px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
             flex-shrink: 0;
         }
 
         .user-details { min-width: 0; }
 
-        /* Estilo actualizado: Título grande arriba */
         .user-details h3 {
-            font-size: 14px;
-            font-weight: 800;
+            font-size: 13px;
+            font-weight: 700;
             color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
-        /* Estilo actualizado: Nombre y cédula más pequeño abajo */
         .user-details span.user-subtext {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--text-muted);
             display: block;
             margin-top: 1px;
@@ -245,13 +248,12 @@
             text-overflow: ellipsis;
         }
 
-        /* Estilo para el indicador de rol a la derecha de la cabecera */
         .role-badge {
             background: #f1f5f9;
             color: var(--text-muted);
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -259,7 +261,6 @@
             border: 1px solid var(--border-card);
         }
 
-        /* Las pestañas manejan su propio scroll interno */
         .tab-content {
             display: none;
             flex: 1;
@@ -272,21 +273,20 @@
             display: block;
         }
 
-        /* Tarjetas de Progreso Minimalistas */
         .progress-card-container {
             background: #ffffff;
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 18px;
             border: 1px solid var(--border-card);
             margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
         }
 
         .progress-title-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .progress-title-row span {
@@ -298,9 +298,10 @@
         }
 
         .progress-title-row h2 {
-            font-size: 20px;
-            font-weight: 800;
+            font-size: 18px;
+            font-weight: 700;
             color: var(--text-main);
+            letter-spacing: -0.3px;
         }
 
         .stats-grid-mini {
@@ -310,48 +311,48 @@
         }
 
         .stat-card {
-            padding: 14px 10px;
-            border-radius: 16px;
+            padding: 12px 8px;
+            border-radius: 12px;
             text-align: center;
         }
 
         .stat-card-total {
             background: #f8fafc;
-            border: 1px solid #cbd5e1;
+            border: 1px solid var(--border-card);
         }
         .stat-card-abiertas {
-            background: #eff6ff;
-            border: 1px solid #3b82f6;
+            background: #fefce8; /* Fondo amarillo sutil */
+            border: 1px solid #fde047;
         }
         .stat-card-cerradas {
-            background: #f0fdf4;
-            border: 1px solid #22c55e;
+            background: #f0fdf4; /* Fondo verde sutil */
+            border: 1px solid #bbf7d0;
         }
 
         .stat-card h4 {
-            font-size: 22px;
-            font-weight: 800;
+            font-size: 18px;
+            font-weight: 700;
             margin-bottom: 2px;
         }
 
         .stat-card span {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* Barra de navegación inferior minimalista estática */
+        /* Barra de navegación inferior minimalista */
         .bottom-nav {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
             background: #ffffff;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border-card);
             display: flex;
             justify-content: space-around;
-            padding: 10px 4px;
+            padding: 8px 4px;
             z-index: 10;
             flex-shrink: 0;
         }
@@ -360,7 +361,7 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
             display: flex;
             flex-direction: column;
@@ -372,22 +373,27 @@
             transition: color 0.2s;
         }
 
-        .nav-item span:first-child { font-size: 18px; }
+        .nav-item .nav-icon {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
         .nav-item.active { color: var(--primary-light); font-weight: 700; }
 
-        /* --- ESTILOS PARA LAS TARJETAS DE TIPO DE KAIZEN --- */
+        /* Tarjetas de Tipo de Kaizen (Minimalistas) */
         .kaizen-type-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 16px;
         }
 
         .kaizen-type-card {
             border: 1px solid var(--border-card);
-            border-radius: 16px;
-            padding: 14px;
-            background: #fafafa;
+            border-radius: 12px;
+            padding: 12px;
+            background: #f8fafc;
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: left;
@@ -399,13 +405,15 @@
         }
 
         .kaizen-type-card .icon {
-            font-size: 18px;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--primary-light);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
         }
 
         .kaizen-type-card .title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text-main);
             margin-bottom: 2px;
@@ -414,17 +422,16 @@
         .kaizen-type-card .desc {
             font-size: 10px;
             color: var(--text-muted);
-            line-height: 1.3;
         }
 
-        /* Tarjetas de Ideas / Propuestas Minimalistas */
+        /* Tarjetas de Ideas / Propuestas */
         .idea-card {
             background: #ffffff;
             border: 1px solid var(--border-card);
-            border-radius: 20px;
-            padding: 18px;
+            border-radius: 16px;
+            padding: 16px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
             position: relative;
         }
 
@@ -443,52 +450,32 @@
 
         .status-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .badge-tipo { background-color: #f1f5f9; color: #475569; }
-        .status-abierto { background-color: #eff6ff; color: #1d4ed8; }
-        .status-cerrado { background-color: #f0fdf4; color: #15803d; }
-
-        .idea-actions-icons {
-            display: flex;
-            gap: 6px;
-        }
-
-        .action-icon-btn {
-            background: #f8fafc;
-            border: 1px solid var(--border-card);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 12px;
-            color: var(--text-muted);
-            transition: background 0.2s;
-        }
-
-        .action-icon-btn:hover { background: #f1f5f9; color: var(--text-main); }
-        .action-icon-btn.delete:hover { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+        /* Colores específicos solicitados para estados */
+        .status-abierto { background-color: #fefce8; color: #a16207; border: 1px solid #fde047; }
+        .status-cerrado { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-tipo { background-color: #f1f5f9; color: #475569; border: 1px solid var(--border-card); }
 
         .idea-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--text-main);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
+            letter-spacing: -0.2px;
         }
 
         .idea-desc {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-muted);
             line-height: 1.4;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             word-break: break-word;
         }
 
@@ -496,9 +483,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 10px;
+            padding-top: 8px;
             border-top: 1px solid var(--border);
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
         }
 
@@ -506,31 +493,34 @@
         .racer-card {
             background: #ffffff;
             border: 1px solid var(--border-card);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 10px;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
         }
 
         .racer-info {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             gap: 8px;
         }
 
         .racer-track-line {
             position: relative;
-            height: 8px;
+            height: 6px;
             background: #f1f5f9;
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
+        /* Icono minimalista de vehículo en pista (bloques o guión) */
         .racer-car-icon {
             position: absolute;
-            top: -10px;
-            font-size: 16px;
+            top: -7px;
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--primary-light);
             transition: left 0.5s ease;
         }
 
@@ -538,26 +528,28 @@
             position: absolute;
             right: 4px;
             top: -6px;
-            font-size: 14px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
         }
 
-        /* Estilo del contenedor deslizante para Mis Ideas / Todas */
         .auth-switch-container.filter-switch {
             position: relative;
             display: flex;
             background: #f1f5f9;
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 3px;
-            width: 180px;
-            margin-bottom: 12px;
+            width: 170px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-card);
         }
 
         .auth-switch-container.filter-switch button {
             flex: 1;
             background: transparent;
             border: none;
-            padding: 6px 10px;
-            font-size: 12px;
+            padding: 5px 8px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             z-index: 2;
@@ -576,7 +568,7 @@
             bottom: 3px;
             width: 50%;
             background: var(--primary-light);
-            border-radius: 17px;
+            border-radius: 13px;
             transition: transform 0.3s ease;
             z-index: 1;
         }
@@ -584,57 +576,53 @@
         .auth-slider-bg.filter-slider.left { transform: translateX(0%); }
         .auth-slider-bg.filter-slider.right { transform: translateX(100%); }
 
-        /* Cursor pointer para los contadores superiores */
         .stat-card-clickable {
             cursor: pointer;
             transition: transform 0.1s ease;
         }
         .stat-card-clickable:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
 
-    <!-- ÁREA DE INICIO DE SESIÓN / REGISTRO -->
+    <!-- ÁREA DE INICIO DE SESIÓN -->
     <div id="loginArea" class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h2>🏎️ Kaizen Race</h2>
-                <p>Acelera tus mejoras continuas</p>
+                <h2>Kaizen Race</h2>
+                <p>Gestión de mejora continua</p>
             </div>
 
-            <!-- Botón deslizante -->
             <div class="auth-switch-container">
                 <div id="authSliderBg" class="auth-slider-bg left"></div>
-                <button type="button" id="tabLoginBtn" class="auth-tab-btn active" onclick="cambiarModoAuth('login')">Iniciar Sesión</button>
-                <button type="button" id="tabRegisterBtn" class="auth-tab-btn" onclick="cambiarModoAuth('register')">Registrarse</button>
+                <button type="button" id="tabLoginBtn" class="auth-tab-btn active" onclick="cambiarModoAuth('login')">Ingresar</button>
+                <button type="button" id="tabRegisterBtn" class="auth-tab-btn" onclick="cambiarModoAuth('register')">Registro</button>
             </div>
 
-            <!-- Formulario Iniciar Sesión -->
             <div id="formLogin" class="auth-form-section active">
                 <div class="form-group">
                     <label for="ciInput">Cédula de Identidad</label>
                     <input type="text" id="ciInput" placeholder="Ej: 3992978">
                 </div>
-                <button id="loginBtn" class="btn-primary">Ingresar al Sistema</button>
+                <button id="loginBtn" class="btn-primary">Acceder</button>
             </div>
 
-            <!-- Formulario Registro -->
             <div id="formRegister" class="auth-form-section">
                 <div class="form-group">
                     <label for="nombreInput">Nombre</label>
-                    <input type="text" id="nombreInput" placeholder="Tu nombre">
+                    <input type="text" id="nombreInput" placeholder="Nombre">
                 </div>
                 <div class="form-group">
                     <label for="apellidoInput">Apellido</label>
-                    <input type="text" id="apellidoInput" placeholder="Tu apellido">
+                    <input type="text" id="apellidoInput" placeholder="Apellido">
                 </div>
                 <div class="form-group">
                     <label for="ciRegistroInput">Cédula de Identidad</label>
-                    <input type="text" id="ciRegistroInput" placeholder="Tu número de cédula">
+                    <input type="text" id="ciRegistroInput" placeholder="Número de cédula">
                 </div>
-                <button id="registerBtn" class="btn-success">Registrar Piloto</button>
+                <button id="registerBtn" class="btn-success">Registrar</button>
             </div>
         </div>
     </div>
@@ -643,38 +631,33 @@
     <div id="appArea" class="hidden">
         <header class="app-header">
             <div class="user-info">
-                <div class="app-brand-icon">🏎️</div>
+                <div class="app-brand-icon">KZ</div>
                 <div class="user-details">
-                    <!-- Título principal grande -->
                     <h3 id="tituloPrincipalRol">PILOTO DE MEJORA</h3>
-                    <!-- Nombre y cédula más pequeño abajo -->
                     <span id="usuarioActual" class="user-subtext">Cargando...</span>
                 </div>
             </div>
-            <!-- Indicador dinámico de rol a la derecha -->
             <div id="roleBadge" class="role-badge">Usuario</div>
         </header>
 
-        <!-- Pestaña 1: Registrar (Acción de nueva mejora) -->
+        <!-- Pestaña 1: Registrar -->
         <div id="tabRegistrar" class="tab-content active">
-            <div class="progress-card-container" style="text-align: center; padding: 40px 20px;">
-                <div style="font-size: 48px; margin-bottom: 12px;">⚡</div>
-                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">¿Tienes una nueva mejora?</h2>
-                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px;">Registra tu propuesta de forma rápida y compite en la pista.</p>
-                <button onclick="abrirModalRegistro()" class="btn-primary" style="padding: 14px 24px; font-size: 15px; border-radius: 14px; box-shadow: 0 4px 12px rgba(37,99,235,0.2);">Registrar Nueva Propuesta</button>
+            <div class="progress-card-container" style="text-align: center; padding: 36px 20px;">
+                <div style="font-size: 13px; font-weight: 700; color: var(--primary-light); margin-bottom: 10px; letter-spacing: 1px;">[ + NUEVA ]</div>
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Propuesta de Mejora</h2>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Registra tu iniciativa para optimizar los procesos.</p>
+                <button onclick="abrirModalRegistro()" class="btn-primary" style="padding: 12px 20px; font-size: 13px; border-radius: 12px;">Crear Propuesta</button>
             </div>
         </div>
 
-        <!-- Pestaña 2: Mis Ideas / Propuestas -->
+        <!-- Pestaña 2: Tareas -->
         <div id="tabIdeas" class="tab-content">
-            
-            <!-- Bloque de Progreso Minimalista -->
             <div class="progress-card-container">
                 <div class="progress-title-row">
-                    <span>MI PROGRESO</span>
-                    <span style="font-size: 16px;">👋</span>
+                    <span>ESTADÍSTICAS</span>
+                    <span style="font-size: 11px; color: var(--text-muted);">●</span>
                 </div>
-                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 16px;">¡Vamos bien hoy!</h2>
+                <h2 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin-bottom: 14px;">Resumen operativo</h2>
                 
                 <div class="stats-grid-mini">
                     <div class="stat-card stat-card-total stat-card-clickable" onclick="filtrarPorEstado('TODOS')">
@@ -682,8 +665,8 @@
                         <span style="color: #475569;">Total</span>
                     </div>
                     <div class="stat-card stat-card-abiertas stat-card-clickable" onclick="filtrarPorEstado('ABIERTO')">
-                        <span id="countAbiertas" style="color: #2563eb; display: block;">0</span>
-                        <span style="color: #1d4ed8;">Abiertas</span>
+                        <span id="countAbiertas" style="color: #a16207; display: block;">0</span>
+                        <span style="color: #854d0e;">Abiertas</span>
                     </div>
                     <div class="stat-card stat-card-cerradas stat-card-clickable" onclick="filtrarPorEstado('CERRADO')">
                         <span id="countCerradas" style="color: #16a34a; display: block;">0</span>
@@ -692,9 +675,8 @@
                 </div>
             </div>
 
-            <!-- Filtros de Listado -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Acciones</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Filtro</span>
                 <div class="auth-switch-container filter-switch" style="margin-bottom: 0;">
                     <div id="filterSliderBg" class="auth-slider-bg filter-slider left"></div>
                     <button id="tabMiasBtn" type="button" class="active" onclick="cambiarFiltroIdeas('mias')">Mis acciones</button>
@@ -705,15 +687,15 @@
             <div id="listaIdeas"></div>
         </div>
 
-        <!-- Pestaña 3: Pista -->
+        <!-- Pestaña 3: Informes -->
         <div id="tabPista" class="tab-content">
             <div class="progress-card-container" style="padding: 16px;">
-                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Ranking Global</span>
-                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 16px;">Pista de Carreras</h2>
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Ranking</span>
+                <h2 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin-bottom: 14px;">Pista de Rendimiento</h2>
                 <div style="display: flex; gap: 10px;">
                     <div class="stat-card stat-card-total" style="flex:1;">
                         <h4 id="posicionTexto" style="color: #334155;">-</h4>
-                        <span style="color: #475569;">Tu Posición</span>
+                        <span style="color: #475569;">Posición</span>
                     </div>
                     <div class="stat-card stat-card-cerradas" style="flex:1;">
                         <h4 id="misKaizensCerradosNum" style="color: #16a34a;">0</h4>
@@ -727,45 +709,44 @@
         <!-- Barra de navegación inferior minimalista -->
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
-                <span>＋</span>
+                <span class="nav-icon">[+]</span>
                 <span>Nueva</span>
             </button>
             <button class="nav-item" onclick="cambiarPestana('tabIdeas', this)">
-                <span>📋</span>
+                <span class="nav-icon">[≡]</span>
                 <span>Tareas</span>
             </button>
             <button class="nav-item" onclick="cambiarPestana('tabPista', this)">
-                <span>📊</span>
+                <span class="nav-icon">[::]</span>
                 <span>Informes</span>
             </button>
             <button class="nav-item" onclick="cerrarSesion()">
-                <span>➜</span>
+                <span class="nav-icon">[→]</span>
                 <span>Salir</span>
             </button>
         </nav>
     </div>
 
     <!-- MODAL DE REGISTRO -->
-    <div id="modalRegistro" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
-        <div style="background: white; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: 24px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);">
+    <div id="modalRegistro" class="hidden" style="position: fixed; inset: 0; background: rgba(15,23,42,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
+        <div style="background: white; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: 20px; border: 1px solid var(--border-card);">
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="color: var(--text-main); font-size: 16px; font-weight: 700;">Nueva Propuesta Kaizen</h3>
-                <button onclick="cerrarModalRegistro()" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; width: auto; padding: 4px;">✕</button>
+                <h3 style="color: var(--text-main); font-size: 15px; font-weight: 700;">Nueva Propuesta Kaizen</h3>
+                <button onclick="cerrarModalRegistro()" style="background: none; border: none; font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; width: auto; padding: 4px;">✕</button>
             </div>
 
-            <!-- Selección de Tipo con Tarjetas Visuales -->
             <div class="form-group">
                 <label>Tipo de kaizen</label>
                 <div class="kaizen-type-container">
                     <div id="cardQuick" class="kaizen-type-card selected" onclick="seleccionarTipoKaizen('Quick')">
-                        <div class="icon">⚡</div>
-                        <div class="title">Quick</div>
-                        <div class="desc">Mejora rápida</div>
+                        <div class="icon">⚡ QUICK</div>
+                        <div class="title">Rápida</div>
+                        <div class="desc">Mejora directa</div>
                     </div>
                     <div id="cardStandard" class="kaizen-type-card" onclick="seleccionarTipoKaizen('Standard')">
-                        <div class="icon">📋</div>
-                        <div class="title">Standard</div>
+                        <div class="icon">📋 STANDARD</div>
+                        <div class="title">Estándar</div>
                         <div class="desc">Con análisis</div>
                     </div>
                 </div>
@@ -774,52 +755,22 @@
 
             <div class="form-group">
                 <label for="titulo">Título de la propuesta</label>
-                <input type="text" id="titulo" placeholder="Ej: Reubicar herramientas...">
+                <input type="text" id="titulo" placeholder="Ej: Reubicar herramientas">
             </div>
 
             <div class="form-group">
                 <label for="area">Área / línea (opcional)</label>
-                <input type="text" id="area" placeholder="Ej: Ensamblaje, Almacén...">
+                <input type="text" id="area" placeholder="Ej: Ensamblaje">
             </div>
 
             <div class="form-group">
-                <label for="descripcion">Descripción de la mejora</label>
-                <textarea id="descripcion" rows="3" placeholder="Describe la situación actual..."></textarea>
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" rows="3" placeholder="Detalle de la mejora..."></textarea>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="guardarIdea" class="btn-primary" style="flex: 2; border-radius: 12px;">Registrar</button>
-                <button onclick="cerrarModalRegistro()" class="btn-logout" style="flex: 1; background: #f1f5f9; color: var(--text-muted); border-radius: 12px;">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE EDICIÓN -->
-    <div id="editModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
-        <div style="background: white; width: 100%; max-width: 420px; padding: 24px; border-radius: 24px;">
-            <h3 style="margin-bottom: 16px; color: var(--text-main); font-size: 16px; font-weight: 700;">Editar Propuesta</h3>
-            <div class="form-group">
-                <label>Título</label>
-                <input type="text" id="editTitulo">
-            </div>
-            <div class="form-group">
-                <label>Área</label>
-                <input type="text" id="editArea">
-            </div>
-            <div class="form-group">
-                <label>Tipo</label>
-                <select id="editTipo">
-                    <option value="Quick">Quick</option>
-                    <option value="Standard">Standard</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea id="editDescripcion" rows="3"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="guardarEdicion" class="btn-success" style="flex:1; border-radius: 12px;">Guardar</button>
-                <button id="cancelarEdicion" class="btn-logout" style="flex:1; background:#f1f5f9; color:var(--text-muted); border-radius: 12px;">Cancelar</button>
+            <div style="display: flex; gap: 10px; margin-top: 16px;">
+                <button id="guardarIdea" class="btn-primary" style="flex: 2; border-radius: 10px;">Guardar</button>
+                <button onclick="cerrarModalRegistro()" style="flex: 1; background: #f1f5f9; color: var(--text-muted); border-radius: 10px;">Cancelar</button>
             </div>
         </div>
     </div>
