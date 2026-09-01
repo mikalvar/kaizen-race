@@ -439,9 +439,7 @@ function cargarRanking(ideas) {
 
     const resultado =
         Object.entries(ranking)
-        .sort(
-            (a, b) => b[1] - a[1]
-        );
+        .sort((a, b) => b[1] - a[1]);
 
     const contenedor =
         document.getElementById("ranking");
