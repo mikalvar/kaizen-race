@@ -178,7 +178,7 @@ LISTAR IDEAS
 
 async function cargarIdeas() {
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from("ideas")
         .select("*")
         .order("fecha_creacion", {
