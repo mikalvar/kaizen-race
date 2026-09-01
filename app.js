@@ -2,20 +2,17 @@
 const SUPABASE_URL = 'https://vmminpanvxxdczzmopua.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU';
 
-// Inicialización
 const dbSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Variables de sesión y estado
 let usuarioLogueado = null;
 let filtroIdeasActual = 'mias';
 let idIdeaEditando = null;
 let tipoKaizenSeleccionado = 'Quick';
 
-// Función auxiliar para formatear el nombre completo sin mostrar "null"
-function obtenerNombreCompleto(piloto) {
-    if (!piloto) return 'Piloto Anónimo';
-    let nombre = piloto.nombre || '';
-    let apellido = piloto.apellido || '';
+function obtenerNombreCompleto(usuario) {
+    if (!usuario) return 'Piloto Anónimo';
+    let nombre = usuario.nombre || '';
+    let apellido = usuario.apellido || '';
     let completo = `${nombre} ${apellido}`.replace(/null/g, '').trim();
     return completo !== '' ? completo : 'Piloto';
 }
@@ -71,7 +68,7 @@ async function iniciarSesion() {
     }
 
     const { data, error } = await dbSupabase
-        .from('pilotos')
+        .from('usuarios')
         .select('*')
         .eq('ci', ci)
         .single();
@@ -97,8 +94,8 @@ async function registrarPiloto() {
     }
 
     const { data, error } = await dbSupabase
-        .from('pilotos')
-        .insert([{ nombre, apellido, ci }])
+        .from('usuarios')
+        .insert([{ nombre, apellido, ci, rol: 'usuario' }])
         .select()
         .single();
 
@@ -164,17 +161,17 @@ async function cargarContadores() {
     if (error) return;
 
     const total = todas.length;
-    const abiertas = todas.filter(i => i.estado === 'Abierto' || !i.estado).length;
-    const cerradas = todas.filter(i => i.estado === 'Cerrado').length;
+    const abiertas = todas.filter(i => i.estado === 'ABIERTO' || i.estado === 'Abierto' || !i.estado).length;
+    const cerradas = todas.filter(i => i.estado === 'CERRADO' || i.estado === 'Cerrado').length;
 
     document.getElementById('countTotal').textContent = total;
     document.getElementById('countAbiertas').textContent = abiertas;
     document.getElementById('countCerradas').textContent = cerradas;
 
-    const misIdeas = todas.filter(i => i.pilot_id === usuarioLogueado.id);
+    const misIdeas = todas.filter(i => i.usuario_ci === usuarioLogueado.ci);
     const misTotal = misIdeas.length;
-    const misAbiertas = misIdeas.filter(i => i.estado === 'Abierto' || !i.estado).length;
-    const misCerradas = misIdeas.filter(i => i.estado === 'Cerrado').length;
+    const misAbiertas = misIdeas.filter(i => i.estado === 'ABIERTO' || i.estado === 'Abierto' || !i.estado).length;
+    const misCerradas = misIdeas.filter(i => i.estado === 'CERRADO' || i.estado === 'Cerrado').length;
 
     document.getElementById('countMisTotal').textContent = misTotal;
     document.getElementById('countMisAbiertas').textContent = misAbiertas;
@@ -192,13 +189,17 @@ async function guardarPropuesta() {
         return;
     }
 
+    const nombreCompleto = obtenerNombreCompleto(usuarioLogueado);
+
     const { error } = await dbSupabase.from('ideas').insert([{
         titulo,
         area: area || 'General',
         descripcion,
         tipo,
-        estado: 'Abierto',
-        pilot_id: usuarioLogueado.id
+        estado: 'ABIERTO',
+        usuario_ci: usuarioLogueado.ci,
+        usuario_nombre: nombreCompleto,
+        fecha_creacion: new Date().toISOString()
     }]);
 
     if (error) {
@@ -219,12 +220,12 @@ async function cargarIdeas() {
     const contenedor = document.getElementById('listaIdeas');
     contenedor.innerHTML = '<p style="text-align:center; color:white;">Cargando ideas...</p>';
 
-    let query = dbSupabase.from('ideas').select('*, pilotos(nombre, apellido)');
+    let query = dbSupabase.from('ideas').select('*');
     if (filtroIdeasActual === 'mias') {
-        query = query.eq('pilot_id', usuarioLogueado.id);
+        query = query.eq('usuario_ci', usuarioLogueado.ci);
     }
 
-    const { data: ideas, error } = await query.order('created_at', { ascending: false });
+    const { data: ideas, error } = await query.order('fecha_creacion', { ascending: false });
 
     if (error) {
         contenedor.innerHTML = '<p style="text-align:center; color:white;">Error al cargar ideas.</p>';
@@ -244,11 +245,11 @@ async function cargarIdeas() {
 
     let html = '';
     ideas.forEach(idea => {
-        const esMio = idea.pilot_id === usuarioLogueado.id;
-        const estado = idea.estado || 'Abierto';
-        const badgeClass = estado === 'Cerrado' ? 'status-cerrado' : 'status-abierto';
-        const nombrePiloto = obtenerNombreCompleto(idea.pilotos);
-        const fechaFormateada = idea.created_at ? new Date(idea.created_at).toLocaleDateString() : '';
+        const esMio = idea.usuario_ci === usuarioLogueado.ci;
+        const estado = idea.estado || 'ABIERTO';
+        const badgeClass = estado.toUpperCase() === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
+        const nombrePiloto = idea.usuario_nombre || 'Piloto';
+        const fechaFormateada = idea.fecha_creacion ? new Date(idea.fecha_creacion).toLocaleDateString() : '';
 
         html += `
             <div class="idea-card">
@@ -268,7 +269,7 @@ async function cargarIdeas() {
                 ${esMio ? `
                     <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px;">
                         <button onclick="abrirModalEditar('${idea.id}', '${encodeURIComponent(idea.titulo)}', '${encodeURIComponent(idea.area)}', '${idea.tipo}', '${encodeURIComponent(idea.descripcion)}')" style="background-color: var(--warning); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Editar</button>
-                        ${estado === 'Abierto' ? `<button onclick="cambiarEstadoIdea('${idea.id}', 'Cerrado')" style="background-color: var(--success); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Cerrar</button>` : ''}
+                        ${estado.toUpperCase() === 'ABIERTO' ? `<button onclick="cambiarEstadoIdea('${idea.id}', 'CERRADO')" style="background-color: var(--success); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Cerrar</button>` : ''}
                         <button onclick="eliminarIdea('${idea.id}')" style="background-color: var(--danger); padding: 6px 12px; font-size: 12px; width: auto; box-shadow: none;">Eliminar</button>
                     </div>
                 ` : ''}
@@ -280,7 +281,11 @@ async function cargarIdeas() {
 }
 
 async function cambiarEstadoIdea(id, nuevoEstado) {
-    const { error } = await dbSupabase.from('ideas').update({ estado: nuevoEstado }).eq('id', id);
+    const updateData = { estado: nuevoEstado };
+    if (nuevoEstado === 'CERRADO') {
+        updateData.fecha_cierre = new Date().toISOString();
+    }
+    const { error } = await dbSupabase.from('ideas').update(updateData).eq('id', id);
     if (error) {
         alert('Error al actualizar estado');
         return;
@@ -337,25 +342,25 @@ async function cargarPista() {
     const contenedor = document.getElementById('pistaPilotosContainer');
     contenedor.innerHTML = '<p style="text-align:center; color:white;">Calculando posiciones...</p>';
 
-    const { data: pilotos, error: errPilotos } = await dbSupabase.from('pilotos').select('*');
+    const { data: usuarios, error: errUsuarios } = await dbSupabase.from('usuarios').select('*');
     const { data: ideas, error: errIdeas } = await dbSupabase.from('ideas').select('*');
 
-    if (errPilotos || errIdeas) {
+    if (errUsuarios || errIdeas) {
         contenedor.innerHTML = '<p style="text-align:center; color:white;">Error al cargar la pista.</p>';
         return;
     }
 
-    let ranking = pilotos.map(piloto => {
-        const cerrados = ideas.filter(i => i.pilot_id === piloto.id && i.estado === 'Cerrado').length;
+    let ranking = usuarios.map(usuario => {
+        const cerrados = ideas.filter(i => i.usuario_ci === usuario.ci && (i.estado === 'CERRADO' || i.estado === 'Cerrado')).length;
         return {
-            ...piloto,
+            ...usuario,
             cerrados
         };
     });
 
     ranking.sort((a, b) => b.cerrados - a.cerrados);
 
-    const indexUsuario = ranking.findIndex(p => p.id === usuarioLogueado.id);
+    const indexUsuario = ranking.findIndex(u => u.ci === usuarioLogueado.ci);
     const miPosicion = indexUsuario !== -1 ? indexUsuario + 1 : 1;
     const misCerrados = indexUsuario !== -1 ? ranking[indexUsuario].cerrados : 0;
 
@@ -365,18 +370,18 @@ async function cargarPista() {
     const metaPista = Math.max(10, ...ranking.map(r => r.cerrados));
 
     let html = '';
-    ranking.forEach((piloto, idx) => {
-        const esMio = piloto.id === usuarioLogueado.id;
-        const nombreCompleto = obtenerNombreCompleto(piloto);
+    ranking.forEach((usuario, idx) => {
+        const esMio = usuario.ci === usuarioLogueado.ci;
+        const nombreCompleto = obtenerNombreCompleto(usuario);
         
-        let porcentajeAvance = (piloto.cerrados / metaPista) * 85;
+        let porcentajeAvance = (usuario.cerrados / metaPista) * 85;
         if (porcentajeAvance > 88) porcentajeAvance = 88;
 
         html += `
             <div class="racer-card">
                 <div class="racer-info">
                     <span class="racer-name">${idx + 1}. ${nombreCompleto} ${esMio ? '(tú)' : ''}</span>
-                    <span class="racer-score">${piloto.cerrados} cerrados</span>
+                    <span class="racer-score">${usuario.cerrados} cerrados</span>
                 </div>
                 <div class="racer-track-line">
                     <div class="racer-car-icon" style="left: ${porcentajeAvance}%;">🏎️</div>
