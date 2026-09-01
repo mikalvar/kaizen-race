@@ -87,6 +87,8 @@ sessionStorage.setItem(
     JSON.stringify(data)
 );
 
+console.log("Usuario logueado:", data);
+
 document.getElementById("loginArea")
 .classList.add("hidden");
 
@@ -95,7 +97,7 @@ document.getElementById("appArea")
 
 document.getElementById("usuarioActual")
 .textContent =
-`Bienvenido ${data.nombre}`;
+`Bienvenido ${data.nombre} ${data.apellido || ""}`;
 
 cargarIdeas();
 }
