@@ -1,6 +1,6 @@
 // --- CONFIGURACIÓN DE SUPABASE ---
-const SUPABASE_URL = 'AQUÍ_VA_TU_URL';
-const SUPABASE_ANON_KEY = 'AQUÍ_VA_TU_ANON_KEY';
+const SUPABASE_URL = 'https://vmminpanvxxdczzmopua.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6InZub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Variables de Estado Global
