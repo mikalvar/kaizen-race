@@ -222,19 +222,24 @@
 
         .user-details { min-width: 0; }
 
-        .user-details span.brand-subtitle {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: block;
+        /* Estilo actualizado: Título grande arriba */
+        .user-details h3 {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 0.3px;
         }
 
-        .user-details h3 {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-main);
+        /* Estilo actualizado: Nombre y cédula más pequeño abajo */
+        .user-details span.user-subtext {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 1px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -310,7 +315,6 @@
             text-align: center;
         }
 
-        /* Colores exactos pedidos para los contadores */
         .stat-card-total {
             background: #f8fafc;
             border: 1px solid #cbd5e1;
@@ -641,11 +645,13 @@
             <div class="user-info">
                 <div class="app-brand-icon">🏎️</div>
                 <div class="user-details">
-                    <span class="brand-subtitle">Piloto de mejora</span>
-                    <h3 id="usuarioActual">PILOTO</h3>
+                    <!-- Título principal grande -->
+                    <h3 id="tituloPrincipalRol">PILOTO DE MEJORA</h3>
+                    <!-- Nombre y cédula más pequeño abajo -->
+                    <span id="usuarioActual" class="user-subtext">Cargando...</span>
                 </div>
             </div>
-            <!-- Indicador dinámico de rol (Admin / Usuario) -->
+            <!-- Indicador dinámico de rol a la derecha -->
             <div id="roleBadge" class="role-badge">Usuario</div>
         </header>
 
@@ -659,7 +665,7 @@
             </div>
         </div>
 
-        <!-- Pestaña 2: Mis Ideas / Propuestas (Con panel de progreso integrado) -->
+        <!-- Pestaña 2: Mis Ideas / Propuestas -->
         <div id="tabIdeas" class="tab-content">
             
             <!-- Bloque de Progreso Minimalista -->
@@ -670,7 +676,6 @@
                 </div>
                 <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 16px;">¡Vamos bien hoy!</h2>
                 
-                <!-- Contadores con los colores específicos solicitados -->
                 <div class="stats-grid-mini">
                     <div class="stat-card stat-card-total stat-card-clickable" onclick="filtrarPorEstado('TODOS')">
                         <span id="countTotal" style="color: #334155; display: block;">0</span>
