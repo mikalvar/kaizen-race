@@ -230,8 +230,11 @@ async function cargarIdeas() {
         card.className = "card";
 
         const esAdmin =
-            currentUser &&
-            currentUser.rol === "admin";
+    currentUser &&
+    currentUser.rol === "admin";
+
+console.log("Usuario actual:", currentUser);
+console.log("Es admin:", esAdmin);
 
         card.innerHTML = `
             <h3>${idea.titulo}</h3>
