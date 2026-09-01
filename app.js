@@ -287,6 +287,10 @@ ${
 
     });
 
+    cargarRanking(data);
+
+}
+    
 } 
 
 async function cerrarIdea(id) {
@@ -408,6 +412,63 @@ async function editarIdea(id) {
     alert("Idea actualizada");
 
     cargarIdeas();
+}
+
+function cargarRanking(ideas) {
+
+    const ranking = {};
+
+    ideas.forEach(idea => {
+
+        if (idea.estado !== "CERRADO") {
+            return;
+        }
+
+        const nombre =
+            idea.usuario_nombre || "Sin nombre";
+
+        const puntos =
+            idea.tipo === "Standard"
+            ? 3
+            : 1;
+
+        ranking[nombre] =
+            (ranking[nombre] || 0)
+            + puntos;
+    });
+
+    const resultado =
+        Object.entries(ranking)
+        .sort(
+            (a, b) => b[1] - a[1]
+        );
+
+    const contenedor =
+        document.getElementById("ranking");
+
+    if (!resultado.length) {
+
+        contenedor.innerHTML = `
+            <div class="card">
+                No hay ideas cerradas todavía.
+            </div>
+        `;
+
+        return;
+    }
+
+    contenedor.innerHTML =
+        resultado
+        .map(
+            (item, index) => `
+                <div class="card">
+                    🏆 ${index + 1}.
+                    <b>${item[0]}</b>
+                    - ${item[1]} puntos
+                </div>
+            `
+        )
+        .join("");
 }
 
 /*
