@@ -330,17 +330,32 @@ async function eliminarIdea(id) {
     cargarIdeas();
 }
 
-<button onclick="editarIdea(${idea.id})">
-    Editar Idea
-</button>
+async function editarIdea(id) {
 
-<button onclick="cerrarIdea(${idea.id})">
-    Cerrar Idea
-</button>
+    const idea =
+        prompt(
+            "Nuevo título:"
+        );
 
-<button onclick="eliminarIdea(${idea.id})">
-    Eliminar Idea
-</button>
+    if (!idea) return;
+
+    const { error } =
+        await supabaseClient
+        .from("ideas")
+        .update({
+            titulo: idea
+        })
+        .eq("id", id);
+
+    if (error) {
+
+        alert(error.message);
+
+        return;
+    }
+
+    cargarIdeas();
+}
 
 /*
 =================================
