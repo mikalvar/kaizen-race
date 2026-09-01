@@ -267,7 +267,7 @@ function filtrarPorEstado(estado) {
 async function cargarDatosTablero() {
     try {
         const { data, error } = await supabaseClient
-            .from('kaizens')
+            .from('ideas')
             .select('*')
             .order('created_at', { ascending: false });
 
