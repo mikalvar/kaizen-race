@@ -222,7 +222,7 @@ async function cargarIdeas() {
 
     lista.innerHTML = "";
 
-    data.forEach(idea => {
+        data.forEach(idea => {
 
         const card =
             document.createElement("div");
@@ -279,7 +279,7 @@ async function cargarIdeas() {
 
     });
 
-}   
+} 
 /*
 =================================
 EVENTOS
