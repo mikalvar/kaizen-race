@@ -1,7 +1,9 @@
 // --- CONFIGURACIÓN DE SUPABASE ---
 const SUPABASE_URL = 'https://tu-proyecto.supabase.co'; // Asegúrate de conservar tus credenciales originales si ya las tenías configuradas
 const SUPABASE_KEY = 'tu-anon-key';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Si ya existe, lo reutilizamos; si no, lo creamos
+window.supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabaseClient;
 
 // Variables de sesión y estado
 let usuarioLogueado = null;
