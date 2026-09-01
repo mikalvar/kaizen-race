@@ -1,8 +1,8 @@
 // --- CONFIGURACIÓN DE SUPABASE ---
-const SUPABASE_URL = 'https://tu-proyecto.supabase.co'; // Tus credenciales originales
-const SUPABASE_KEY = 'tu-anon-key';
+const SUPABASE_URL = 'https://vmminpanvxxdczzmopua.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU';
 
-// Inicialización utilizando un nombre único para evitar conflictos con la librería global
+// Inicialización
 const dbSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Variables de sesión y estado
