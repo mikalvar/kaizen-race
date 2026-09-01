@@ -336,23 +336,77 @@ async function eliminarIdea(id) {
 
 async function editarIdea(id) {
 
-    const idea =
-        prompt("Nuevo título:");
+    const { data: idea, error: errorIdea } =
+        await supabaseClient
+        .from("ideas")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-    if (!idea) return;
+    if (errorIdea || !idea) {
+        alert("No se pudo cargar la idea.");
+        return;
+    }
+
+    const nuevoTitulo =
+        prompt(
+            "Título:",
+            idea.titulo
+        );
+
+    if (!nuevoTitulo) return;
+
+    const nuevaArea =
+        prompt(
+            "Área:",
+            idea.area
+        );
+
+    if (!nuevaArea) return;
+
+    const nuevoTipo =
+        prompt(
+            "Tipo (Quick o Standard):",
+            idea.tipo
+        );
+
+    if (
+        nuevoTipo !== "Quick" &&
+        nuevoTipo !== "Standard"
+    ) {
+        alert(
+            "El tipo debe ser Quick o Standard"
+        );
+        return;
+    }
+
+    const nuevaDescripcion =
+        prompt(
+            "Descripción:",
+            idea.descripcion
+        );
+
+    if (!nuevaDescripcion) return;
 
     const { error } =
         await supabaseClient
         .from("ideas")
         .update({
-            titulo: idea
+            titulo: nuevoTitulo,
+            area: nuevaArea,
+            tipo: nuevoTipo,
+            descripcion: nuevaDescripcion
         })
         .eq("id", id);
 
     if (error) {
+
         alert(error.message);
+
         return;
     }
+
+    alert("Idea actualizada");
 
     cargarIdeas();
 }
