@@ -457,30 +457,84 @@ async function cargarPistaCarreras() {
 }
 
 function renderizarPistaPilotos(ranking) {
-    
-    // Máximo de cerrados para calcular el avance porcentual del auto en la pista
-    const maxPuntos = Math.max(...ranking.map(r => r.puntos), 5);
+
+    const contenedor =
+        document.getElementById(
+            'pistaPilotosContainer'
+        );
+
+    contenedor.innerHTML = '';
+
+    if (ranking.length === 0) {
+
+        contenedor.innerHTML =
+            '<p style="text-align:center; color:#64748b;">Aún no hay actividad en la pista.</p>';
+
+        return;
+    }
+
+    const maxPuntos =
+        Math.max(
+            ...ranking.map(
+                r => r.puntos
+            ),
+            5
+        );
 
     ranking.forEach((piloto, index) => {
-        let porcentaje = (piloto.puntos / maxPuntos) * 85;
-        if (porcentaje > 88) porcentaje = 88; // Límite visual para que no cruce la bandera de llegada antes de tiempo
 
-        const esMiCarro = piloto.ci === usuarioActual.ci;
-        const card = document.createElement('div');
+        let porcentaje =
+            (piloto.puntos / maxPuntos) * 85;
+
+        if (porcentaje > 88)
+            porcentaje = 88;
+
+        const esMiCarro =
+            piloto.ci === usuarioActual.ci;
+
+        const card =
+            document.createElement('div');
+
         card.className = 'racer-card';
-        card.style.borderColor = esMiCarro ? 'var(--primary-light)' : 'var(--border-card)';
-        card.style.background = esMiCarro ? '#f8fafc' : '#ffffff';
+
+        card.style.borderColor =
+            esMiCarro
+                ? 'var(--primary-light)'
+                : 'var(--border-card)';
+
+        card.style.background =
+            esMiCarro
+                ? '#f8fafc'
+                : '#ffffff';
 
         card.innerHTML = `
             <div class="racer-info">
-                <span>#${index + 1} ${piloto.nombre} ${esMiCarro ? '(Tú)' : ''}</span>
-                <span style="color: var(--success);">${piloto.puntos} Puntos</span>
+                <span>
+                    #${index + 1}
+                    ${piloto.nombre}
+                    ${esMiCarro ? '(Tú)' : ''}
+                </span>
+
+                <span style="color: var(--success);">
+                    ${piloto.puntos} Puntos
+                </span>
             </div>
+
             <div class="racer-track-line">
-                <div class="racer-car-icon" style="left: ${porcentaje}%;">🏎️</div>
-                <div class="racer-flag-icon">🏁</div>
+                <div
+                    class="racer-car-icon"
+                    style="left:${porcentaje}%;">
+                    🏎️
+                </div>
+
+                <div class="racer-flag-icon">
+                    🏁
+                </div>
             </div>
         `;
+
         contenedor.appendChild(card);
+
     });
+
 }
