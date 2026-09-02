@@ -456,6 +456,8 @@ async function cargarPistaCarreras() {
     }
 }
 
+function renderizarPistaPilotos(ranking) {
+    
     // Máximo de cerrados para calcular el avance porcentual del auto en la pista
     const maxPuntos = Math.max(...ranking.map(r => r.puntos), 5);
 
