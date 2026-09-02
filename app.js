@@ -518,9 +518,9 @@ function renderizarPistaPilotos(ranking) {
                     ${esMiCarro ? '(Tú)' : ''}
                 </span>
 
-                <span style="color: var(--success);">
-                    ${piloto.puntos} Puntos
-                </span>
+                <span style="color: var(--success); font-weight:700;">
+    ${piloto.puntos} Puntos • ${piloto.total} Ideas
+</span>
             </div>
 
             <div class="racer-track-line">
