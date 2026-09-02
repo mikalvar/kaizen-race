@@ -820,7 +820,18 @@
         <!-- Barra de navegación inferior minimalista -->
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
-                <span>＋</span>
+                <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
+
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+        <path d="M12 5V19M5 12H19"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"/>
+    </svg>
+
+    <span>Nueva</span>
+
+</button>
                 <span>Nueva</span>
             </button>
             <button class="nav-item" onclick="cambiarPestana('tabIdeas', this)">
