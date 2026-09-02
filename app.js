@@ -385,7 +385,6 @@ async function cargarPistaCarreras() {
 
         // Agrupar kaizens por usuario
         const rankingMap = {};
-        const rankingMap = {};
 
 data.forEach(k => {
 
