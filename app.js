@@ -212,15 +212,23 @@ document.getElementById('guardarIdea')?.addEventListener('click', async () => {
     const descripcion = document.getElementById('descripcion').value.trim();
     const tipo = document.getElementById('tipo').value;
 
-    if (!titulo || !descripcion) {
-        alert('Por favor completa al menos el título y la descripción.');
-        return;
-    }
+if (
+    !titulo ||
+    !area ||
+    !descripcion
+) {
+
+    alert(
+        'Debes completar Área, Título y Descripción.'
+    );
+
+    return;
+}
 
     try {
         const { error } = await supabaseClient.from('ideas').insert([{
             titulo,
-            area: area || 'General',
+            area: area,
             descripcion,
             tipo,
             estado: 'ABIERTO',
