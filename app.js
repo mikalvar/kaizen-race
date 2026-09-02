@@ -723,3 +723,17 @@ function renderizarPistaPilotos(ranking) {
     });
 
 }
+
+document
+.getElementById('guardarEdicion')
+?.addEventListener(
+    'click',
+    guardarEdicion
+);
+
+document
+.getElementById('cancelarEdicion')
+?.addEventListener(
+    'click',
+    cancelarEdicion
+);
