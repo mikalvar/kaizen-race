@@ -404,7 +404,6 @@ async function cargarPistaCarreras() {
 
     rankingMap[k.usuario_ci].puntos += puntos;
 }
-`
         });
 
         // Convertir a array y ordenar por cantidad de cerrados (descendente)
