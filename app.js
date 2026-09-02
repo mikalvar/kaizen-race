@@ -376,13 +376,83 @@ async function eliminarKaizen(id) {
 
 // --- PESTAÑA PISTA / RANKING ---
 async function cargarPistaCarreras() {
+
     try {
-        const { data, error } = await supabaseClient
-            .from('ideas')
-            .select('*');
+
+        const { data, error } =
+            await supabaseClient
+                .from('ideas')
+                .select('*');
 
         if (error) throw error;
 
+        const rankingMap = {};
+
+        data.forEach(k => {
+
+            if (!k.usuario_ci) return;
+
+            if (!rankingMap[k.usuario_ci]) {
+
+                rankingMap[k.usuario_ci] = {
+                    nombre: k.usuario_nombre || 'Piloto',
+                    ci: k.usuario_ci,
+                    puntos: 0,
+                    total: 0
+                };
+            }
+
+            rankingMap[k.usuario_ci].total++;
+
+            if (k.estado === 'CERRADO') {
+
+                const puntos =
+                    k.tipo === 'Standard'
+                        ? 3
+                        : 1;
+
+                rankingMap[k.usuario_ci].puntos += puntos;
+            }
+        });
+
+        const rankingArray =
+            Object.values(rankingMap)
+                .sort((a, b) => b.puntos - a.puntos);
+
+        const misDatos =
+            rankingArray.find(
+                r => r.ci === usuarioActual.ci
+            );
+
+        const misPuntos =
+            misDatos
+                ? misDatos.puntos
+                : 0;
+
+        document.getElementById(
+            'misKaizensCerradosNum'
+        ).textContent = misPuntos;
+
+        const miPosicionIndex =
+            rankingArray.findIndex(
+                r => r.ci === usuarioActual.ci
+            );
+
+        document.getElementById(
+            'posicionTexto'
+        ).textContent =
+            miPosicionIndex !== -1
+                ? `#${miPosicionIndex + 1}`
+                : '-';
+
+        renderizarPistaPilotos(rankingArray);
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+}
         // Agrupar kaizens por usuario
         const rankingMap = {};
 
