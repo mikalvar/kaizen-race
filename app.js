@@ -496,15 +496,6 @@ data.forEach(k => {
     }
 }
 
-function renderizarPistaPilotos(ranking) {
-    const contenedor = document.getElementById('pistaPilotosContainer');
-    contenedor.innerHTML = '';
-
-    if (ranking.length === 0) {
-        contenedor.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">Aún no hay actividad en la pista.</p>`;
-        return;
-    }
-
     // Máximo de cerrados para calcular el avance porcentual del auto en la pista
     const maxPuntos = Math.max(...ranking.map(r => r.puntos), 5);
 
