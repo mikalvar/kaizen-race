@@ -339,7 +339,6 @@ document.getElementById(
     filtroIdeasActual === 'mias'
         ? '👋'
         : '🏭';
-``
         
 renderizarListaIdeas(listaFiltrada);
     } catch (err) {
