@@ -448,7 +448,7 @@ function renderizarPistaPilotos(ranking) {
         card.innerHTML = `
             <div class="racer-info">
                 <span>#${index + 1} ${piloto.nombre} ${esMiCarro ? '(Tú)' : ''}</span>
-                <span style="color: var(--success);">${piloto.cerrados} Puntos</span>
+                <span style="color: var(--success);">${piloto.puntos} Puntos</span>
             </div>
             <div class="racer-track-line">
                 <div class="racer-car-icon" style="left: ${porcentaje}%;">🏎️</div>
