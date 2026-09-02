@@ -625,6 +625,8 @@ async function cargarPistaCarreras() {
                 ? `#${miPosicionIndex + 1}`
                 : '-';
 
+cargarDashboard(data);
+        
         renderizarPistaPilotos(
             rankingArray
         );
