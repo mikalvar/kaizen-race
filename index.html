@@ -362,28 +362,30 @@
         }
 
         .nav-item {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-weight: 500;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            cursor: pointer;
-            width: auto;
-            padding: 4px 12px;
-            transition: color 0.2s;
-        }
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    font-size:11px;
+    font-weight:500;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    gap:2px;
+
+    width:auto;
+    padding:4px 12px;
+}
 
 .nav-icon{
     width:20px;
     height:20px;
-    color:currentColor;
+    display:block;
+    margin-bottom:2px;
 }
         
-        .nav-item span:first-child { font-size: 18px; }
         .nav-item.active { color: var(--primary-light); font-weight: 700; }
 
         /* --- ESTILOS PARA LAS TARJETAS DE TIPO DE KAIZEN --- */
