@@ -445,7 +445,9 @@ async function cargarPistaCarreras() {
                 ? `#${miPosicionIndex + 1}`
                 : '-';
 
-        renderizarPistaPilotos(rankingArray);
+        renderizarPistaPilotos(
+            rankingArray
+        );
 
     } catch (err) {
 
