@@ -397,8 +397,12 @@ async function cargarPistaCarreras() {
             }
             rankingMap[k.usuario_ci].total++;
             if (k.estado === 'CERRADO') {
-                rankingMap[k.usuario_ci].cerrados++;
-            }
+
+    rankingMap[k.usuario_ci].cerrados +=
+        k.tipo === 'Standard'
+        ? 3
+        : 1;
+}
         });
 
         // Convertir a array y ordenar por cantidad de cerrados (descendente)
