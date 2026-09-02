@@ -433,6 +433,96 @@ else if (esPropio) {
     });
 }
 
+async function abrirEdicion(id) {
+
+    try {
+
+        const { data, error } =
+            await supabaseClient
+                .from('ideas')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+        if (error) throw error;
+
+        kaizenEditandoId = id;
+
+        document.getElementById(
+            'editTitulo'
+        ).value = data.titulo || '';
+
+        document.getElementById(
+            'editArea'
+        ).value = data.area || '';
+
+        document.getElementById(
+            'editTipo'
+        ).value = data.tipo || 'Quick';
+
+        document.getElementById(
+            'editDescripcion'
+        ).value = data.descripcion || '';
+
+        document.getElementById(
+            'editModal'
+        ).classList.remove('hidden');
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert('No se pudo abrir la edición.');
+
+    }
+}
+
+async function guardarEdicion() {
+
+    try {
+
+        const { error } =
+            await supabaseClient
+                .from('ideas')
+                .update({
+                    titulo:
+                        document.getElementById('editTitulo').value,
+
+                    area:
+                        document.getElementById('editArea').value,
+
+                    tipo:
+                        document.getElementById('editTipo').value,
+
+                    descripcion:
+                        document.getElementById('editDescripcion').value
+                })
+                .eq('id', kaizenEditandoId);
+
+        if (error) throw error;
+
+        document.getElementById(
+            'editModal'
+        ).classList.add('hidden');
+
+        cargarDatosTablero();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert('No se pudo guardar.');
+
+    }
+}
+
+function cancelarEdicion() {
+
+    document.getElementById(
+        'editModal'
+    ).classList.add('hidden');
+}
+
 // --- ACCIONES DE MODIFICACIÓN DE TAREAS ---
 async function cambiarEstadoKaizen(id, nuevoEstado) {
     try {
