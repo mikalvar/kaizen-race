@@ -519,7 +519,11 @@ function renderizarPistaPilotos(ranking) {
                 </span>
 
                 <span style="color: var(--success); font-weight:700;">
-    ${piloto.puntos} Puntos • ${piloto.total} Ideas
+    ${piloto.puntos} pts
+</span>
+
+<span style="color: var(--text-muted);">
+    • ${piloto.total} ideas
 </span>
             </div>
 
