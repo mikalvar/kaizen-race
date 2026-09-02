@@ -272,22 +272,53 @@ async function cargarDatosTablero() {
 
         if (error) throw error;
 
-        const misKaizens = data.filter(k => k.usuario_ci === usuarioActual.ci);
-        const totalMias = misKaizens.length;
-        const abiertasMias = misKaizens.filter(k => k.estado === 'ABIERTO').length;
-        const cerradasMias = misKaizens.filter(k => k.estado === 'CERRADO').length;
+        const misKaizens =
+    data.filter(
+        k =>
+            String(k.usuario_ci) ===
+            String(usuarioActual.ci)
+    );
 
-        document.getElementById('countTotal').textContent = totalMias;
-        document.getElementById('countAbiertas').textContent = abiertasMias;
-        document.getElementById('countCerradas').textContent = cerradasMias;
+const dataset =
+    filtroIdeasActual === 'mias'
+        ? misKaizens
+        : data;
 
-        let listaFiltrada = filtroIdeasActual === 'mias' ? misKaizens : data;
+// Contadores dinámicos según el filtro seleccionado
+const totalMias =
+    dataset.length;
 
-        if (filtroEstadoActual !== 'TODOS') {
-            listaFiltrada = listaFiltrada.filter(k => k.estado === filtroEstadoActual);
-        }
+const abiertasMias =
+    dataset.filter(
+        k => k.estado === 'ABIERTO'
+    ).length;
 
-        renderizarListaIdeas(listaFiltrada);
+const cerradasMias =
+    dataset.filter(
+        k => k.estado === 'CERRADO'
+    ).length;
+
+document.getElementById('countTotal').textContent =
+    totalMias;
+
+document.getElementById('countAbiertas').textContent =
+    abiertasMias;
+
+document.getElementById('countCerradas').textContent =
+    cerradasMias;
+
+// Lista a mostrar según filtro
+let listaFiltrada = dataset;
+
+if (filtroEstadoActual !== 'TODOS') {
+
+    listaFiltrada =
+        listaFiltrada.filter(
+            k => k.estado === filtroEstadoActual
+        );
+}
+
+renderizarListaIdeas(listaFiltrada);
     } catch (err) {
         console.error(err);
     }
