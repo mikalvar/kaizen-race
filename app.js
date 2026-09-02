@@ -483,20 +483,6 @@ data.forEach(k => {
     }
 });
 
-const rankingArray =
-    Object.values(rankingMap)
-    .sort((a, b) => b.puntos - a.puntos);
-
-const misDatos =
-    rankingArray.find(r => r.ci === usuarioActual.ci);
-
-const misPuntos =
-    misDatos ? misDatos.puntos : 0;
-
-document.getElementById(
-    'misKaizensCerradosNum'
-).textContent = misPuntos;
-
         // Convertir a array y ordenar por cantidad de cerrados (descendente)
         const rankingArray = Object.values(rankingMap).sort((a, b) => b.puntos - a.puntos);
 
