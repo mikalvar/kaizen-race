@@ -318,6 +318,21 @@ if (filtroEstadoActual !== 'TODOS') {
         );
 }
 
+document.getElementById(
+    'tituloIndicador'
+).textContent =
+    filtroIdeasActual === 'mias'
+        ? 'MI PROGRESO'
+        : 'PROGRESO DE PLANTA';
+
+document.getElementById(
+    'iconoIndicador'
+).textContent =
+    filtroIdeasActual === 'mias'
+        ? '👋'
+        : '🏭';
+``
+        
 renderizarListaIdeas(listaFiltrada);
     } catch (err) {
         console.error(err);
