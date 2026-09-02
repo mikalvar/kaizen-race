@@ -482,10 +482,6 @@ data.forEach(k => {
         rankingMap[k.usuario_ci].puntos += puntos;
     }
 });
-
-        // Convertir a array y ordenar por cantidad de cerrados (descendente)
-        const rankingArray = Object.values(rankingMap).sort((a, b) => b.puntos - a.puntos);
-
         // Actualizar estadísticas personales en la vista Pista
         const misDatos = rankingArray.find(r => r.ci === usuarioActual.ci);
         const misPuntos = misDatos ? misDatos.puntos : 0;
