@@ -310,18 +310,50 @@ function renderizarListaIdeas(kaizens) {
         const esPropio = (k.usuario_ci === usuarioActual.ci);
         const estadoClase = k.estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
 
-        let htmlBotonesAccion = '';
-        if (esAdmin || esPropio) {
-            htmlBotonesAccion = `
-                <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);">
-                    <button onclick="abrirEdicion('${k.id}')" style="background: var(--warning); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">Editar</button>
-                    <button onclick="cambiarEstadoKaizen('${k.id}', '${k.estado === 'ABIERTO' ? 'CERRADO' : 'ABIERTO'}')" style="background: var(--primary-light); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">
-                        ${k.estado === 'ABIERTO' ? 'Marcar Cerrado' : 'Marcar Abierto'}
-                    </button>
-                    <button onclick="eliminarKaizen('${k.id}')" style="background: var(--danger); color: white; padding: 6px 12px; font-size: 11px; border-radius: 8px; width: auto;">Eliminar</button>
-                </div>
-            `;
-        }
+       let htmlBotonesAccion = '';
+
+if (esAdmin) {
+
+    htmlBotonesAccion = `
+        <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+
+            <button
+                onclick="abrirEdicion('${k.id}')"
+                style="background: var(--warning); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
+                Editar
+            </button>
+
+            <button
+                onclick="cambiarEstadoKaizen('${k.id}', '${k.estado === 'ABIERTO' ? 'CERRADO' : 'ABIERTO'}')"
+                style="background: var(--primary-light); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
+                ${k.estado === 'ABIERTO' ? 'Marcar Cerrado' : 'Marcar Abierto'}
+            </button>
+
+            <button
+                onclick="eliminarKaizen('${k.id}')"
+                style="background: var(--danger); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
+                Eliminar
+            </button>
+
+        </div>
+    `;
+
+}
+else if (esPropio) {
+
+    htmlBotonesAccion = `
+        <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+
+            <button
+                onclick="abrirEdicion('${k.id}')"
+                style="background: var(--warning); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
+                Editar
+            </button>
+
+        </div>
+    `;
+
+}
 
         const card = document.createElement('div');
         card.className = 'idea-card';
