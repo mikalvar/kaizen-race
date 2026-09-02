@@ -395,14 +395,16 @@ async function cargarPistaCarreras() {
                     total: 0
                 };
             }
-            rankingMap[k.usuario_ci].total++;
             if (k.estado === 'CERRADO') {
 
-    rankingMap[k.usuario_ci].cerrados +=
+    const puntos =
         k.tipo === 'Standard'
         ? 3
         : 1;
+
+    rankingMap[k.usuario_ci].cerrados += puntos;
 }
+`
         });
 
         // Convertir a array y ordenar por cantidad de cerrados (descendente)
@@ -447,7 +449,7 @@ function renderizarPistaPilotos(ranking) {
         card.innerHTML = `
             <div class="racer-info">
                 <span>#${index + 1} ${piloto.nombre} ${esMiCarro ? '(Tú)' : ''}</span>
-                <span style="color: var(--success);">${piloto.cerrados} Cerrados</span>
+                <span style="color: var(--success);">${piloto.cerrados} Puntos</span>
             </div>
             <div class="racer-track-line">
                 <div class="racer-car-icon" style="left: ${porcentaje}%;">🏎️</div>
