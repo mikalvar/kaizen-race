@@ -433,7 +433,7 @@ function renderizarPistaPilotos(ranking) {
     }
 
     // Máximo de cerrados para calcular el avance porcentual del auto en la pista
-    const maxCerrados = Math.max(...ranking.map(r => r.cerrados), 5);
+    const maxCerrados = Math.max(...ranking.map(r => r.puntos), 5);
 
     ranking.forEach((piloto, index) => {
         let porcentaje = (piloto.cerrados / maxCerrados) * 85;
