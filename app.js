@@ -433,10 +433,10 @@ function renderizarPistaPilotos(ranking) {
     }
 
     // Máximo de cerrados para calcular el avance porcentual del auto en la pista
-    const maxCerrados = Math.max(...ranking.map(r => r.puntos), 5);
+    const maxPuntos = Math.max(...ranking.map(r => r.puntos), 5);
 
     ranking.forEach((piloto, index) => {
-        let porcentaje = (piloto.cerrados / maxCerrados) * 85;
+        let porcentaje = (piloto.cerrados / maxPuntos) * 85;
         if (porcentaje > 88) porcentaje = 88; // Límite visual para que no cruce la bandera de llegada antes de tiempo
 
         const esMiCarro = piloto.ci === usuarioActual.ci;
