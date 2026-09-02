@@ -789,14 +789,47 @@
             </div>
 
             <div class="form-group">
-                <label for="area">Área / línea (opcional)</label>
-                <input type="text" id="area" placeholder="Ej: Ensamblaje, Almacén...">
-            </div>
+                <label for="area">Área</label>
 
-            <div class="form-group">
-                <label for="descripcion">Descripción de la mejora</label>
-                <textarea id="descripcion" rows="3" placeholder="Describe la situación actual..."></textarea>
-            </div>
+<select id="area">
+
+    <option value="">
+        Seleccione un área
+    </option>
+
+    <option value="Extrusión">
+        Extrusión
+    </option>
+
+    <option value="Calidad">
+        Calidad
+    </option>
+
+    <option value="PMP">
+        PMP
+    </option>
+
+    <option value="Mantenimiento">
+        Mantenimiento
+    </option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+    <label for="descripcion">
+        Descripción de la mejora
+    </label>
+
+    <textarea
+        id="descripcion"
+        rows="3"
+        placeholder="Describe la situación actual..."
+    ></textarea>
+
+</div>
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button id="guardarIdea" class="btn-primary" style="flex: 2; border-radius: 12px;">Registrar</button>
