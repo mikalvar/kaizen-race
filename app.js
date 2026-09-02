@@ -471,7 +471,7 @@ function renderizarPistaPilotos(ranking) {
     if (ranking.length === 0) {
 
         contenedor.innerHTML =
-            '<p style="text-align:center; color:#64748b;">Aún no hay actividad en la pista.</p>';
+            '<p style="text-align:center;">Aún no hay actividad en la pista.</p>';
 
         return;
     }
