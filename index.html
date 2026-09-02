@@ -819,34 +819,85 @@
 
         <!-- Barra de navegación inferior minimalista -->
         <nav class="bottom-nav">
-            <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
-                <button class="nav-item active" onclick="cambiarPestana('tabRegistrar', this)">
 
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
-        <path d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"/>
-    </svg>
+    <!-- NUEVA -->
+    <button class="nav-item active"
+        onclick="cambiarPestana('tabRegistrar', this)">
 
-    <span>Nueva</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5V19M5 12H19"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+        </svg>
 
-</button>
-                <span>Nueva</span>
-            </button>
-            <button class="nav-item" onclick="cambiarPestana('tabIdeas', this)">
-                <span>📋</span>
-                <span>Tareas</span>
-            </button>
-            <button class="nav-item" onclick="cambiarPestana('tabPista', this)">
-                <span>📊</span>
-                <span>Informes</span>
-            </button>
-            <button class="nav-item" onclick="cerrarSesion()">
-                <span>➜</span>
-                <span>Salir</span>
-            </button>
-        </nav>
+        <span>Nueva</span>
+
+    </button>
+
+    <!-- TAREAS -->
+    <button class="nav-item"
+        onclick="cambiarPestana('tabIdeas', this)">
+
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M9 6H20M9 12H20M9 18H20"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+
+            <circle cx="4" cy="6" r="1.5"
+                fill="currentColor"/>
+
+            <circle cx="4" cy="12" r="1.5"
+                fill="currentColor"/>
+
+            <circle cx="4" cy="18" r="1.5"
+                fill="currentColor"/>
+        </svg>
+
+        <span>Tareas</span>
+
+    </button>
+
+    <!-- INFORMES -->
+    <button class="nav-item"
+        onclick="cambiarPestana('tabPista', this)">
+
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6 20V10M12 20V5M18 20V14"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+        </svg>
+
+        <span>Informes</span>
+
+    </button>
+
+    <!-- SALIR -->
+    <button class="nav-item"
+        onclick="cerrarSesion()">
+
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+
+            <path d="M10 17L15 12L10 7"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+
+            <path d="M15 12H4"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+
+        </svg>
+
+        <span>Salir</span>
+
+    </button>
+
+</nav>
     </div>
 
     <!-- MODAL DE REGISTRO -->
