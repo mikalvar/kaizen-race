@@ -426,7 +426,6 @@ const misPuntos =
 document.getElementById(
     'misKaizensCerradosNum'
 ).textContent = misPuntos;
-        });
 
         // Convertir a array y ordenar por cantidad de cerrados (descendente)
         const rankingArray = Object.values(rankingMap).sort((a, b) => b.puntos - a.puntos);
