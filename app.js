@@ -391,7 +391,7 @@ async function cargarPistaCarreras() {
                 rankingMap[k.usuario_ci] = {
                     nombre: k.usuario_nombre || 'Piloto',
                     ci: k.usuario_ci,
-                    cerrados: 0,
+                    puntos: 0,
                     total: 0
                 };
             }
@@ -402,18 +402,18 @@ async function cargarPistaCarreras() {
         ? 3
         : 1;
 
-    rankingMap[k.usuario_ci].cerrados += puntos;
+    rankingMap[k.usuario_ci].puntos += puntos;
 }
 `
         });
 
         // Convertir a array y ordenar por cantidad de cerrados (descendente)
-        const rankingArray = Object.values(rankingMap).sort((a, b) => b.cerrados - a.cerrados);
+        const rankingArray = Object.values(rankingMap).sort((a, b) => b.puntos - a.puntos);
 
         // Actualizar estadísticas personales en la vista Pista
         const misDatos = rankingArray.find(r => r.ci === usuarioActual.ci);
-        const misCerrados = misDatos ? misDatos.cerrados : 0;
-        document.getElementById('misKaizensCerradosNum').textContent = misCerrados;
+        const misPuntos = misDatos ? misDatos.puntos : 0;
+        document.getElementById('misKaizensCerradosNum').textContent = misPuntos;
 
         const miPosicionIndex = rankingArray.findIndex(r => r.ci === usuarioActual.ci);
         document.getElementById('posicionTexto').textContent = miPosicionIndex !== -1 ? `#${miPosicionIndex + 1}` : '-';
