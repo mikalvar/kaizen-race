@@ -385,25 +385,48 @@ async function cargarPistaCarreras() {
 
         // Agrupar kaizens por usuario
         const rankingMap = {};
-        data.forEach(k => {
-            if (!k.usuario_ci) return;
-            if (!rankingMap[k.usuario_ci]) {
-                rankingMap[k.usuario_ci] = {
-                    nombre: k.usuario_nombre || 'Piloto',
-                    ci: k.usuario_ci,
-                    puntos: 0,
-                    total: 0
-                };
-            }
-            if (k.estado === 'CERRADO') {
+        const rankingMap = {};
 
-    const puntos =
-        k.tipo === 'Standard'
-        ? 3
-        : 1;
+data.forEach(k => {
 
-    rankingMap[k.usuario_ci].puntos += puntos;
-}
+    if (!k.usuario_ci) return;
+
+    if (!rankingMap[k.usuario_ci]) {
+
+        rankingMap[k.usuario_ci] = {
+            nombre: k.usuario_nombre || 'Piloto',
+            ci: k.usuario_ci,
+            puntos: 0,
+            total: 0
+        };
+    }
+
+    rankingMap[k.usuario_ci].total++;
+
+    if (k.estado === 'CERRADO') {
+
+        const puntos =
+            k.tipo === 'Standard'
+                ? 3
+                : 1;
+
+        rankingMap[k.usuario_ci].puntos += puntos;
+    }
+});
+
+const rankingArray =
+    Object.values(rankingMap)
+    .sort((a, b) => b.puntos - a.puntos);
+
+const misDatos =
+    rankingArray.find(r => r.ci === usuarioActual.ci);
+
+const misPuntos =
+    misDatos ? misDatos.puntos : 0;
+
+document.getElementById(
+    'misKaizensCerradosNum'
+).textContent = misPuntos;
         });
 
         // Convertir a array y ordenar por cantidad de cerrados (descendente)
