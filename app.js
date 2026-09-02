@@ -636,6 +636,51 @@ async function cargarPistaCarreras() {
     }
 }
 
+function cargarDashboard(ideas) {
+
+    document.getElementById(
+        'dashTotal'
+    ).textContent =
+        ideas.length;
+
+    document.getElementById(
+        'dashAbiertas'
+    ).textContent =
+        ideas.filter(
+            i => i.estado === 'ABIERTO'
+        ).length;
+
+    document.getElementById(
+        'dashCerradas'
+    ).textContent =
+        ideas.filter(
+            i => i.estado === 'CERRADO'
+        ).length;
+
+    document.getElementById(
+        'dashQuick'
+    ).textContent =
+        ideas.filter(
+            i => i.tipo === 'Quick'
+        ).length;
+
+    document.getElementById(
+        'dashStandard'
+    ).textContent =
+        ideas.filter(
+            i => i.tipo === 'Standard'
+        ).length;
+
+    document.getElementById(
+        'dashParticipantes'
+    ).textContent =
+        new Set(
+            ideas.map(
+                i => i.usuario_ci
+            )
+        ).size;
+}
+
 function renderizarPistaPilotos(ranking) {
 
     const contenedor =
