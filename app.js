@@ -334,7 +334,7 @@ function renderizarListaIdeas(kaizens) {
             <p class="idea-desc">${k.descripcion}</p>
             <div class="idea-footer-row">
                 <span>Por: ${k.autor_nombre || 'Piloto'}</span>
-                <span>${new Date(k.created_at).toLocaleDateString()}</span>
+                <span>${new Date(k.fecha_creacion).toLocaleDateString()}</span>
             </div>
             ${htmlBotonesAccion}
         `;
