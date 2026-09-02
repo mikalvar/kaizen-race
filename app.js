@@ -294,6 +294,9 @@ async function cargarDatosTablero() {
 }
 
 function renderizarListaIdeas(kaizens) {
+    
+    console.log("Kaizens recibidos:", kaizens);
+    
     const contenedor = document.getElementById('listaIdeas');
     contenedor.innerHTML = '';
 
