@@ -678,7 +678,7 @@ function cargarDashboard(ideas) {
     ).textContent =
         new Set(
             ideas.map(
-                i => i.usuario_ci
+                i => i.usuario_legajo
             )
         ).size;
 }
