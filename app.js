@@ -48,7 +48,7 @@ function cambiarModoAuth(modo) {
 
 // Botón de Iniciar Sesión
 document.getElementById('loginBtn')?.addEventListener('click', async () => {
-    const ci = document.getElementById('ciInput').value.trim();
+    const legajo = document.getElementById('legajoInput').value.trim();
     if (!legajo) {
         alert('Por favor ingresa tu legajo');
         return;
