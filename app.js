@@ -86,7 +86,7 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
 document.getElementById('registerBtn')?.addEventListener('click', async () => {
     const nombre = document.getElementById('nombreInput').value.trim();
     const apellido = document.getElementById('apellidoInput').value.trim();
-    const legajo = document.getElementById('ciRegistroInput').value.trim();
+    const legajo = document.getElementById('legajoRegistroInput').value.trim();
 
     if (!nombre || !apellido || !legajo) {
         alert('Completa todos los campos para registrarte.');
