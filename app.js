@@ -138,7 +138,7 @@ function mostrarAppPrincipal() {
     // Título grande superior
     tituloRol.textContent = "PILOTO DE MEJORA";
 
-    // Nombre y cédula pequeño abajo (ej: mikaelaalvarez51000364 o con espacios legibles)
+    // Nombre y legajo pequeño abajo (ej: mikaelaalvarez51000364 o con espacios legibles)
     const nombreCompleto = `${usuarioActual.nombre || ''} ${usuarioActual.apellido || ''}`.trim();
     spanUsuario.textContent = `${nombreCompleto} (${usuarioActual.legajo})`;
 
