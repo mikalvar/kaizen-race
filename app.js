@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Variables de Estado Global
-let usuarioActual = null; // Ejemplo: { nombre: 'Mikaela', apellido: 'Alvarez', ci: '3992978', rol: 'admin' }
+let usuarioActual = null; // Ejemplo: { nombre: 'Mikaela', apellido: 'Alvarez', legajo: '51000364', rol: 'admin' }
 let filtroIdeasActual = 'mias'; // 'mias' o 'todas'
 let filtroEstadoActual = 'TODOS'; // 'TODOS', 'ABIERTO', 'CERRADO'
 let kaizenEditandoId = null;
@@ -15,8 +15,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const sesionGuardada = localStorage.getItem('kaizen_user');
     if (sesionGuardada) {
         usuarioActual = JSON.parse(sesionGuardada);
-        // Forzar rol Admin si la cédula es 3992978
-        if (usuarioActual.ci === '3992978') {
+        // Forzar rol Admin si la legajo es 51000364
+        if (usuarioActual.legajo === '51000364') {
             usuarioActual.rol = 'admin';
         }
         mostrarAppPrincipal();
@@ -49,8 +49,8 @@ function cambiarModoAuth(modo) {
 // Botón de Iniciar Sesión
 document.getElementById('loginBtn')?.addEventListener('click', async () => {
     const ci = document.getElementById('ciInput').value.trim();
-    if (!ci) {
-        alert('Por favor ingresa tu Cédula de Identidad');
+    if (!legajo) {
+        alert('Por favor ingresa tu legajo');
         return;
     }
 
@@ -59,18 +59,18 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
         const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
-            .eq('ci', ci)
+            .eq('Legajo', Legajo)
             .single();
 
         if (error || !data) {
-            alert('Cédula no encontrada. Por favor regístrate primero.');
+            alert('Legajo no encontrado. Por favor regístrate primero.');
             return;
         }
 
         usuarioActual = data;
 
-        // Regla específica solicitada: cédula 3992978 es Administrador
-        if (usuarioActual.ci === '3992978') {
+        // Regla específica solicitada: legajo 51000364 es Administrador
+        if (usuarioActual.legajo === '51000364') {
             usuarioActual.rol = 'admin';
         }
 
@@ -86,20 +86,20 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
 document.getElementById('registerBtn')?.addEventListener('click', async () => {
     const nombre = document.getElementById('nombreInput').value.trim();
     const apellido = document.getElementById('apellidoInput').value.trim();
-    const ci = document.getElementById('ciRegistroInput').value.trim();
+    const legajo = document.getElementById('ciRegistroInput').value.trim();
 
-    if (!nombre || !apellido || !ci) {
+    if (!nombre || !apellido || !legajo) {
         alert('Completa todos los campos para registrarte.');
         return;
     }
 
     try {
-        // Definir rol inicial (Admin automático si es 3992978)
-        const rol = (ci === '3992978') ? 'admin' : 'usuario';
+        // Definir rol inicial (Admin automático si es 51000364)
+        const rol = (legajo === '51000364') ? 'admin' : 'usuario';
 
         const { data, error } = await supabaseClient
             .from('usuarios')
-            .insert([{ nombre, apellido, ci, rol }])
+            .insert([{ nombre, apellido, legajo, rol }])
             .select()
             .single();
 
@@ -138,12 +138,12 @@ function mostrarAppPrincipal() {
     // Título grande superior
     tituloRol.textContent = "PILOTO DE MEJORA";
 
-    // Nombre y cédula pequeño abajo (ej: mikaelaalvarez3992978 o con espacios legibles)
+    // Nombre y cédula pequeño abajo (ej: mikaelaalvarez51000364 o con espacios legibles)
     const nombreCompleto = `${usuarioActual.nombre || ''} ${usuarioActual.apellido || ''}`.trim();
-    spanUsuario.textContent = `${nombreCompleto} (${usuarioActual.ci})`;
+    spanUsuario.textContent = `${nombreCompleto} (${usuarioActual.legajo})`;
 
     // Ajustar Indicador de Rol (Admin o Usuario)
-    if (usuarioActual.ci === '3992978' || usuarioActual.rol === 'admin') {
+    if (usuarioActual.legajo === '51000364' || usuarioActual.rol === 'admin') {
         roleBadge.textContent = "Admin";
         roleBadge.style.background = "#eff6ff";
         roleBadge.style.color = "#1d4ed8";
@@ -232,7 +232,7 @@ if (
             descripcion,
             tipo,
             estado: 'ABIERTO',
-            usuario_ci: usuarioActual.ci,
+            usuario_ci: usuarioActual.legajo,
             usuario_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido || ''}`.trim()
         }]);
 
@@ -359,10 +359,10 @@ function renderizarListaIdeas(kaizens) {
     }
 
     kaizens.forEach(k => {
-        const esAdmin = (usuarioActual.ci === '3992978' || usuarioActual.rol === 'admin');
+        const esAdmin = (usuarioActual.legajo === '51000364' || usuarioActual.rol === 'admin');
         const esPropio =
-    String(k.usuario_ci) ===
-    String(usuarioActual.ci);
+    String(k.usuario_legajo) ===
+    String(usuarioActual.legajo);
         const estadoClase = k.estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
 
        let htmlBotonesAccion = '';
