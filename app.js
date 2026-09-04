@@ -283,8 +283,8 @@ async function cargarDatosTablero() {
         const misKaizens =
     data.filter(
         k =>
-            String(k.usuario_ci) ===
-            String(usuarioActual.ci)
+            String(k.usuario_legajo) ===
+            String(usuarioActual.legajo)
     );
 
 const dataset =
