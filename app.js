@@ -59,11 +59,11 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
         const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
-            .eq('Legajo', Legajo)
+            .eq('legajo', legajo)
             .single();
 
         if (error || !data) {
-            alert('Legajo no encontrado. Por favor regístrate primero.');
+            alert('legajo no encontrado. Por favor regístrate primero.');
             return;
         }
 
