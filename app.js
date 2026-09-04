@@ -232,7 +232,7 @@ if (
             descripcion,
             tipo,
             estado: 'ABIERTO',
-            usuario_ci: usuarioActual.legajo,
+            usuario_legajo: usuarioActual.legajo,
             usuario_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido || ''}`.trim()
         }]);
 
