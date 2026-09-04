@@ -570,19 +570,19 @@ async function cargarPistaCarreras() {
 
         data.forEach(k => {
 
-            if (!k.usuario_ci) return;
+            if (!k.usuario_legajo) return;
 
-            if (!rankingMap[k.usuario_ci]) {
+            if (!rankingMap[k.usuario_legajo]) {
 
-                rankingMap[k.usuario_ci] = {
+                rankingMap[k.usuario_legajo] = {
                     nombre: k.usuario_nombre || 'Piloto',
-                    ci: k.usuario_ci,
+                    legajo: k.usuario_legajo,
                     puntos: 0,
                     total: 0
                 };
             }
 
-            rankingMap[k.usuario_ci].total++;
+            rankingMap[k.usuario_legajo].total++;
 
             if (k.estado === 'CERRADO') {
 
@@ -591,7 +591,7 @@ async function cargarPistaCarreras() {
                         ? 3
                         : 1;
 
-                rankingMap[k.usuario_ci].puntos += puntos;
+                rankingMap[k.usuario_legajo].puntos += puntos;
             }
         });
 
@@ -601,7 +601,7 @@ async function cargarPistaCarreras() {
 
         const misDatos =
             rankingArray.find(
-                r => r.ci === usuarioActual.ci
+                r => r.legajo === usuarioActual.legajo
             );
 
         const misPuntos =
@@ -615,7 +615,7 @@ async function cargarPistaCarreras() {
 
         const miPosicionIndex =
             rankingArray.findIndex(
-                r => r.ci === usuarioActual.ci
+                r => r.legajo === usuarioActual.legajo
             );
 
         document.getElementById(
@@ -717,7 +717,7 @@ function renderizarPistaPilotos(ranking) {
             porcentaje = 88;
 
         const esMiCarro =
-            piloto.ci === usuarioActual.ci;
+            piloto.legajo === usuarioActual.legajo;
 
         const card =
             document.createElement('div');
