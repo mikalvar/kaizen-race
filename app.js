@@ -638,9 +638,9 @@ async function cargarPistaCarreras() {
 
 cargarDashboard(data);
         
-        renderizarPistaPilotos(
-            rankingArray
-            
+        
+renderizarPistaPilotos(rankingArray);
+
 ideasParaRankingMensual = data;
 actualizarRankingMensual(data);
 
