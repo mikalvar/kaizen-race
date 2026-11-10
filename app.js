@@ -8,6 +8,8 @@ let usuarioActual = null; // Ejemplo: { nombre: 'Mikaela', apellido: 'Alvarez', 
 let filtroIdeasActual = 'mias'; // 'mias' o 'todas'
 let filtroEstadoActual = 'TODOS'; // 'TODOS', 'ABIERTO', 'CERRADO'
 let kaizenEditandoId = null;
+let ideasParaRankingMensual = [];
+
 
 // Inicialización al cargar la ventana
 window.addEventListener('DOMContentLoaded', () => {
