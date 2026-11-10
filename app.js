@@ -523,20 +523,29 @@ function cancelarEdicion() {
 }
 
 // --- ACCIONES DE MODIFICACIÓN DE TAREAS ---
+
 async function cambiarEstadoKaizen(id, nuevoEstado) {
     try {
         const { error } = await supabaseClient
             .from('ideas')
-            .update({ estado: nuevoEstado })
+            .update({
+                estado: nuevoEstado,
+                fecha_cierre: nuevoEstado === 'CERRADO'
+                    ? new Date().toISOString()
+                    : null
+            })
             .eq('id', id);
 
         if (error) throw error;
+
         cargarDatosTablero();
+
     } catch (err) {
         console.error(err);
         alert('No se pudo cambiar el estado.');
     }
 }
+
 
 async function eliminarKaizen(id) {
     if (!confirm('¿Estás seguro de eliminar esta propuesta?')) return;
