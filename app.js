@@ -640,6 +640,10 @@ cargarDashboard(data);
         
         renderizarPistaPilotos(
             rankingArray
+            
+ideasParaRankingMensual = data;
+actualizarRankingMensual(data);
+
         );
 
     } catch (err) {
@@ -794,3 +798,158 @@ document
     'click',
     cancelarEdicion
 );
+
+/* ==========================================
+   RANKING MENSUAL KAIZEN
+   SEGÚN FECHA DE CIERRE
+========================================== */
+
+function cambiarMesRanking() {
+    actualizarRankingMensual(ideasParaRankingMensual);
+}
+
+function actualizarRankingMensual(ideas) {
+
+    const selector = document.getElementById('mesRanking');
+    const ganador = document.getElementById('ganadorMensual');
+    const contenedor = document.getElementById('rankingMensualContainer');
+
+    if (!selector || !ganador || !contenedor) return;
+
+    // Seleccionar el mes actual automáticamente
+    if (!selector.value) {
+        const hoy = new Date();
+
+        selector.value =
+            hoy.getFullYear() + '-' +
+            String(hoy.getMonth() + 1).padStart(2, '0');
+    }
+
+    const mesSeleccionado = selector.value;
+
+    const rankingMap = {};
+
+    ideas.forEach(idea => {
+
+        // Solo propuestas cerradas con fecha de cierre
+        if (
+            idea.estado !== 'CERRADO' ||
+            !idea.fecha_cierre ||
+            !idea.usuario_legajo
+        ) return;
+
+        const fecha = new Date(idea.fecha_cierre);
+
+        if (Number.isNaN(fecha.getTime())) return;
+
+        const mesIdea =
+            fecha.getFullYear() + '-' +
+            String(fecha.getMonth() + 1).padStart(2, '0');
+
+        if (mesIdea !== mesSeleccionado) return;
+
+        const legajo = String(idea.usuario_legajo);
+
+        if (!rankingMap[legajo]) {
+            rankingMap[legajo] = {
+                nombre: idea.usuario_nombre || 'Piloto',
+                legajo: legajo,
+                puntos: 0,
+                total: 0
+            };
+        }
+
+        rankingMap[legajo].total++;
+
+        rankingMap[legajo].puntos +=
+            idea.tipo === 'Standard' ? 3 : 1;
+    });
+
+    // Ordenar de mayor a menor puntuación
+    const ranking = Object.values(rankingMap)
+        .sort((a, b) =>
+            b.puntos - a.puntos ||
+            b.total - a.total ||
+            a.nombre.localeCompare(b.nombre, 'es')
+        );
+
+    ganador.innerHTML = '';
+    contenedor.innerHTML = '';
+
+    // Si no hay propuestas cerradas en el mes
+    if (ranking.length === 0) {
+        ganador.textContent =
+            'Todavía no hay propuestas cerradas en este mes.';
+        return;
+    }
+
+    // Mostrar ganador del mes
+    const primero = ranking[0];
+
+    const tituloGanador = document.createElement('strong');
+
+    tituloGanador.textContent =
+        '🏆 Ganador del mes: ' +
+        primero.nombre +
+        ' — ' +
+        primero.puntos +
+        ' puntos';
+
+    ganador.appendChild(tituloGanador);
+
+    // Dibujar pista mensual
+    const maxPuntos = ranking[0].puntos || 1;
+
+    ranking.forEach((piloto, index) => {
+
+        const porcentaje = Math.min(
+            85,
+            (piloto.puntos / maxPuntos) * 85
+        );
+
+        const esMiCarro =
+            piloto.legajo === String(usuarioActual.legajo);
+
+        const card = document.createElement('div');
+        card.className = 'racer-card';
+
+        if (esMiCarro) {
+            card.style.borderColor = 'var(--primary-light)';
+            card.style.background = '#f8fafc';
+        }
+
+        const info = document.createElement('div');
+        info.className = 'racer-info';
+
+        const nombre = document.createElement('span');
+        nombre.textContent =
+            '#' + (index + 1) + ' ' +
+            piloto.nombre +
+            (esMiCarro ? ' (Tú)' : '');
+
+        const puntos = document.createElement('span');
+        puntos.textContent =
+            piloto.puntos + ' pts · ' +
+            piloto.total + ' cerradas';
+
+        info.append(nombre, puntos);
+
+        const pista = document.createElement('div');
+        pista.className = 'racer-track-line';
+
+        const carro = document.createElement('div');
+        carro.className = 'racer-car-icon';
+        carro.style.left = porcentaje + '%';
+        carro.textContent = '🏎️';
+
+        const meta = document.createElement('div');
+        meta.className = 'racer-flag-icon';
+        meta.textContent = '🏁';
+
+        pista.append(carro, meta);
+        card.append(info, pista);
+
+        contenedor.appendChild(card);
+    });
+}
+
