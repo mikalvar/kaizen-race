@@ -644,8 +644,6 @@ renderizarPistaPilotos(rankingArray);
 ideasParaRankingMensual = data;
 actualizarRankingMensual(data);
 
-        );
-
     } catch (err) {
 
         console.error(err);
