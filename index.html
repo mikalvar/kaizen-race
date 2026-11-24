@@ -1,1148 +1,3679 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#142b55">
+
     <title>Kaizen Race</title>
-    <!-- Carga de Supabase desde CDN -->
+
+    <!-- SUPABASE -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
-    
+    <!-- TIPOGRAFÍA -->
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
+
+        /* =====================================
+           VARIABLES GENERALES
+        ===================================== */
+
         :root {
-            --primary: #1e3a8a;
+
+            --primary: #142b55;
             --primary-light: #2563eb;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-dark: #0f172a;
+            --orange: #f59e0b;
+
+            --success: #15803d;
+            --danger: #dc2626;
+            --warning: #d97706;
+
+            --bg-dark: #0f1e3b;
             --card-bg: #ffffff;
-            --text-main: #0f172a;
+            --app-bg: #f3f6fa;
+
+            --text-main: #17243b;
             --text-muted: #64748b;
-            --border: #f1f5f9;
+
+            --border: #edf1f5;
             --border-card: #e2e8f0;
+
+            --shadow:
+                0 4px 16px rgba(20,43,85,0.05);
         }
 
         * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-}
 
-        /* Bloquea por completo el scroll y rebote de la página principal */
-        html, body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+
+            font-family:
+                'Inter',
+                Arial,
+                sans-serif;
+        }
+
+        html,
+        body {
+
             width: 100%;
-            height: 100vh;
-            height: 100dvh;
+            height: 100%;
             overflow: hidden;
-            background-color: #1b3168;
+
+            background: #142b55;
+
             color: var(--text-main);
+        }
+
+        body {
+
             display: flex;
             align-items: center;
             justify-content: center;
-            position: fixed;
-            inset: 0;
+
+            height: 100vh;
+            height: 100dvh;
         }
 
         .hidden {
+
             display: none !important;
         }
 
-        /* --- LOGIN & REGISTRO --- */
+        button,
+        input,
+        textarea,
+        select {
+
+            font: inherit;
+        }
+
+        button {
+
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+            transition:
+                background 0.2s,
+                opacity 0.2s;
+        }
+
+        button:disabled {
+
+            opacity: 0.55;
+            cursor: wait;
+        }
+
+        button:focus-visible,
+        summary:focus-visible {
+
+            outline: 3px solid #93c5fd;
+            outline-offset: 3px;
+        }
+
+        button:hover:not(:disabled) {
+
+            opacity: 0.92;
+        }
+
+        .btn-primary,
+        .btn-success,
+        .btn-secondary {
+
+            width: 100%;
+            min-height: 46px;
+            padding: 13px 16px;
+
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .btn-success {
+
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-secondary {
+
+            background: #edf2f7;
+            color: #475569;
+        }
+
+        /* =====================================
+           LOGIN Y REGISTRO
+        ===================================== */
+
         .login-container {
+
             width: 100%;
             max-width: 440px;
-            padding: 16px;
-            max-height: 100vh;
+
+            padding: 24px;
+
+            max-height: 100dvh;
             overflow-y: auto;
         }
 
-        .login-card {
-            background: var(--card-bg);
-            padding: 28px;
+        .login-brand {
+
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .brand-symbol {
+
+            width: 76px;
+            height: 76px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin: 0 auto 18px;
+
             border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 100%;
+
+            background: #ffffff;
+            color: var(--primary);
+
+            font-size: 38px;
+
+            box-shadow:
+                0 8px 24px rgba(0,0,0,0.18);
+        }
+
+        .login-brand h1 {
+
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .login-brand h1 span {
+
+            color: #fbbf24;
+        }
+
+        .login-brand p {
+
+            color: #cbd5e1;
+            font-size: 13px;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .login-card {
+
+            background: white;
+
+            padding: 26px;
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 16px 40px rgba(0,0,0,0.15);
         }
 
         .login-header h2 {
-            color: var(--primary);
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
+
+            font-size: 21px;
+            font-weight: 800;
+
+            margin-bottom: 6px;
         }
 
         .login-header p {
-            color: var(--text-muted);
+
             font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+
             margin-bottom: 24px;
         }
 
-        /* Botón deslizante (Switch de pestañas) */
         .auth-switch-container {
+
             position: relative;
+
             display: flex;
-            background-color: #f1f5f9;
-            border-radius: 30px;
+
+            background: #eef2f7;
+
             padding: 4px;
+
+            border-radius: 12px;
+
             margin-bottom: 24px;
         }
 
         .auth-slider-bg {
+
             position: absolute;
+
             top: 4px;
             bottom: 4px;
-            width: 50%;
-            background-color: var(--primary-light);
-            border-radius: 24px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            left: 4px;
+
+            width: calc(50% - 4px);
+
+            background: var(--primary-light);
+
+            border-radius: 9px;
+
+            transition: transform 0.25s ease;
         }
 
-        .auth-slider-bg.left { transform: translateX(0); }
-        .auth-slider-bg.right { transform: translateX(100%); }
+        .auth-slider-bg.left {
+
+            transform: translateX(0);
+        }
+
+        .auth-slider-bg.right {
+
+            transform: translateX(100%);
+        }
 
         .auth-tab-btn {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 10px 0;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
+
+            position: relative;
             z-index: 1;
-            transition: color 0.3s ease;
+
+            flex: 1;
+
+            padding: 11px 4px;
+
+            background: transparent;
+
+            color: var(--text-muted);
+
+            font-size: 12px;
         }
 
-        .auth-tab-btn.active { color: #ffffff; }
+        .auth-tab-btn.active {
+
+            color: white;
+        }
 
         .auth-form-section {
+
             display: none;
-            animation: fadeInAuth 0.3s ease-in-out;
         }
 
-        .auth-form-section.active { display: block; }
+        .auth-form-section.active {
 
-        @keyframes fadeInAuth {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
+            display: block;
         }
 
         .form-group {
-            margin-bottom: 16px;
+
+            margin-bottom: 17px;
         }
 
         .form-group label {
+
             display: block;
+
+            color: #475569;
+
             font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 700;
+
+            margin-bottom: 8px;
         }
 
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+
             width: 100%;
+
+            min-height: 46px;
+
             padding: 12px 14px;
-            border: 1px solid var(--border-card);
-            border-radius: 12px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-            background: #fafafa;
-        }
 
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: var(--primary-light);
-            background: #fff;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            color: white;
-            transition: opacity 0.2s;
-        }
-
-        button:hover { opacity: 0.9; }
-
-        .btn-primary { background-color: var(--primary-light); }
-        .btn-success { background-color: var(--success); }
-
-        /* --- APLICACIÓN PRINCIPAL FIJA --- */
-        #appArea {
-            width: 100%;
-            max-width: 480px;
-            height: 94vh;
-            height: 94dvh;
             background: #f8fafc;
-            border-radius: 28px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+
+            border: 1px solid var(--border-card);
+
+            border-radius: 11px;
+
+            font-size: 16px;
+
+            color: var(--text-main);
+
+            outline: none;
+
+            transition:
+                border-color 0.2s,
+                box-shadow 0.2s;
+        }
+
+        .form-group textarea {
+
+            resize: vertical;
+
+            min-height: 100px;
+
+            line-height: 1.5;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+
+            border-color: var(--primary-light);
+
+            background: white;
+
+            box-shadow:
+                0 0 0 3px rgba(37,99,235,0.08);
+        }
+
+        .login-footer {
+
+            text-align: center;
+
+            margin-top: 22px;
+
+            color: #a9bad5;
+
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        /* =====================================
+           APLICACIÓN PRINCIPAL
+        ===================================== */
+
+        #appArea {
+
+            width: 100%;
+            max-width: 560px;
+
+            height: 95vh;
+            height: 95dvh;
+
             display: flex;
             flex-direction: column;
+
             position: relative;
+
             overflow: hidden;
+
+            background: var(--app-bg);
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.25);
         }
 
+        /* =====================================
+           CABECERA
+        ===================================== */
+
         .app-header {
-            background: #ffffff;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
+
+            background: var(--primary);
+
+            padding: 18px 18px 20px;
+
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+
+            gap: 12px;
+
             flex-shrink: 0;
+
+            border-bottom: 3px solid var(--orange);
         }
 
         .user-info {
+
             display: flex;
             align-items: center;
-            gap: 12px;
+
+            gap: 11px;
+
             min-width: 0;
         }
 
         .app-brand-icon {
-            width: 38px;
-            height: 38px;
-            background: var(--primary);
-            border-radius: 12px;
+
+            width: 43px;
+            height: 43px;
+
+            flex-shrink: 0;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
+            background: rgba(255,255,255,0.12);
+
+            border: 1px solid rgba(255,255,255,0.15);
+
+            border-radius: 13px;
+
+            font-size: 23px;
+        }
+
+        .user-details {
+
+            min-width: 0;
+        }
+
+        .brand-name {
+
             color: white;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
 
-        .user-details { min-width: 0; }
-
-        /* Estilo actualizado: Título grande arriba */
-        .user-details h3 {
-            font-size: 14px;
+            font-size: 17px;
             font-weight: 800;
-            color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            letter-spacing: 0.3px;
+
+            letter-spacing: -0.4px;
         }
 
-        /* Estilo actualizado: Nombre y Legajo más pequeño abajo */
-        .user-details span.user-subtext {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: block;
-            margin-top: 1px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .brand-name span {
+
+            color: #fbbf24;
         }
 
-        /* Estilo para el indicador de rol a la derecha de la cabecera */
-        .role-badge {
-            background: #f1f5f9;
-            color: var(--text-muted);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 11px;
+        .user-details h3 {
+
+            color: #dbeafe;
+
+            font-size: 9px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            flex-shrink: 0;
-            border: 1px solid var(--border-card);
+
+            letter-spacing: 0.7px;
+
+            margin-top: 3px;
         }
 
-.logout-header{
-    width:36px;
-    height:36px;
-    padding:0;
+        .user-subtext {
 
-    background:#f8fafc;
-    border:1px solid var(--border-card);
-    border-radius:10px;
+            display: block;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            color: #cbd5e1;
 
-    color:#64748b;
-    cursor:pointer;
-}
+            font-size: 10px;
 
-.logout-header svg{
-    width:18px;
-    height:18px;
-}
+            margin-top: 3px;
 
-.logout-header:hover{
-    background:#eef2ff;
-    color:var(--primary-light);
-}
-        
-        /* Las pestañas manejan su propio scroll interno */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-actions {
+
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            flex-shrink: 0;
+        }
+
+        .role-badge {
+
+            font-size: 9px;
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            padding: 6px 9px;
+
+            border: 1px solid var(--border-card);
+
+            border-radius: 7px;
+
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .logout-header {
+
+            width: 36px;
+            height: 36px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(255,255,255,0.10);
+
+            border: 1px solid rgba(255,255,255,0.15);
+
+            border-radius: 10px;
+
+            color: white;
+        }
+
+        .logout-header svg {
+
+            width: 19px;
+            height: 19px;
+        }
+
+        /* =====================================
+           CONTENIDO DE PESTAÑAS
+        ===================================== */
+
         .tab-content {
+
             display: none;
+
             flex: 1;
+            min-height: 0;
+
             overflow-y: auto;
-            padding: 16px;
-            padding-bottom: 90px;
+            overscroll-behavior: contain;
+
+            padding: 18px;
+
+            scrollbar-width: thin;
         }
 
         .tab-content.active {
+
             display: block;
         }
 
-        /* Tarjetas de Progreso Minimalistas */
-        .progress-card-container {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid var(--border-card);
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        .page-heading {
+
+            margin-bottom: 18px;
         }
 
-        .progress-title-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .page-heading h2 {
+
+            font-size: 24px;
+            font-weight: 800;
+
+            letter-spacing: -0.8px;
+
+            margin-bottom: 5px;
+        }
+
+        .page-heading p {
+
+            font-size: 13px;
+
+            color: var(--text-muted);
+
+            line-height: 1.5;
+        }
+
+        .section-label {
+
+            color: var(--text-muted);
+
+            font-size: 10px;
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.2px;
+        }
+
+        /* =====================================
+           PANTALLA NUEVA PROPUESTA
+        ===================================== */
+
+        .hero-card {
+
+            position: relative;
+
+            overflow: hidden;
+
+            background: linear-gradient(
+                145deg,
+                #142b55,
+                #244d94
+            );
+
+            color: white;
+
+            padding: 28px 24px;
+
+            border-radius: 22px;
+
+            margin-bottom: 20px;
+        }
+
+        .hero-card::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 180px;
+            height: 180px;
+
+            border: 28px solid rgba(255,255,255,0.04);
+
+            border-radius: 50%;
+
+            top: -65px;
+            right: -65px;
+
+            pointer-events: none;
+        }
+
+        .hero-label {
+
+            color: #fbbf24;
+
+            font-size: 10px;
+            font-weight: 800;
+
+            letter-spacing: 1.5px;
+        }
+
+        .hero-icon {
+
+            font-size: 52px;
+
+            margin: 20px 0;
+        }
+
+        .hero-card h2 {
+
+            font-size: 28px;
+            font-weight: 800;
+
+            line-height: 1.2;
+
+            letter-spacing: -0.8px;
+
             margin-bottom: 12px;
         }
 
-.progress-title-row span {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-}
+        .hero-card p {
 
-        .progress-title-row h2 {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-main);
+            color: #dbeafe;
+
+            font-size: 13px;
+
+            line-height: 1.7;
+
+            margin-bottom: 24px;
         }
 
-        .stats-grid-mini {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
+        .hero-button {
 
-        .stat-card {
-            padding: 14px 10px;
-            border-radius: 16px;
-            text-align: center;
-        }
+            width: 100%;
 
-        .stat-card-total {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-        }
-        .stat-card-abiertas {
-            background: #eff6ff;
-            border: 1px solid #3b82f6;
-        }
-        .stat-card-cerradas {
-            background: #f0fdf4;
-            border: 1px solid #22c55e;
-        }
-
-        .stat-card h4 {
-    font-size: 28px;
-    font-weight: 800;
-    margin-bottom: 4px;
-}
-
-        .stat-card span {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Barra de navegación inferior minimalista estática */
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #ffffff;
-            border-top: 1px solid var(--border);
             display: flex;
-            justify-content: space-around;
-            padding: 10px 4px;
-            z-index: 10;
-            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+
+            gap: 10px;
+
+            background: #fbbf24;
+            color: #17243b;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            font-size: 14px;
+            font-weight: 800;
         }
 
-        .nav-item {
-    background: none;
-    border: none;
+        .hero-button svg {
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
 
-    gap: 4px;
+        .home-types {
 
-    width: auto;
-    padding: 4px 12px;
-
-    color: var(--text-muted);
-    font-size: 11px;
-    font-weight: 500;
-}
-
-.nav-icon{
-    width:20px;
-    height:20px;
-    display:block;
-    margin-bottom:2px;
-}
-
-.nav-item svg {
-    flex-shrink: 0;
-}
-
-.nav-item span {
-    display: block;
-    line-height: 1;
-}
-
-.nav-item.active {
-    color: var(--primary-light);
-    font-weight: 700;
-}
-
-        /* --- ESTILOS PARA LAS TARJETAS DE TIPO DE KAIZEN --- */
-        .kaizen-type-container {
             display: grid;
+
             grid-template-columns: 1fr 1fr;
+
             gap: 12px;
-            margin-bottom: 16px;
+
+            margin-top: 12px;
+            margin-bottom: 20px;
         }
 
-        .kaizen-type-card {
+        .home-type-card {
+
+            background: white;
+
             border: 1px solid var(--border-card);
+
             border-radius: 16px;
-            padding: 14px;
-            background: #fafafa;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
+
+            padding: 18px;
+
+            box-shadow: var(--shadow);
         }
 
-        .kaizen-type-card.selected {
-            border-color: var(--primary-light);
-            background: #eff6ff;
+        .home-type-icon {
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            font-size: 22px;
+
+            margin-bottom: 13px;
         }
 
-        .kaizen-type-card .icon {
-            font-size: 18px;
-            color: var(--primary-light);
+        .quick-icon {
+
+            background: #fff4dd;
+            color: #b45309;
+        }
+
+        .standard-icon {
+
+            background: #eaf1ff;
+            color: #2563eb;
+        }
+
+        .home-type-card h3 {
+
+            font-size: 16px;
+            font-weight: 800;
+
             margin-bottom: 6px;
         }
 
-        .kaizen-type-card .title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 2px;
-        }
+        .home-type-card p {
 
-        .kaizen-type-card .desc {
-            font-size: 10px;
+            font-size: 11px;
+
             color: var(--text-muted);
-            line-height: 1.3;
+
+            line-height: 1.5;
         }
 
-        /* Tarjetas de Ideas / Propuestas Minimalistas */
-        .idea-card {
-            background: #ffffff;
-            border: 1px solid var(--border-card);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.01);
-            position: relative;
+        .home-points {
+
+            display: block;
+
+            margin-top: 14px;
+
+            font-size: 12px;
+            font-weight: 800;
         }
 
-        .idea-header-row {
+        .quick-text {
+
+            color: #b45309;
+        }
+
+        .standard-text {
+
+            color: #2563eb;
+        }
+
+        .home-note {
+
             display: flex;
-            justify-content: space-between;
             align-items: flex-start;
+
+            gap: 12px;
+
+            padding: 16px;
+
+            background: #eaf0f8;
+
+            border-radius: 14px;
+
+            color: #475569;
+
+            font-size: 12px;
+
+            line-height: 1.6;
+        }
+
+        /* =====================================
+           INDICADORES Y DASHBOARD
+        ===================================== */
+
+        .progress-card-container {
+
+            background: white;
+
+            border: 1px solid var(--border-card);
+
+            border-radius: 18px;
+
+            padding: 18px;
+
+            margin-bottom: 18px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .progress-title-row {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
             margin-bottom: 8px;
         }
 
-        .badges-group {
+        .progress-title-row span {
+
+            font-size: 10px;
+            font-weight: 800;
+
+            color: var(--text-muted);
+
+            letter-spacing: 1px;
+        }
+
+        #iconoIndicador {
+
+            font-size: 23px;
+        }
+
+        .progress-heading {
+
+            font-size: 20px;
+            font-weight: 800;
+
+            letter-spacing: -0.5px;
+
+            margin-bottom: 18px;
+        }
+
+        .stats-grid-mini {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0,1fr));
+
+            gap: 9px;
+        }
+
+        .stat-card {
+
+            min-width: 0;
+
+            text-align: center;
+
+            padding: 16px 6px;
+
+            border-radius: 13px;
+
+            border: 1px solid transparent;
+        }
+
+        .stat-card-total {
+
+            background: #f1f5f9;
+
+            color: #334155;
+        }
+
+        .stat-card-abiertas {
+
+            background: #eaf1ff;
+
+            color: #1d4ed8;
+        }
+
+        .stat-card-cerradas {
+
+            background: #e8f7ee;
+
+            color: #15803d;
+        }
+
+        .stat-card-quick {
+
+            background: #fff5e3;
+
+            color: #b45309;
+        }
+
+        .stat-card-standard {
+
+            background: #eaf1ff;
+
+            color: #1d4ed8;
+        }
+
+        .stat-card h4,
+        #countTotal,
+        #countAbiertas,
+        #countCerradas {
+
+            display: block;
+
+            font-size: 29px;
+            font-weight: 800;
+
+            letter-spacing: -1px;
+
+            line-height: 1.2;
+
+            margin-bottom: 6px;
+
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-card span {
+
+            font-size: 9px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.2px;
+
+            overflow-wrap: anywhere;
+        }
+
+        .stat-card-clickable {
+
+            cursor: pointer;
+
+            transition:
+                border-color 0.2s,
+                transform 0.2s;
+        }
+
+        .stat-card-clickable:hover {
+
+            transform: translateY(-2px);
+        }
+
+        .stat-card-clickable.filter-active {
+
+            border-color: currentColor;
+
+            box-shadow:
+                inset 0 0 0 1px currentColor;
+        }
+
+        /* =====================================
+           FILTROS DE PROPUESTAS
+        ===================================== */
+
+        .list-heading {
+
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            flex-wrap: wrap;
+
+            gap: 12px;
+
+            margin: 22px 0 14px;
+        }
+
+        .list-heading h3 {
+
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .auth-switch-container.filter-switch {
+
+            width: 180px;
+
+            margin: 0;
+
+            padding: 3px;
+
+            border-radius: 10px;
+
+            background: #e3eaf3;
+        }
+
+        .filter-switch button {
+
+            position: relative;
+            z-index: 1;
+
+            flex: 1;
+
+            background: transparent;
+
+            padding: 8px 4px;
+
+            color: var(--text-muted);
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .filter-switch button.active {
+
+            color: white;
+        }
+
+        .auth-slider-bg.filter-slider {
+
+            top: 3px;
+            bottom: 3px;
+            left: 3px;
+
+            width: calc(50% - 3px);
+
+            border-radius: 8px;
+        }
+
+        /* =====================================
+           TARJETAS KAIZEN 2.0
+        ===================================== */
+
+        .idea-card {
+
+            position: relative;
+
+            background: white;
+
+            border: 1px solid var(--border-card);
+
+            border-left: 4px solid var(--primary-light);
+
+            border-radius: 16px;
+
+            padding: 17px;
+
+            margin-bottom: 14px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .idea-card.is-open {
+
+            border-left-color: #2563eb;
+        }
+
+        .idea-card.is-closed {
+
+            border-left-color: #16a34a;
+        }
+
+        .idea-header-row {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 8px;
+
+            margin-bottom: 12px;
+        }
+
+        .badges-group {
+
+            display: flex;
+            align-items: center;
+
             gap: 6px;
+
             flex-wrap: wrap;
         }
 
         .status-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
+
+            display: inline-flex;
+            align-items: center;
+
+            padding: 5px 9px;
+
+            border-radius: 6px;
+
+            font-size: 9px;
+            font-weight: 800;
+
+            letter-spacing: 0.4px;
+
             text-transform: uppercase;
         }
 
-        .badge-tipo { background-color: #f1f5f9; color: #475569; }
-        .status-abierto { background-color: #eff6ff; color: #1d4ed8; }
-        .status-cerrado { background-color: #f0fdf4; color: #15803d; }
+        .status-abierto {
 
-        .idea-actions-icons {
-            display: flex;
-            gap: 6px;
+            background: #eaf1ff;
+            color: #1d4ed8;
         }
 
-        .action-icon-btn {
-            background: #f8fafc;
-            border: 1px solid var(--border-card);
-            width: 30px;
-            height: 30px;
+        .status-cerrado {
+
+            background: #e8f7ee;
+            color: #15803d;
+        }
+
+        .status-abierto::before,
+        .status-cerrado::before {
+
+            content: "";
+
+            width: 6px;
+            height: 6px;
+
             border-radius: 50%;
+
+            background: currentColor;
+
+            margin-right: 6px;
+        }
+
+        .type-quick {
+
+            background: #fff3db;
+
+            color: #a16207;
+        }
+
+        .type-standard {
+
+            background: #e0e7ff;
+
+            color: #3730a3;
+        }
+
+        .badge-tipo {
+
+            background: #f1f5f9;
+
+            color: #475569;
+        }
+
+        .idea-title {
+
+            color: var(--text-main);
+
+            font-size: 17px;
+            font-weight: 800;
+
+            letter-spacing: -0.35px;
+
+            line-height: 1.4;
+
+            margin-bottom: 8px;
+
+            overflow-wrap: anywhere;
+        }
+
+        .idea-meta {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            color: var(--text-muted);
+
+            font-size: 11px;
+            font-weight: 600;
+
+            margin-bottom: 13px;
+        }
+
+        .idea-meta > span:first-child {
+
+            background: #f1f5f9;
+
+            padding: 5px 8px;
+
+            border-radius: 6px;
+        }
+
+        .idea-points {
+
+            color: #a16207;
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .is-closed .idea-points {
+
+            color: #15803d;
+        }
+
+        .idea-desc {
+
+            color: #526176;
+
+            font-size: 13px;
+
+            line-height: 1.7;
+
+            margin-bottom: 16px;
+
+            overflow-wrap: anywhere;
+
+            white-space: pre-wrap;
+        }
+
+        .idea-footer-row {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            padding-top: 13px;
+
+            border-top: 1px solid var(--border);
+
+            font-size: 11px;
+
+            color: var(--text-muted);
+        }
+
+        .idea-author {
+
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            min-width: 0;
+
+            font-weight: 600;
+
+            color: #475569;
+        }
+
+        .idea-author > span:last-child {
+
+            overflow-wrap: anywhere;
+        }
+
+        .idea-avatar {
+
+            width: 33px;
+            height: 33px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            font-size: 12px;
-            color: var(--text-muted);
-            transition: background 0.2s;
-        }
 
-        .action-icon-btn:hover { background: #f1f5f9; color: var(--text-main); }
-        .action-icon-btn.delete:hover { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+            flex-shrink: 0;
 
-        .idea-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 8px;
-    line-height: 1.2;
-}
+            background: #eaf1ff;
 
-        .idea-desc {
-    font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 14px;
-    word-break: break-word;
-}
+            color: #1d4ed8;
 
-        .idea-footer-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 10px;
-            border-top: 1px solid var(--border);
+            border-radius: 50%;
+
             font-size: 11px;
-            color: var(--text-muted);
+            font-weight: 800;
         }
 
-        /* Tarjetas de Pista (Ranking) */
-        .racer-card {
-            background: #ffffff;
+        .idea-date {
+
+            font-size: 10px;
+
+            flex-shrink: 0;
+        }
+
+        .idea-closed-date {
+
+            margin-top: 12px;
+
+            padding: 9px 11px;
+
+            background: #f0fdf4;
+
+            border-radius: 8px;
+
+            color: #15803d;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .idea-actions {
+
+            margin-top: 14px;
+        }
+
+        .race-primary,
+        .race-secondary {
+
+            width: 100%;
+
+            min-height: 40px;
+
+            padding: 10px 14px;
+
+            border-radius: 9px;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .race-primary {
+
+            background: var(--primary-light);
+
+            color: white;
+        }
+
+        .race-secondary {
+
+            background: #f1f5f9;
+
             border: 1px solid var(--border-card);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 10px;
+
+            color: #334155;
         }
 
-        .racer-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    gap: 8px;
-}
+        /* =====================================
+           MENÚ ADMINISTRATIVO DE TRES PUNTOS
+        ===================================== */
 
-        .racer-track-line {
+        .idea-menu {
+
             position: relative;
-            height: 8px;
-            background: #f1f5f9;
-            border-radius: 4px;
+
+            flex-shrink: 0;
         }
 
-        .racer-car-icon {
-            position: absolute;
-            top: -10px;
-            font-size: 16px;
-            transition: left 0.5s ease;
-        }
+        .idea-menu summary {
 
-        .racer-flag-icon {
-            position: absolute;
-            right: 4px;
-            top: -6px;
-            font-size: 14px;
-        }
-
-        /* Estilo del contenedor deslizante para Mis Ideas / Todas */
-        .auth-switch-container.filter-switch {
-            position: relative;
             display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 34px;
+            height: 34px;
+
+            background: #f5f7fa;
+
+            border: 1px solid var(--border-card);
+
+            border-radius: 9px;
+
+            color: #64748b;
+
+            font-size: 23px;
+
+            cursor: pointer;
+
+            list-style: none;
+        }
+
+        .idea-menu summary::-webkit-details-marker {
+
+            display: none;
+        }
+
+        .idea-menu summary::marker {
+
+            content: "";
+        }
+
+        .idea-menu[open] summary {
+
+            background: #eaf1ff;
+
+            color: var(--primary-light);
+        }
+
+        .idea-menu-panel {
+
+            position: absolute;
+
+            top: 42px;
+            right: 0;
+
+            width: 185px;
+
+            padding: 5px;
+
+            z-index: 20;
+
+            background: white;
+
+            border: 1px solid var(--border-card);
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 8px 30px rgba(15,23,42,0.15);
+        }
+
+        .menu-action {
+
+            display: block;
+
+            width: 100%;
+
+            text-align: left;
+
+            padding: 12px 10px;
+
+            background: transparent;
+
+            border-radius: 7px;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            color: #334155;
+        }
+
+        .menu-action:hover {
+
             background: #f1f5f9;
-            border-radius: 20px;
-            padding: 3px;
-            width: 180px;
+        }
+
+        .menu-danger {
+
+            color: var(--danger);
+        }
+
+        .menu-danger:hover {
+
+            background: #fef2f2;
+        }
+
+        .empty-state {
+
+            text-align: center;
+
+            background: white;
+
+            border: 1px dashed #cbd5e1;
+
+            border-radius: 14px;
+
+            padding: 28px 16px;
+
+            color: var(--text-muted);
+
+            font-size: 13px;
+
+            line-height: 1.6;
+        }
+
+        /* =====================================
+           INFORMES Y RANKINGS
+        ===================================== */
+
+        .report-summary {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 12px;
+
+            margin-bottom: 18px;
+        }
+
+        .report-metric {
+
+            background: var(--primary);
+
+            color: white;
+
+            padding: 20px 16px;
+
+            border-radius: 16px;
+        }
+
+        .report-metric.points-metric {
+
+            background: #e8f7ee;
+
+            color: #15803d;
+        }
+
+        .report-metric .metric-icon {
+
+            font-size: 22px;
+
             margin-bottom: 12px;
         }
 
-        .auth-switch-container.filter-switch button {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            z-index: 2;
+        .report-metric h4 {
+
+            font-size: 34px;
+            font-weight: 800;
+
+            letter-spacing: -1px;
+
+            margin-bottom: 6px;
+        }
+
+        .report-metric span {
+
+            font-size: 10px;
+            font-weight: 700;
+
+            letter-spacing: 0.7px;
+        }
+
+        .section-heading {
+
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 16px;
+        }
+
+        .section-heading-icon {
+
+            width: 36px;
+            height: 36px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #edf2f8;
+
+            border-radius: 10px;
+
+            font-size: 18px;
+
+            flex-shrink: 0;
+        }
+
+        .section-heading h3 {
+
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .section-heading p {
+
             color: var(--text-muted);
-            transition: color 0.3s ease;
+
+            font-size: 11px;
+
+            margin-top: 3px;
+        }
+
+        .monthly-winner {
+
+            background: #fff8e6;
+
+            border: 1px solid #f5dca1;
+
+            border-radius: 12px;
+
+            padding: 16px;
+
+            margin-bottom: 18px;
+
+            color: #92400e;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
             text-align: center;
         }
 
-        .auth-switch-container.filter-switch button.active {
-            color: #fff;
+        .monthly-winner:empty {
+
+            display: none;
         }
 
-        .auth-slider-bg.filter-slider {
+        .racer-card {
+
+            background: white;
+
+            border: 1px solid var(--border-card);
+
+            border-radius: 12px;
+
+            padding: 14px 12px 18px;
+
+            margin-bottom: 10px;
+        }
+
+        .racer-first {
+
+            border-color: #f4ce78;
+
+            background: #fffdf7;
+        }
+
+        .racer-info {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 8px;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            margin-bottom: 20px;
+        }
+
+        .racer-info > span:first-child {
+
+            min-width: 0;
+
+            overflow-wrap: anywhere;
+        }
+
+        .racer-points {
+
+            text-align: right;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            flex-shrink: 0;
+        }
+
+        .racer-track-line {
+
+            position: relative;
+
+            height: 20px;
+
+            background: #dce3ec;
+
+            border-top: 2px solid #cbd5e1;
+            border-bottom: 2px solid #cbd5e1;
+
+            border-radius: 5px;
+        }
+
+        .racer-track-line::before {
+
+            content: "";
+
             position: absolute;
-            top: 3px;
-            bottom: 3px;
-            width: 50%;
-            background: var(--primary-light);
-            border-radius: 17px;
-            transition: transform 0.3s ease;
+
+            top: 7px;
+            left: 5px;
+            right: 5px;
+
+            border-top: 2px dashed white;
+        }
+
+        .racer-car-icon {
+
+            position: absolute;
+
+            top: -7px;
+
+            font-size: 25px;
+
+            line-height: 1;
+
             z-index: 1;
+
+            transform: scaleX(-1);
+
+            transition: left 0.4s ease;
         }
 
-        .auth-slider-bg.filter-slider.left { transform: translateX(0%); }
-        .auth-slider-bg.filter-slider.right { transform: translateX(100%); }
+        .racer-flag-icon {
 
-        /* Cursor pointer para los contadores superiores */
-        .stat-card-clickable {
+            position: absolute;
+
+            right: 3px;
+            top: -5px;
+
+            font-size: 20px;
+
+            line-height: 1;
+        }
+
+        .report-note {
+
+            font-size: 11px;
+
+            color: var(--text-muted);
+
+            line-height: 1.6;
+
+            margin-top: 12px;
+        }
+
+        .export-button {
+
+            width: 100%;
+
+            min-height: 46px;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            gap: 10px;
+
+            padding: 13px;
+
+            margin-bottom: 18px;
+
+            background: #15803d;
+
+            color: white;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .export-button svg {
+
+            width: 19px;
+            height: 19px;
+        }
+
+        .closure-summary {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 12px;
+
+            background: #f0fdf4;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            margin-top: 12px;
+        }
+
+        .closure-summary span {
+
+            font-size: 12px;
+
+            color: #15803d;
+
+            font-weight: 600;
+        }
+
+        .closure-summary strong {
+
+            font-size: 23px;
+            font-weight: 800;
+
+            color: #15803d;
+        }
+
+        /* =====================================
+           NAVEGACIÓN INFERIOR
+        ===================================== */
+
+        .bottom-nav {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+
+            gap: 8px;
+
+            background: white;
+
+            border-top: 1px solid var(--border-card);
+
+            padding: 9px 12px;
+
+            padding-bottom:
+                max(9px, env(safe-area-inset-bottom));
+
+            flex-shrink: 0;
+
+            z-index: 30;
+        }
+
+        .nav-item {
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            gap: 5px;
+
+            flex: 1;
+
+            min-width: 0;
+
+            min-height: 52px;
+
+            background: transparent;
+
+            border-radius: 12px;
+
+            color: var(--text-muted);
+
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .nav-item.active {
+
+            background: #eaf1ff;
+
+            color: var(--primary-light);
+
+            font-weight: 800;
+        }
+
+        .nav-icon {
+
+            width: 23px;
+            height: 23px;
+        }
+
+        /* =====================================
+           MODALES
+        ===================================== */
+
+        .modal-overlay {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 1000;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 18px;
+
+            background: rgba(10,22,43,0.65);
+        }
+
+        .modal-card {
+
+            width: 100%;
+            max-width: 440px;
+
+            max-height: 90vh;
+            max-height: 90dvh;
+
+            overflow-y: auto;
+
+            background: white;
+
+            padding: 24px;
+
+            border-radius: 22px;
+
+            box-shadow:
+                0 20px 50px rgba(0,0,0,0.20);
+        }
+
+        .modal-header {
+
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+
+            font-size: 20px;
+            font-weight: 800;
+
+            letter-spacing: -0.5px;
+
+            margin-bottom: 5px;
+        }
+
+        .modal-header p {
+
+            font-size: 12px;
+
+            color: var(--text-muted);
+
+            line-height: 1.5;
+        }
+
+        .modal-close {
+
+            width: 32px;
+            height: 32px;
+
+            flex-shrink: 0;
+
+            background: #f1f5f9;
+
+            border-radius: 9px;
+
+            color: #64748b;
+
+            font-size: 16px;
+        }
+
+        .modal-actions {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 24px;
+        }
+
+        .modal-actions button {
+
+            flex: 1;
+        }
+
+        /* =====================================
+           SELECCIÓN QUICK / STANDARD
+        ===================================== */
+
+        .kaizen-type-container {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 12px;
+        }
+
+        .kaizen-type-card {
+
+            position: relative;
+
+            background: #f8fafc;
+
+            border: 2px solid var(--border-card);
+
+            border-radius: 14px;
+
+            padding: 15px;
+
             cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-        .stat-card-clickable:hover {
-            transform: translateY(-2px);
-        }
-        
-/* GANADOR MENSUAL */
 
-.monthly-winner {
-    padding: 14px;
-    margin-bottom: 14px;
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    border-radius: 14px;
-    font-size: 13px;
-    color: #92400e;
-    text-align: center;
-}
+            text-align: left;
+        }
+
+        .kaizen-type-card .icon {
+
+            font-size: 25px;
+
+            margin-bottom: 10px;
+        }
+
+        .kaizen-type-card .title {
+
+            color: var(--text-main);
+
+            font-size: 14px;
+            font-weight: 800;
+
+            margin-bottom: 5px;
+        }
+
+        .kaizen-type-card .desc {
+
+            font-size: 11px;
+
+            color: var(--text-muted);
+
+            line-height: 1.5;
+        }
+
+        .kaizen-type-card .type-points {
+
+            display: block;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            margin-top: 12px;
+        }
+
+        #cardQuick.selected {
+
+            background: #fff8e9;
+
+            border-color: #f59e0b;
+        }
+
+        #cardStandard.selected {
+
+            background: #eff6ff;
+
+            border-color: #2563eb;
+        }
+
+        .kaizen-type-card.selected::after {
+
+            content: "✓";
+
+            position: absolute;
+
+            top: 10px;
+            right: 10px;
+
+            width: 19px;
+            height: 19px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: var(--primary-light);
+
+            color: white;
+
+            border-radius: 50%;
+
+            font-size: 11px;
+        }
+
+        #cardQuick.selected::after {
+
+            background: #d97706;
+        }
+
+        /* =====================================
+           ADAPTACIÓN A CELULARES
+        ===================================== */
+
+        @media (max-width: 600px) {
+
+            #appArea {
+
+                width: 100%;
+                max-width: none;
+
+                height: 100vh;
+                height: 100dvh;
+
+                border-radius: 0;
+
+                box-shadow: none;
+            }
+
+            .app-header {
+
+                padding-top:
+                    max(16px, env(safe-area-inset-top));
+            }
+
+            .tab-content {
+
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 360px) {
+
+            .app-header {
+
+                padding-left: 12px;
+                padding-right: 12px;
+
+                gap: 7px;
+            }
+
+            .app-brand-icon {
+
+                width: 35px;
+                height: 35px;
+            }
+
+            .header-actions {
+
+                gap: 5px;
+            }
+
+            .tab-content {
+
+                padding: 12px;
+            }
+
+            .idea-card {
+
+                padding: 13px;
+            }
+
+            .stat-card h4,
+            #countTotal,
+            #countAbiertas,
+            #countCerradas {
+
+                font-size: 24px;
+            }
+
+            .stat-card span {
+
+                font-size: 8px;
+            }
+
+            .home-type-card {
+
+                padding: 13px;
+            }
+
+            .modal-card {
+
+                padding: 18px;
+            }
+
+            .login-container {
+
+                padding: 16px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+
+                transition: none !important;
+                animation: none !important;
+            }
+        }
 
     </style>
+
 </head>
+
 <body>
 
-    <!-- ÁREA DE INICIO DE SESIÓN / REGISTRO -->
+    <!-- =====================================
+         INICIO DE SESIÓN Y REGISTRO
+    ====================================== -->
+
     <div id="loginArea" class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h2>🏎️ Kaizen Race</h2>
-                <p>Acelera tus mejoras continuas</p>
+
+        <div class="login-brand">
+
+            <div class="brand-symbol">
+                🏎️
             </div>
 
-            <!-- Botón deslizante -->
-            <div class="auth-switch-container">
-                <div id="authSliderBg" class="auth-slider-bg left"></div>
-                <button type="button" id="tabLoginBtn" class="auth-tab-btn active" onclick="cambiarModoAuth('login')">Iniciar Sesión</button>
-                <button type="button" id="tabRegisterBtn" class="auth-tab-btn" onclick="cambiarModoAuth('register')">Registrarse</button>
-            </div>
+            <h1>
+                KAIZEN <span>RACE</span>
+            </h1>
 
-            <!-- Formulario Iniciar Sesión -->
-            <div id="formLogin" class="auth-form-section active">
-                <div class="form-group">
-                    <label for="legajoInput">Legajo</label>
-                    <input type="text" id="legajoInput" placeholder="Ej: 12345678">
-                </div>
-                <button id="loginBtn" class="btn-primary">Ingresar al Sistema</button>
-            </div>
+            <p>
+                Pequeñas mejoras. Grandes resultados.
+            </p>
 
-            <!-- Formulario Registro -->
-            <div id="formRegister" class="auth-form-section">
-                <div class="form-group">
-                    <label for="nombreInput">Nombre</label>
-                    <input type="text" id="nombreInput" placeholder="Tu nombre">
-                </div>
-                <div class="form-group">
-                    <label for="apellidoInput">Apellido</label>
-                    <input type="text" id="apellidoInput" placeholder="Tu apellido">
-                </div>
-                <div class="form-group">
-                    <label for="legajoRegistroInput">Legajo</label>
-                    <input type="text" id="legajoRegistroInput" placeholder="Tu Legajo">
-                </div>
-                <button id="registerBtn" class="btn-success">Registrar Piloto</button>
-            </div>
         </div>
-    </div>
 
-    <!-- APLICACIÓN PRINCIPAL -->
-    <div id="appArea" class="hidden">
-        <header class="app-header">
-            <div class="user-info">
-                <div class="app-brand-icon">🏎️</div>
-                <div class="user-details">
-                    <!-- Título principal grande -->
-                    <h3 id="tituloPrincipalRol">PILOTO DE MEJORA</h3>
-                    <!-- Nombre y legajo más pequeño abajo -->
-                    <span id="usuarioActual" class="user-subtext">Cargando...</span>
-                </div>
+        <div class="login-card">
+
+            <div class="login-header">
+
+                <h2>Bienvenido, piloto</h2>
+
+                <p>
+                    Sé parte de la carrera hacia
+                    la mejora continua.
+                </p>
+
             </div>
-            <!-- Acciones cabecera -->
-<div style="display:flex; align-items:center; gap:8px;">
 
-    <div id="roleBadge" class="role-badge">
-        Usuario
+            <div class="auth-switch-container">
+
+                <div
+                    id="authSliderBg"
+                    class="auth-slider-bg left">
+                </div>
+
+                <button
+                    type="button"
+                    id="tabLoginBtn"
+                    class="auth-tab-btn active"
+                    onclick="cambiarModoAuth('login')">
+
+                    Iniciar sesión
+
+                </button>
+
+                <button
+                    type="button"
+                    id="tabRegisterBtn"
+                    class="auth-tab-btn"
+                    onclick="cambiarModoAuth('register')">
+
+                    Registrarse
+
+                </button>
+
+            </div>
+
+            <!-- LOGIN -->
+
+            <div
+                id="formLogin"
+                class="auth-form-section active">
+
+                <div class="form-group">
+
+                    <label for="legajoInput">
+                        Número de legajo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="legajoInput"
+                        inputmode="numeric"
+                        autocomplete="username"
+                        placeholder="Ingresa tu legajo">
+
+                </div>
+
+                <button
+                    id="loginBtn"
+                    class="btn-primary">
+
+                    Ingresar a Kaizen Race
+
+                </button>
+
+            </div>
+
+            <!-- REGISTRO -->
+
+            <div
+                id="formRegister"
+                class="auth-form-section">
+
+                <div class="form-group">
+
+                    <label for="nombreInput">
+                        Nombre
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nombreInput"
+                        autocomplete="given-name"
+                        placeholder="Tu nombre">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="apellidoInput">
+                        Apellido
+                    </label>
+
+                    <input
+                        type="text"
+                        id="apellidoInput"
+                        autocomplete="family-name"
+                        placeholder="Tu apellido">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="legajoRegistroInput">
+                        Número de legajo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="legajoRegistroInput"
+                        inputmode="numeric"
+                        placeholder="Tu legajo">
+
+                </div>
+
+                <button
+                    id="registerBtn"
+                    class="btn-primary">
+
+                    Registrar piloto
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="login-footer">
+
+            MEJORA CONTINUA · TIGRE PY
+
+        </div>
+
     </div>
 
-    <button
-        class="logout-header"
-        onclick="cerrarSesion()">
+    <!-- =====================================
+         APLICACIÓN PRINCIPAL
+    ====================================== -->
 
-        <svg viewBox="0 0 24 24" fill="none">
-            <path d="M10 17L15 12L10 7"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"/>
+    <div id="appArea" class="hidden">
 
-            <path d="M15 12H4"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
-        </svg>
+        <!-- CABECERA -->
 
-    </button>
+        <header class="app-header">
 
-</div>
+            <div class="user-info">
+
+                <div class="app-brand-icon">
+                    🏎️
+                </div>
+
+                <div class="user-details">
+
+                    <div class="brand-name">
+
+                        KAIZEN <span>RACE</span>
+
+                    </div>
+
+                    <h3 id="tituloPrincipalRol">
+
+                        PILOTO DE MEJORA
+
+                    </h3>
+
+                    <span
+                        id="usuarioActual"
+                        class="user-subtext">
+
+                        Cargando...
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="header-actions">
+
+                <div
+                    id="roleBadge"
+                    class="role-badge">
+
+                    Usuario
+
+                </div>
+
+                <button
+                    class="logout-header"
+                    onclick="cerrarSesion()"
+                    title="Cerrar sesión"
+                    aria-label="Cerrar sesión">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path
+                            d="M10 17L15 12L10 7"/>
+
+                        <path
+                            d="M15 12H3"/>
+
+                        <path
+                            d="M14 3H19A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H14"/>
+
+                    </svg>
+
+                </button>
+
+            </div>
+
         </header>
 
-        <!-- Pestaña 1: Registrar (Acción de nueva mejora) -->
-        <div id="tabRegistrar" class="tab-content active">
-            <div class="progress-card-container" style="text-align: center; padding: 40px 20px;">
-                <div style="font-size: 48px; margin-bottom: 12px;">⚡</div>
-                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">¿Tienes una nueva mejora?</h2>
-                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px;">Registra tu propuesta de forma rápida y compite en la pista.</p>
-                <button onclick="abrirModalRegistro()" class="btn-primary" style="padding: 14px 24px; font-size: 15px; border-radius: 14px; box-shadow: 0 4px 12px rgba(37,99,235,0.2);">Registrar Nueva Propuesta</button>
+        <!-- =================================
+             PESTAÑA NUEVA PROPUESTA
+        ================================== -->
+
+        <div
+            id="tabRegistrar"
+            class="tab-content active">
+
+            <div class="page-heading">
+
+                <h2>Zona de partida</h2>
+
+                <p>
+                    Cada mejora cuenta.
+                </p>
+
             </div>
+
+            <div class="hero-card">
+
+                <div class="hero-label">
+
+                    TU PRÓXIMO DESAFÍO
+
+                </div>
+
+                <div class="hero-icon">
+
+                    🏎️
+
+                </div>
+
+                <h2>
+
+                    ¿Listo para tu<br>
+                    próxima mejora?
+
+                </h2>
+
+                <p>
+
+                    Transforma tus ideas en acciones,
+                    mejora tu área de trabajo y suma
+                    puntos en la carrera Kaizen.
+
+                </p>
+
+                <button
+                    class="hero-button"
+                    onclick="abrirModalRegistro()">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round">
+
+                        <path d="M12 5V19M5 12H19"/>
+
+                    </svg>
+
+                    Registrar nueva propuesta
+
+                </button>
+
+            </div>
+
+            <div class="section-label">
+
+                Tipos de mejora
+
+            </div>
+
+            <div class="home-types">
+
+                <div class="home-type-card">
+
+                    <div
+                        class="home-type-icon quick-icon">
+
+                        ⚡
+
+                    </div>
+
+                    <h3>Quick</h3>
+
+                    <p>
+
+                        Mejoras rápidas y simples
+                        de implementación.
+
+                    </p>
+
+                    <span
+                        class="home-points quick-text">
+
+                        +1 punto al cerrar
+
+                    </span>
+
+                </div>
+
+                <div class="home-type-card">
+
+                    <div
+                        class="home-type-icon standard-icon">
+
+                        📋
+
+                    </div>
+
+                    <h3>Standard</h3>
+
+                    <p>
+
+                        Mejoras que requieren
+                        análisis y desarrollo.
+
+                    </p>
+
+                    <span
+                        class="home-points standard-text">
+
+                        +3 puntos al cerrar
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="home-note">
+
+                <span style="font-size:23px;">
+
+                    🏁
+
+                </span>
+
+                <div>
+
+                    <strong>
+                        La meta es mejorar juntos.
+                    </strong>
+
+                    <br>
+
+                    Cada propuesta implementada
+                    contribuye al progreso de
+                    nuestra planta.
+
+                </div>
+
+            </div>
+
         </div>
 
-        <!-- Pestaña 2: Mis Ideas / Propuestas -->
-        <div id="tabIdeas" class="tab-content">
-            
-            <!-- Bloque de Progreso Minimalista -->
+        <!-- =================================
+             PESTAÑA PROPUESTAS
+        ================================== -->
+
+        <div
+            id="tabIdeas"
+            class="tab-content">
+
+            <div class="page-heading">
+
+                <h2>Propuestas</h2>
+
+                <p>
+
+                    Gestiona y consulta
+                    las mejoras Kaizen.
+
+                </p>
+
+            </div>
+
             <div class="progress-card-container">
+
                 <div class="progress-title-row">
 
-    <span id="tituloIndicador">
-        MI PROGRESO
-    </span>
+                    <span id="tituloIndicador">
 
-    <span id="iconoIndicador"
-          style="
-            font-size:24px;
-            display:flex;
-            align-items:center;">
-        👋
-    </span>
+                        MI PROGRESO
 
-</div>
-                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 16px;">¡Vamos bien hoy!</h2>
-                
+                    </span>
+
+                    <span id="iconoIndicador">
+
+                        🏎️
+
+                    </span>
+
+                </div>
+
+                <h2 class="progress-heading">
+
+                    Seguimiento Kaizen
+
+                </h2>
+
                 <div class="stats-grid-mini">
-                    <div class="stat-card stat-card-total stat-card-clickable" onclick="filtrarPorEstado('TODOS')">
-                        <span id="countTotal" style="color: #334155; display: block;">0</span>
-                        <span style="color: #475569;">Total</span>
-                    </div>
-                    <div class="stat-card stat-card-abiertas stat-card-clickable" onclick="filtrarPorEstado('ABIERTO')">
-                        <span id="countAbiertas" style="color: #2563eb; display: block;">0</span>
-                        <span style="color: #1d4ed8;">Abiertas</span>
-                    </div>
-                    <div class="stat-card stat-card-cerradas stat-card-clickable" onclick="filtrarPorEstado('CERRADO')">
-                        <span id="countCerradas" style="color: #16a34a; display: block;">0</span>
-                        <span style="color: #15803d;">Cerradas</span>
-                    </div>
+
+                    <button
+                        class="stat-card stat-card-total stat-card-clickable filter-active"
+                        onclick="filtrarPorEstado('TODOS')">
+
+                        <span id="countTotal">
+
+                            0
+
+                        </span>
+
+                        <span>Total</span>
+
+                    </button>
+
+                    <button
+                        class="stat-card stat-card-abiertas stat-card-clickable"
+                        onclick="filtrarPorEstado('ABIERTO')">
+
+                        <span id="countAbiertas">
+
+                            0
+
+                        </span>
+
+                        <span>Abiertas</span>
+
+                    </button>
+
+                    <button
+                        class="stat-card stat-card-cerradas stat-card-clickable"
+                        onclick="filtrarPorEstado('CERRADO')">
+
+                        <span id="countCerradas">
+
+                            0
+
+                        </span>
+
+                        <span>Cerradas</span>
+
+                    </button>
+
                 </div>
+
             </div>
 
-            <!-- Filtros de Listado -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Acciones</span>
-                <div class="auth-switch-container filter-switch" style="margin-bottom: 0;">
-                    <div id="filterSliderBg" class="auth-slider-bg filter-slider left"></div>
-                    <button id="tabMiasBtn" type="button" class="active" onclick="cambiarFiltroIdeas('mias')">Mis acciones</button>
-                    <button id="tabTodasBtn" type="button" onclick="cambiarFiltroIdeas('todas')">Todas</button>
+            <!-- FILTROS -->
+
+            <div class="list-heading">
+
+                <h3>Listado de mejoras</h3>
+
+                <div
+                    class="auth-switch-container filter-switch">
+
+                    <div
+                        id="filterSliderBg"
+                        class="auth-slider-bg filter-slider left">
+
+                    </div>
+
+                    <button
+                        id="tabMiasBtn"
+                        type="button"
+                        class="active"
+                        onclick="cambiarFiltroIdeas('mias')">
+
+                        Mis acciones
+
+                    </button>
+
+                    <button
+                        id="tabTodasBtn"
+                        type="button"
+                        onclick="cambiarFiltroIdeas('todas')">
+
+                        Todas
+
+                    </button>
+
                 </div>
+
             </div>
 
-            <div id="listaIdeas"></div>
+            <!-- LISTADO DINÁMICO -->
+
+            <div id="listaIdeas">
+
+                <p class="empty-state">
+
+                    Cargando propuestas...
+
+                </p>
+
+            </div>
+
         </div>
 
-<!-- PESTAÑA INFORMES -->
-<div id="tabPista" class="tab-content">
+        <!-- =================================
+             PESTAÑA INFORMES
+        ================================== -->
 
-    <!-- RESUMEN DEL USUARIO -->
-    <div class="progress-card-container">
+        <div
+            id="tabPista"
+            class="tab-content">
 
-        <div style="display:flex; gap:10px;">
+            <div class="page-heading">
 
-            <div class="stat-card stat-card-total" style="flex:1;">
-                <h4 id="posicionTexto">-</h4>
-                <span>TU POSICIÓN</span>
+                <h2>Informes y rankings</h2>
+
+                <p>
+
+                    Descubre tu posición
+                    en la carrera Kaizen.
+
+                </p>
+
             </div>
 
-            <div class="stat-card stat-card-cerradas" style="flex:1;">
-                <h4 id="misKaizensCerradosNum">0</h4>
-                <span>PUNTOS</span>
+            <!-- RESUMEN PERSONAL -->
+
+            <div class="report-summary">
+
+                <div class="report-metric">
+
+                    <div class="metric-icon">
+
+                        🏁
+
+                    </div>
+
+                    <h4 id="posicionTexto">
+
+                        -
+
+                    </h4>
+
+                    <span>
+
+                        TU POSICIÓN GLOBAL
+
+                    </span>
+
+                </div>
+
+                <div
+                    class="report-metric points-metric">
+
+                    <div class="metric-icon">
+
+                        ⚡
+
+                    </div>
+
+                    <h4 id="misKaizensCerradosNum">
+
+                        0
+
+                    </h4>
+
+                    <span>
+
+                        PUNTOS ACUMULADOS
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- EXPORTACIÓN ADMIN -->
+
+            <button
+                id="btnExportarExcel"
+                class="export-button"
+                onclick="exportarIdeasExcel()">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M12 3V15"/>
+
+                    <path d="M7 10L12 15L17 10"/>
+
+                    <path d="M4 16V20H20V16"/>
+
+                </svg>
+
+                Exportar base de datos a Excel
+
+            </button>
+
+            <!-- RANKING MENSUAL -->
+
+            <div class="progress-card-container">
+
+                <div class="section-heading">
+
+                    <div class="section-heading-icon">
+
+                        🏆
+
+                    </div>
+
+                    <div>
+
+                        <h3>Ranking mensual</h3>
+
+                        <p>
+                            Competición del mes
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="mesRanking">
+
+                        Seleccionar mes y año
+
+                    </label>
+
+                    <input
+                        type="month"
+                        id="mesRanking"
+                        onchange="cambiarMesRanking()">
+
+                </div>
+
+                <div
+                    id="ganadorMensual"
+                    class="monthly-winner">
+
+                </div>
+
+                <div id="rankingMensualContainer">
+
+                </div>
+
+                <p class="report-note">
+
+                    Se consideran únicamente las
+                    propuestas cerradas durante
+                    el mes seleccionado.
+
+                </p>
+
+            </div>
+
+            <!-- RANKING GLOBAL -->
+
+            <div class="progress-card-container">
+
+                <div class="section-heading">
+
+                    <div class="section-heading-icon">
+
+                        🏎️
+
+                    </div>
+
+                    <div>
+
+                        <h3>Ranking global</h3>
+
+                        <p>
+                            Clasificación histórica
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div id="pistaPilotosContainer">
+
+                </div>
+
+            </div>
+
+            <!-- DASHBOARD GENERAL -->
+
+            <div class="progress-card-container">
+
+                <div class="section-heading">
+
+                    <div class="section-heading-icon">
+
+                        📊
+
+                    </div>
+
+                    <div>
+
+                        <h3>Dashboard Kaizen</h3>
+
+                        <p>
+                            Resultados generales de planta
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="stats-grid-mini">
+
+                    <div
+                        class="stat-card stat-card-total">
+
+                        <h4 id="dashTotal">
+
+                            0
+
+                        </h4>
+
+                        <span>Total</span>
+
+                    </div>
+
+                    <div
+                        class="stat-card stat-card-abiertas">
+
+                        <h4 id="dashAbiertas">
+
+                            0
+
+                        </h4>
+
+                        <span>Abiertas</span>
+
+                    </div>
+
+                    <div
+                        class="stat-card stat-card-cerradas">
+
+                        <h4 id="dashCerradas">
+
+                            0
+
+                        </h4>
+
+                        <span>Cerradas</span>
+
+                    </div>
+
+                    <div
+                        class="stat-card stat-card-quick">
+
+                        <h4 id="dashQuick">
+
+                            0
+
+                        </h4>
+
+                        <span>Quick</span>
+
+                    </div>
+
+                    <div
+                        class="stat-card stat-card-standard">
+
+                        <h4 id="dashStandard">
+
+                            0
+
+                        </h4>
+
+                        <span>Standard</span>
+
+                    </div>
+
+                    <div
+                        class="stat-card stat-card-total">
+
+                        <h4 id="dashParticipantes">
+
+                            0
+
+                        </h4>
+
+                        <span>Participantes</span>
+
+                    </div>
+
+                </div>
+
+                <div class="closure-summary">
+
+                    <span>
+
+                        Tasa de cierre de propuestas
+
+                    </span>
+
+                    <strong id="dashTasaCierre">
+
+                        0%
+
+                    </strong>
+
+                </div>
+
             </div>
 
         </div>
+
+        <!-- =================================
+             NAVEGACIÓN INFERIOR
+        ================================== -->
+
+        <nav
+            class="bottom-nav"
+            aria-label="Navegación principal">
+
+            <!-- NUEVA PROPUESTA -->
+
+            <button
+                class="nav-item active"
+                onclick="cambiarPestana('tabRegistrar', this)">
+
+                <svg
+                    class="nav-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <rect
+                        x="3"
+                        y="3"
+                        width="18"
+                        height="18"
+                        rx="5"/>
+
+                    <path d="M12 8V16M8 12H16"/>
+
+                </svg>
+
+                <span>Nueva</span>
+
+            </button>
+
+            <!-- PROPUESTAS -->
+
+            <button
+                class="nav-item"
+                onclick="cambiarPestana('tabIdeas', this)">
+
+                <svg
+                    class="nav-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <rect
+                        x="5"
+                        y="4"
+                        width="14"
+                        height="17"
+                        rx="2"/>
+
+                    <path
+                        d="M9 4V2H15V4"/>
+
+                    <path
+                        d="M9 9H15M9 13H15M9 17H13"/>
+
+                </svg>
+
+                <span>Propuestas</span>
+
+            </button>
+
+            <!-- INFORMES -->
+
+            <button
+                class="nav-item"
+                onclick="cambiarPestana('tabPista', this)">
+
+                <svg
+                    class="nav-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M3 3V21H21"/>
+
+                    <rect
+                        x="7"
+                        y="12"
+                        width="3"
+                        height="5"
+                        rx="0.5"/>
+
+                    <rect
+                        x="12"
+                        y="8"
+                        width="3"
+                        height="9"
+                        rx="0.5"/>
+
+                    <rect
+                        x="17"
+                        y="4"
+                        width="3"
+                        height="13"
+                        rx="0.5"/>
+
+                </svg>
+
+                <span>Informes</span>
+
+            </button>
+
+        </nav>
 
     </div>
 
-<button
-    id="btnExportarExcel"
-    onclick="exportarIdeasExcel()"
-    style="
-        display: none;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        background: #15803d;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 14px;
-        width: 100%;
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 16px;
-        cursor: pointer;
-    ">
-    📥 Exportar base de datos a Excel
-</button>
+    <!-- =====================================
+         MODAL NUEVA PROPUESTA
+    ====================================== -->
 
-    <!-- RANKING -->
-    
-<!-- RANKING MENSUAL -->
-<div class="progress-card-container">
-
-    <h3 style="
-        margin-bottom:12px;
-        font-size:16px;
-        font-weight:800;
-    ">
-        🏆 Ganador mensual
-    </h3>
-
-    <!-- Selector de mes -->
-    <div class="form-group">
-        <label for="mesRanking">
-            Seleccionar mes y año
-        </label>
-
-        <input
-            type="month"
-            id="mesRanking"
-            onchange="cambiarMesRanking()"
-        >
-    </div>
-
-    <!-- Ganador -->
     <div
-        id="ganadorMensual"
-        class="monthly-winner">
-    </div>
+        id="modalRegistro"
+        class="modal-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalRegistro">
 
-    <!-- Pista mensual -->
-    <div id="rankingMensualContainer"></div>
+        <div class="modal-card">
 
-    <p style="
-        font-size:11px;
-        color:var(--text-muted);
-        margin-top:10px;
-    ">
-        Se cuentan las propuestas cerradas
-        durante el mes seleccionado.
-    </p>
+            <div class="modal-header">
 
-</div>
+                <div>
 
-    <div class="progress-card-container">
+                    <h3 id="tituloModalRegistro">
 
-        <h3 style="
-            margin-bottom:12px;
-            font-size:16px;
-            font-weight:800;">
+                        Nueva propuesta
 
-            🏆 Ranking Global
+                    </h3>
 
-        </h3>
+                    <p>
 
-        <div id="pistaPilotosContainer"></div>
+                        Registra tu próxima mejora Kaizen.
 
-    </div>
+                    </p>
 
-    <!-- DASHBOARD -->
-    <div class="progress-card-container">
-
-        <h3 style="
-            margin-bottom:12px;
-            font-size:16px;
-            font-weight:800;">
-
-            📊 Dashboard Kaizen
-
-        </h3>
-
-        <div class="stats-grid-mini">
-
-            <div class="stat-card stat-card-total">
-                <h4 id="dashTotal">0</h4>
-                <span>TOTAL</span>
-            </div>
-
-            <div class="stat-card stat-card-abiertas">
-                <h4 id="dashAbiertas">0</h4>
-                <span>ABIERTAS</span>
-            </div>
-
-            <div class="stat-card stat-card-cerradas">
-                <h4 id="dashCerradas">0</h4>
-                <span>CERRADAS</span>
-            </div>
-
-            <div class="stat-card stat-card-total">
-                <h4 id="dashQuick">0</h4>
-                <span>QUICK</span>
-            </div>
-
-            <div class="stat-card stat-card-total">
-                <h4 id="dashStandard">0</h4>
-                <span>STANDARD</span>
-            </div>
-
-            <div class="stat-card stat-card-total">
-                <h4 id="dashParticipantes">0</h4>
-                <span>PARTICIPANTES</span>
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-        <!-- Barra de navegación inferior minimalista -->
-        <nav class="bottom-nav">
-
-    <!-- NUEVA -->
-    <button class="nav-item active"
-        onclick="cambiarPestana('tabRegistrar', this)">
-
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5V19M5 12H19"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
-        </svg>
-
-        <span>Nueva</span>
-
-    </button>
-
-    <!-- TAREAS -->
-    <button class="nav-item"
-        onclick="cambiarPestana('tabIdeas', this)">
-
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
-            <path d="M9 6H20M9 12H20M9 18H20"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
-
-            <circle cx="4" cy="6" r="1.5"
-                fill="currentColor"/>
-
-            <circle cx="4" cy="12" r="1.5"
-                fill="currentColor"/>
-
-            <circle cx="4" cy="18" r="1.5"
-                fill="currentColor"/>
-        </svg>
-
-        <span>Tareas</span>
-
-    </button>
-
-    <!-- INFORMES -->
-    <button class="nav-item"
-        onclick="cambiarPestana('tabPista', this)">
-
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
-            <path d="M6 20V10M12 20V5M18 20V14"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
-        </svg>
-
-        <span>Informes</span>
-
-    </button>
-
-</nav>
-    </div>
-
-    <!-- MODAL DE REGISTRO -->
-    <div id="modalRegistro" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
-        <div style="background: white; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: 24px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="color: var(--text-main); font-size: 16px; font-weight: 700;">Nueva Propuesta Kaizen</h3>
-                <button onclick="cerrarModalRegistro()" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; width: auto; padding: 4px;">✕</button>
-            </div>
-
-            <!-- Selección de Tipo con Tarjetas Visuales -->
-            <div class="form-group">
-                <label>Tipo de kaizen</label>
-                <div class="kaizen-type-container">
-                    <div id="cardQuick" class="kaizen-type-card selected" onclick="seleccionarTipoKaizen('Quick')">
-                        <div class="icon">⚡</div>
-                        <div class="title">Quick</div>
-                        <div class="desc">Mejora rápida</div>
-                    </div>
-                    <div id="cardStandard" class="kaizen-type-card" onclick="seleccionarTipoKaizen('Standard')">
-                        <div class="icon">📋</div>
-                        <div class="title">Standard</div>
-                        <div class="desc">Con análisis</div>
-                    </div>
                 </div>
-                <input type="hidden" id="tipo" value="Quick">
+
+                <button
+                    class="modal-close"
+                    onclick="cerrarModalRegistro()"
+                    aria-label="Cerrar">
+
+                    ✕
+
+                </button>
+
             </div>
 
+            <!-- TIPO DE KAIZEN -->
+
             <div class="form-group">
-                <label for="titulo">Título de la propuesta</label>
-                <input type="text" id="titulo" placeholder="Ej: Reubicar herramientas...">
+
+                <label>
+
+                    Tipo de Kaizen
+
+                </label>
+
+                <div class="kaizen-type-container">
+
+                    <button
+                        type="button"
+                        id="cardQuick"
+                        class="kaizen-type-card selected"
+                        onclick="seleccionarTipoKaizen('Quick')">
+
+                        <div class="icon">
+
+                            ⚡
+
+                        </div>
+
+                        <div class="title">
+
+                            Quick
+
+                        </div>
+
+                        <div class="desc">
+
+                            Mejora rápida
+
+                        </div>
+
+                        <span
+                            class="type-points quick-text">
+
+                            +1 punto
+
+                        </span>
+
+                    </button>
+
+                    <button
+                        type="button"
+                        id="cardStandard"
+                        class="kaizen-type-card"
+                        onclick="seleccionarTipoKaizen('Standard')">
+
+                        <div class="icon">
+
+                            📋
+
+                        </div>
+
+                        <div class="title">
+
+                            Standard
+
+                        </div>
+
+                        <div class="desc">
+
+                            Mejora con análisis
+
+                        </div>
+
+                        <span
+                            class="type-points standard-text">
+
+                            +3 puntos
+
+                        </span>
+
+                    </button>
+
+                </div>
+
+                <input
+                    type="hidden"
+                    id="tipo"
+                    value="Quick">
+
             </div>
 
+            <!-- TÍTULO -->
+
             <div class="form-group">
-                <label for="area">Área</label>
 
+                <label for="titulo">
 
+                    Título de la propuesta
 
-<select id="area">
-    <option value="">Seleccione un área</option>
-    <option value="Extrusión">Extrusión</option>
-    <option value="PMP">PMP</option>
-    <option value="Piezas Especiales">Piezas Especiales</option>
-    <option value="Almacén">Almacén</option>
-    <option value="Logística">Logística</option>
-    <option value="Admin">Admin</option>
-    <option value="Calidad">Calidad</option>
-    <option value="Mantenimiento">Mantenimiento</option>
-</select>
+                </label>
 
+                <input
+                    type="text"
+                    id="titulo"
+                    placeholder="Ej: Reubicación de herramientas">
 
-</div>
-
-<div class="form-group">
-
-    <label for="descripcion">
-        Descripción de la mejora
-    </label>
-
-    <textarea
-        id="descripcion"
-        rows="3"
-        placeholder="Describe la situación actual..."
-    ></textarea>
-
-</div>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="guardarIdea" class="btn-primary" style="flex: 2; border-radius: 12px;">Registrar</button>
-                <button onclick="cerrarModalRegistro()" class="btn-logout" style="flex: 1; background: #f1f5f9; color: var(--text-muted); border-radius: 12px;">Cancelar</button>
             </div>
-        </div>
-    </div>
 
-    <!-- MODAL DE EDICIÓN -->
-    <div id="editModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
-        <div style="background: white; width: 100%; max-width: 420px; padding: 24px; border-radius: 24px;">
-            <h3 style="margin-bottom: 16px; color: var(--text-main); font-size: 16px; font-weight: 700;">Editar Propuesta</h3>
-            <div class="form-group">
-                <label>Título</label>
-                <input type="text" id="editTitulo">
-            </div>
+            <!-- ÁREA -->
+
             <div class="form-group">
 
-    <label>Área</label>
+                <label for="area">
 
-    <select id="editArea">
-    <option value="Extrusión">Extrusión</option>
-    <option value="PMP">PMP</option>
-    <option value="Piezas Especiales">Piezas Especiales</option>
-    <option value="Almacén">Almacén</option>
-    <option value="Logística">Logística</option>
-    <option value="Admin">Admin</option>
-    <option value="Calidad">Calidad</option>
-    <option value="Mantenimiento">Mantenimiento</option>
-</select>
+                    Área
 
-</div>
-            <div class="form-group">
-                <label>Tipo</label>
-                <select id="editTipo">
-                    <option value="Quick">Quick</option>
-                    <option value="Standard">Standard</option>
+                </label>
+
+                <select id="area">
+
+                    <option value="">
+
+                        Selecciona un área
+
+                    </option>
+
+                    <option value="Extrusión">
+
+                        Extrusión
+
+                    </option>
+
+                    <option value="PMP">
+
+                        PMP
+
+                    </option>
+
+                    <option value="Piezas Especiales">
+
+                        Piezas Especiales
+
+                    </option>
+
+                    <option value="Almacén">
+
+                        Almacén
+
+                    </option>
+
+                    <option value="Logística">
+
+                        Logística
+
+                    </option>
+
+                    <option value="Admin">
+
+                        Admin
+
+                    </option>
+
+                    <option value="Calidad">
+
+                        Calidad
+
+                    </option>
+
+                    <option value="Mantenimiento">
+
+                        Mantenimiento
+
+                    </option>
+
                 </select>
-            </div>
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea id="editDescripcion" rows="3"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="guardarEdicion" class="btn-success" style="flex:1; border-radius: 12px;">Guardar</button>
-                <button id="cancelarEdicion" class="btn-logout" style="flex:1; background:#f1f5f9; color:var(--text-muted); border-radius: 12px;">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    
-    
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
-<script src="app.js"></script>
+            </div>
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="form-group">
+
+                <label for="descripcion">
+
+                    Descripción de la mejora
+
+                </label>
+
+                <textarea
+                    id="descripcion"
+                    rows="4"
+                    placeholder="Describe la situación actual y la mejora propuesta..."></textarea>
+
+            </div>
+
+            <!-- ACCIONES -->
+
+            <div class="modal-actions">
+
+                <button
+                    class="btn-secondary"
+                    onclick="cerrarModalRegistro()">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                    id="guardarIdea"
+                    class="btn-primary">
+
+                    Registrar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =====================================
+         MODAL EDITAR PROPUESTA
+    ====================================== -->
+
+    <div
+        id="editModal"
+        class="modal-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalEdicion">
+
+        <div class="modal-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h3 id="tituloModalEdicion">
+
+                        Editar propuesta
+
+                    </h3>
+
+                    <p>
+
+                        Actualiza los datos de la mejora.
+
+                    </p>
+
+                </div>
+
+                <button
+                    class="modal-close"
+                    onclick="cancelarEdicion()"
+                    aria-label="Cerrar">
+
+                    ✕
+
+                </button>
+
+            </div>
+
+            <!-- TÍTULO -->
+
+            <div class="form-group">
+
+                <label for="editTitulo">
+
+                    Título de la propuesta
+
+                </label>
+
+                <input
+                    type="text"
+                    id="editTitulo">
+
+            </div>
+
+            <!-- ÁREA -->
+
+            <div class="form-group">
+
+                <label for="editArea">
+
+                    Área
+
+                </label>
+
+                <select id="editArea">
+
+                    <option value="">
+
+                        Selecciona un área
+
+                    </option>
+
+                    <option value="Extrusión">
+
+                        Extrusión
+
+                    </option>
+
+                    <option value="PMP">
+
+                        PMP
+
+                    </option>
+
+                    <option value="Piezas Especiales">
+
+                        Piezas Especiales
+
+                    </option>
+
+                    <option value="Almacén">
+
+                        Almacén
+
+                    </option>
+
+                    <option value="Logística">
+
+                        Logística
+
+                    </option>
+
+                    <option value="Admin">
+
+                        Admin
+
+                    </option>
+
+                    <option value="Calidad">
+
+                        Calidad
+
+                    </option>
+
+                    <option value="Mantenimiento">
+
+                        Mantenimiento
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- TIPO -->
+
+            <div class="form-group">
+
+                <label for="editTipo">
+
+                    Tipo de Kaizen
+
+                </label>
+
+                <select id="editTipo">
+
+                    <option value="Quick">
+
+                        Quick — 1 punto
+
+                    </option>
+
+                    <option value="Standard">
+
+                        Standard — 3 puntos
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="form-group">
+
+                <label for="editDescripcion">
+
+                    Descripción de la mejora
+
+                </label>
+
+                <textarea
+                    id="editDescripcion"
+                    rows="4"></textarea>
+
+            </div>
+
+            <!-- ACCIONES -->
+
+            <div class="modal-actions">
+
+                <button
+                    id="cancelarEdicion"
+                    class="btn-secondary">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                    id="guardarEdicion"
+                    class="btn-primary">
+
+                    Guardar cambios
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =====================================
+         LIBRERÍA DE EXPORTACIÓN EXCEL
+    ====================================== -->
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+    <!-- =====================================
+         JAVASCRIPT PRINCIPAL
+    ====================================== -->
+
+    <script src="app.js"></script>
 
 </body>
+
 </html>
