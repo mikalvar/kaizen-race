@@ -951,3 +951,224 @@ function actualizarRankingMensual(ideas) {
     });
 }
 
+// ==========================================
+// EXPORTAR BASE DE DATOS KAIZEN A EXCEL
+// ==========================================
+
+async function exportarIdeasExcel() {
+
+    const esAdmin = usuarioActual && (
+        String(usuarioActual.legajo) === '51000364' ||
+        usuarioActual.rol === 'admin'
+    );
+
+    if (!esAdmin) {
+        alert('Solo los administradores pueden exportar.');
+        return;
+    }
+
+    if (typeof XLSX === 'undefined') {
+        alert('No se pudo cargar la librería de Excel.');
+        return;
+    }
+
+    try {
+
+        let ideas = [];
+        const limite = 500;
+        let inicio = 0;
+
+        // Obtener todas las propuestas de Supabase
+        while (true) {
+
+            const { data, error } = await supabaseClient
+                .from('ideas')
+                .select('*')
+                .order('id', { ascending: true })
+                .range(inicio, inicio + limite - 1);
+
+            if (error) throw error;
+
+            ideas.push(...data);
+
+            if (data.length < limite) break;
+
+            inicio += limite;
+        }
+
+        if (ideas.length === 0) {
+            alert('No hay propuestas para exportar.');
+            return;
+        }
+
+        // Formato de fechas
+        function formatoFecha(valor) {
+
+            if (!valor) return '';
+
+            const fecha = new Date(valor);
+
+            if (Number.isNaN(fecha.getTime())) return '';
+
+            return fecha.toLocaleDateString('es-PY', {
+                timeZone: 'America/Asuncion'
+            });
+        }
+
+        // Preparar columnas del Excel
+        const registros = ideas.map(idea => ({
+
+            'ID': idea.id,
+
+            'Colaborador':
+                idea.usuario_nombre || '',
+
+            'Legajo':
+                String(idea.usuario_legajo || ''),
+
+            'Área':
+                idea.area || '',
+
+            'Título de la propuesta':
+                idea.titulo || '',
+
+            'Descripción':
+                idea.descripcion || '',
+
+            'Tipo de Kaizen':
+                idea.tipo || '',
+
+            'Estado':
+                idea.estado || '',
+
+            'Fecha de creación':
+                formatoFecha(idea.fecha_creacion),
+
+            'Fecha de cierre':
+                formatoFecha(idea.fecha_cierre),
+
+            'Puntos':
+                idea.estado === 'CERRADO'
+                    ? (
+                        idea.tipo === 'Standard'
+                            ? 3
+                            : 1
+                    )
+                    : 0
+
+        }));
+
+        const abiertas = registros.filter(
+            idea => idea.Estado === 'ABIERTO'
+        );
+
+        const cerradas = registros.filter(
+            idea => idea.Estado === 'CERRADO'
+        );
+
+        // Crear libro de Excel
+        const libro = XLSX.utils.book_new();
+
+        const columnas = Object.keys(registros[0]);
+
+        function crearHoja(datos) {
+
+            const hoja = XLSX.utils.json_to_sheet(
+                datos,
+                { header: columnas }
+            );
+
+            // Ancho de las columnas
+            hoja['!cols'] = [
+                { wch: 38 },
+                { wch: 30 },
+                { wch: 15 },
+                { wch: 22 },
+                { wch: 45 },
+                { wch: 70 },
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 20 },
+                { wch: 20 },
+                { wch: 12 }
+            ];
+
+            // Activar filtros
+            if (hoja['!ref']) {
+                hoja['!autofilter'] = {
+                    ref: hoja['!ref']
+                };
+            }
+
+            return hoja;
+        }
+
+        // Agregar las tres hojas
+        XLSX.utils.book_append_sheet(
+            libro,
+            crearHoja(registros),
+            'Base general'
+        );
+
+        XLSX.utils.book_append_sheet(
+            libro,
+            crearHoja(abiertas),
+            'Abiertas'
+        );
+
+        XLSX.utils.book_append_sheet(
+            libro,
+            crearHoja(cerradas),
+            'Cerradas'
+        );
+
+        // Nombre del archivo
+        const partes = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Asuncion',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).formatToParts(new Date());
+
+        const obtenerParte = tipo =>
+            partes.find(p => p.type === tipo).value;
+
+        const fechaArchivo =
+            obtenerParte('year') + '-' +
+            obtenerParte('month') + '-' +
+            obtenerParte('day');
+
+        XLSX.writeFile(
+            libro,
+            `Kaizen_Race_${fechaArchivo}.xlsx`
+        );
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert(
+            'No se pudo exportar la base de datos: ' +
+            err.message
+        );
+    }
+}
+
+// MOSTRAR BOTÓN SOLO A ADMINISTRADORES
+
+function actualizarBotonExportar() {
+
+    const boton = document.getElementById(
+        'btnExportarExcel'
+    );
+
+    if (!boton) return;
+
+    const esAdmin = usuarioActual && (
+        String(usuarioActual.legajo) === '51000364' ||
+        usuarioActual.rol === 'admin'
+    );
+
+    boton.style.display = esAdmin ? 'flex' : 'none';
+}
+
