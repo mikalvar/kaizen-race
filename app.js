@@ -158,7 +158,8 @@ function mostrarAppPrincipal() {
     }
 
     // Cargar datos iniciales de la app
-    cargarDatosTablero();
+    actualizarBotonExportar();
+cargarDatosTablero();
 }
 
 // --- NAVEGACIÓN ENTRE PESTAÑAS ---
