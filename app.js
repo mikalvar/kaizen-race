@@ -1,63 +1,187 @@
-// --- CONFIGURACIÓN DE SUPABASE ---
-const SUPABASE_URL = 'https://vmminpanvxxdczzmopua.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ==========================================
+// KAIZEN RACE 2.0 - APP.JS
+// ==========================================
 
-// Variables de Estado Global
-let usuarioActual = null; // Ejemplo: { nombre: 'Mikaela', apellido: 'Alvarez', legajo: '51000364', rol: 'admin' }
-let filtroIdeasActual = 'mias'; // 'mias' o 'todas'
-let filtroEstadoActual = 'TODOS'; // 'TODOS', 'ABIERTO', 'CERRADO'
+// CONFIGURACIÓN DE SUPABASE
+
+const SUPABASE_URL = 'https://vmminpanvxxdczzmopua.supabase.co';
+
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbWlucGFudnh4ZGN6em1vcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzU1MDQsImV4cCI6MjEwMzg1MTUwNH0.K3eWFErUjf3_VhZ8Jr7ZID3NnHp7vM8kwZZFwNoRaiU';
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+// VARIABLES GLOBALES
+
+let usuarioActual = null;
+let filtroIdeasActual = 'mias';
+let filtroEstadoActual = 'TODOS';
 let kaizenEditandoId = null;
 let ideasParaRankingMensual = [];
+let propietarioEdicion = null;
 
+const $ = id => document.getElementById(id);
 
-// Inicialización al cargar la ventana
-window.addEventListener('DOMContentLoaded', () => {
-    // Revisar si ya hay sesión guardada en localStorage
-    const sesionGuardada = localStorage.getItem('kaizen_user');
-    if (sesionGuardada) {
-        usuarioActual = JSON.parse(sesionGuardada);
-        // Forzar rol Admin si la legajo es 51000364
-        if (usuarioActual.legajo === '51000364') {
-            usuarioActual.rol = 'admin';
-        }
-        mostrarAppPrincipal();
+// ==========================================
+// FUNCIONES AUXILIARES
+// ==========================================
+
+function esAdministradorKaizen() {
+    return Boolean(usuarioActual && (
+        String(usuarioActual.legajo) === '51000364' ||
+        usuarioActual.rol === 'admin'
+    ));
+}
+
+function crearElemento(tag, clase, texto) {
+    const elemento = document.createElement(tag);
+
+    if (clase) elemento.className = clase;
+
+    if (texto !== undefined) {
+        elemento.textContent = texto;
     }
-});
 
-// --- AUTENTICACIÓN Y PESTAÑAS DE LOGIN ---
-function cambiarModoAuth(modo) {
-    const slider = document.getElementById('authSliderBg');
-    const btnLogin = document.getElementById('tabLoginBtn');
-    const btnRegister = document.getElementById('tabRegisterBtn');
-    const formLogin = document.getElementById('formLogin');
-    const formRegister = document.getElementById('formRegister');
+    return elemento;
+}
 
-    if (modo === 'login') {
-        slider.className = 'auth-slider-bg left';
-        btnLogin.classList.add('active');
-        btnRegister.classList.remove('active');
-        formLogin.classList.add('active');
-        formRegister.classList.remove('active');
-    } else {
-        slider.className = 'auth-slider-bg right';
-        btnRegister.classList.add('active');
-        btnLogin.classList.remove('active');
-        formRegister.classList.add('active');
-        formLogin.classList.remove('active');
+function crearBoton(texto, clase, accion) {
+    const boton = crearElemento('button', clase, texto);
+
+    boton.type = 'button';
+    boton.addEventListener('click', accion);
+
+    return boton;
+}
+
+function formatoFecha(valor) {
+    if (!valor) return '';
+
+    const fecha = new Date(valor);
+
+    if (Number.isNaN(fecha.getTime())) return '';
+
+    return fecha.toLocaleDateString('es-PY', {
+        timeZone: 'America/Asuncion'
+    });
+}
+
+function fechaISOParaguay(valor) {
+    if (!valor) return '';
+
+    const fecha = new Date(valor);
+
+    if (Number.isNaN(fecha.getTime())) return '';
+
+    const partes = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Asuncion',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(fecha);
+
+    const obtener = tipo =>
+        partes.find(p => p.type === tipo).value;
+
+    return `${obtener('year')}-${obtener('month')}-${obtener('day')}`;
+}
+
+function obtenerPuntos(idea) {
+    return idea.tipo === 'Standard' ? 3 : 1;
+}
+
+function obtenerIniciales(nombre) {
+    return String(nombre || 'Piloto')
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(n => n[0] || '')
+        .join('')
+        .toUpperCase();
+}
+
+function asignarTexto(id, valor) {
+    const elemento = $(id);
+
+    if (elemento) {
+        elemento.textContent = valor;
     }
 }
 
-// Botón de Iniciar Sesión
-document.getElementById('loginBtn')?.addEventListener('click', async () => {
-    const legajo = document.getElementById('legajoInput').value.trim();
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
+
+window.addEventListener('DOMContentLoaded', () => {
+
+    const sesionGuardada =
+        localStorage.getItem('kaizen_user');
+
+    if (!sesionGuardada) return;
+
+    try {
+        usuarioActual = JSON.parse(sesionGuardada);
+
+        if (!usuarioActual || !usuarioActual.legajo) {
+            throw new Error('Sesión inválida');
+        }
+
+        if (String(usuarioActual.legajo) === '51000364') {
+            usuarioActual.rol = 'admin';
+        }
+
+        mostrarAppPrincipal();
+
+    } catch (error) {
+        console.error(error);
+        localStorage.removeItem('kaizen_user');
+        usuarioActual = null;
+    }
+});
+
+// ==========================================
+// LOGIN Y REGISTRO
+// ==========================================
+
+function cambiarModoAuth(modo) {
+
+    const slider = $('authSliderBg');
+    const btnLogin = $('tabLoginBtn');
+    const btnRegister = $('tabRegisterBtn');
+    const formLogin = $('formLogin');
+    const formRegister = $('formRegister');
+
+    const login = modo === 'login';
+
+    slider.className =
+        'auth-slider-bg ' + (login ? 'left' : 'right');
+
+    btnLogin.classList.toggle('active', login);
+    btnRegister.classList.toggle('active', !login);
+
+    formLogin.classList.toggle('active', login);
+    formRegister.classList.toggle('active', !login);
+}
+
+$('loginBtn')?.addEventListener('click', async () => {
+
+    const legajo = $('legajoInput').value.trim();
+
     if (!legajo) {
-        alert('Por favor ingresa tu legajo');
+        alert('Por favor ingresa tu legajo.');
         return;
     }
 
+    const boton = $('loginBtn');
+    const textoOriginal = boton.textContent;
+
+    boton.disabled = true;
+    boton.textContent = 'Ingresando...';
+
     try {
-        // Consultar en la tabla de usuarios de Supabase
+
         const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
@@ -65,1009 +189,1734 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
             .single();
 
         if (error || !data) {
-            alert('legajo no encontrado. Por favor regístrate primero.');
+            alert('Legajo no encontrado. Regístrate primero.');
             return;
         }
 
         usuarioActual = data;
 
-        // Regla específica solicitada: legajo 51000364 es Administrador
-        if (usuarioActual.legajo === '51000364') {
+        if (String(usuarioActual.legajo) === '51000364') {
             usuarioActual.rol = 'admin';
         }
 
-        localStorage.setItem('kaizen_user', JSON.stringify(usuarioActual));
+        localStorage.setItem(
+            'kaizen_user',
+            JSON.stringify(usuarioActual)
+        );
+
         mostrarAppPrincipal();
-    } catch (err) {
-        console.error(err);
-        alert('Error al conectar con la base de datos');
+
+    } catch (error) {
+
+        console.error(error);
+        alert('Error al conectar con la base de datos.');
+
+    } finally {
+
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
     }
 });
 
-// Botón de Registro de Nuevo Piloto
-document.getElementById('registerBtn')?.addEventListener('click', async () => {
-    const nombre = document.getElementById('nombreInput').value.trim();
-    const apellido = document.getElementById('apellidoInput').value.trim();
-    const legajo = document.getElementById('legajoRegistroInput').value.trim();
+// REGISTRO DE NUEVO PILOTO
+
+$('registerBtn')?.addEventListener('click', async () => {
+
+    const nombre = $('nombreInput').value.trim();
+
+    const apellido = $('apellidoInput').value.trim();
+
+    const legajo = $('legajoRegistroInput').value.trim();
 
     if (!nombre || !apellido || !legajo) {
-        alert('Completa todos los campos para registrarte.');
+
+        alert('Completa todos los campos.');
         return;
     }
 
+    const boton = $('registerBtn');
+    const textoOriginal = boton.textContent;
+
+    boton.disabled = true;
+    boton.textContent = 'Registrando...';
+
     try {
-        // Definir rol inicial (Admin automático si es 51000364)
-        const rol = (legajo === '51000364') ? 'admin' : 'usuario';
+
+        const rol =
+            legajo === '51000364' ? 'admin' : 'usuario';
 
         const { data, error } = await supabaseClient
             .from('usuarios')
-            .insert([{ nombre, apellido, legajo, rol }])
+            .insert([{
+                nombre,
+                apellido,
+                legajo,
+                rol
+            }])
             .select()
             .single();
 
-        if (error) {
-            alert('Error al registrar: ' + error.message);
-            return;
-        }
+        if (error) throw error;
 
         usuarioActual = data;
-        localStorage.setItem('kaizen_user', JSON.stringify(usuarioActual));
+
+        localStorage.setItem(
+            'kaizen_user',
+            JSON.stringify(usuarioActual)
+        );
+
         alert('¡Registro exitoso!');
+
         mostrarAppPrincipal();
-    } catch (err) {
-        console.error(err);
-        alert('Ocurrió un error en el registro.');
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert('Error al registrar: ' + error.message);
+
+    } finally {
+
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
     }
 });
 
+// ==========================================
+// CERRAR SESIÓN
+// ==========================================
+
 function cerrarSesion() {
+
     localStorage.removeItem('kaizen_user');
+
     usuarioActual = null;
-    document.getElementById('appArea').classList.add('hidden');
-    document.getElementById('loginArea').classList.remove('hidden');
+    kaizenEditandoId = null;
+    propietarioEdicion = null;
+    ideasParaRankingMensual = [];
+
+    $('appArea').classList.add('hidden');
+    $('loginArea').classList.remove('hidden');
+
+    $('listaIdeas')?.replaceChildren();
+    $('pistaPilotosContainer')?.replaceChildren();
+    $('rankingMensualContainer')?.replaceChildren();
+    $('ganadorMensual')?.replaceChildren();
+
+    $('modalRegistro')?.classList.add('hidden');
+    $('editModal')?.classList.add('hidden');
+
+    actualizarBotonExportar();
 }
 
-// --- TRANSICIÓN A LA APP PRINCIPAL ---
+// ==========================================
+// MOSTRAR APLICACIÓN PRINCIPAL
+// ==========================================
+
 function mostrarAppPrincipal() {
-    document.getElementById('loginArea').classList.add('hidden');
-    document.getElementById('appArea').classList.remove('hidden');
 
-    // Actualizar datos en la cinta superior (Header)
-    const tituloRol = document.getElementById('tituloPrincipalRol');
-    const spanUsuario = document.getElementById('usuarioActual');
-    const roleBadge = document.getElementById('roleBadge');
+    if (!usuarioActual) return;
 
-    // Título grande superior
-    tituloRol.textContent = "PILOTO DE MEJORA";
+    $('loginArea').classList.add('hidden');
+    $('appArea').classList.remove('hidden');
 
-    // Nombre y legajo pequeño abajo (ej: mikaelaalvarez51000364 o con espacios legibles)
-    const nombreCompleto = `${usuarioActual.nombre || ''} ${usuarioActual.apellido || ''}`.trim();
-    spanUsuario.textContent = `${nombreCompleto} (${usuarioActual.legajo})`;
+    const nombreCompleto =
+        `${usuarioActual.nombre || ''} ${usuarioActual.apellido || ''}`.trim();
 
-    // Ajustar Indicador de Rol (Admin o Usuario)
-    if (usuarioActual.legajo === '51000364' || usuarioActual.rol === 'admin') {
-        roleBadge.textContent = "Admin";
-        roleBadge.style.background = "#eff6ff";
-        roleBadge.style.color = "#1d4ed8";
-        roleBadge.style.borderColor = "#bfdbfe";
+    asignarTexto(
+        'tituloPrincipalRol',
+        'PILOTO DE MEJORA'
+    );
+
+    asignarTexto(
+        'usuarioActual',
+        `${nombreCompleto} (${usuarioActual.legajo})`
+    );
+
+    const roleBadge = $('roleBadge');
+
+    if (esAdministradorKaizen()) {
+
+        roleBadge.textContent = 'Admin';
+
+        roleBadge.style.background = '#eff6ff';
+        roleBadge.style.color = '#1d4ed8';
+        roleBadge.style.borderColor = '#bfdbfe';
+
     } else {
-        roleBadge.textContent = "Usuario";
-        roleBadge.style.background = "#f1f5f9";
-        roleBadge.style.color = "var(--text-muted)";
-        roleBadge.style.borderColor = "var(--border-card)";
+
+        roleBadge.textContent = 'Usuario';
+
+        roleBadge.style.background = '#f1f5f9';
+        roleBadge.style.color = 'var(--text-muted)';
+        roleBadge.style.borderColor = 'var(--border-card)';
     }
 
-    // Cargar datos iniciales de la app
     actualizarBotonExportar();
-cargarDatosTablero();
+
+    const navegacion =
+        document.querySelectorAll('.bottom-nav .nav-item');
+
+    cambiarPestana('tabRegistrar', navegacion[0]);
+
+    cargarDatosTablero();
 }
 
-// --- NAVEGACIÓN ENTRE PESTAÑAS ---
-function cambiarPestana(idTab, elementoBtn) {
-    // Ocultar todas las pestañas
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    // Mostrar la seleccionada
-    document.getElementById(idTab).classList.add('active');
+// ==========================================
+// NAVEGACIÓN
+// ==========================================
 
-    // Actualizar botones de la barra inferior
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
-        btn.classList.remove('active');
-    });
+function cambiarPestana(idTab, elementoBtn) {
+
+    document.querySelectorAll('.tab-content')
+        .forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+    const pestaña = $(idTab);
+
+    if (!pestaña) return;
+
+    pestaña.classList.add('active');
+
+    document.querySelectorAll('.bottom-nav .nav-item')
+        .forEach(btn => {
+            btn.classList.remove('active');
+        });
+
     if (elementoBtn) {
         elementoBtn.classList.add('active');
     }
 
     if (idTab === 'tabIdeas') {
+
         cargarDatosTablero();
+
     } else if (idTab === 'tabPista') {
+
         cargarPistaCarreras();
     }
 }
 
-// --- MODAL DE NUEVO KAIZEN ---
+// ==========================================
+// REGISTRO DE NUEVO KAIZEN
+// ==========================================
+
 function abrirModalRegistro() {
-    document.getElementById('modalRegistro').classList.remove('hidden');
+
+    if (!usuarioActual) return;
+
+    $('modalRegistro').classList.remove('hidden');
 }
 
 function cerrarModalRegistro() {
-    document.getElementById('modalRegistro').classList.add('hidden');
-    document.getElementById('titulo').value = '';
-    document.getElementById('area').value = '';
-    document.getElementById('descripcion').value = '';
+
+    $('modalRegistro').classList.add('hidden');
+
+    $('titulo').value = '';
+    $('area').value = '';
+    $('descripcion').value = '';
+
+    seleccionarTipoKaizen('Quick');
 }
 
 function seleccionarTipoKaizen(tipo) {
-    document.getElementById('tipo').value = tipo;
-    if (tipo === 'Quick') {
-        document.getElementById('cardQuick').classList.add('selected');
-        document.getElementById('cardStandard').classList.remove('selected');
-    } else {
-        document.getElementById('cardStandard').classList.add('selected');
-        document.getElementById('cardQuick').classList.remove('selected');
-    }
-}
 
-document.getElementById('guardarIdea')?.addEventListener('click', async () => {
-    const titulo = document.getElementById('titulo').value.trim();
-    const area = document.getElementById('area').value.trim();
-    const descripcion = document.getElementById('descripcion').value.trim();
-    const tipo = document.getElementById('tipo').value;
+    $('tipo').value = tipo;
 
-if (
-    !titulo ||
-    !area ||
-    !descripcion
-) {
-
-    alert(
-        'Debes completar Área, Título y Descripción.'
+    $('cardQuick').classList.toggle(
+        'selected',
+        tipo === 'Quick'
     );
 
-    return;
+    $('cardStandard').classList.toggle(
+        'selected',
+        tipo === 'Standard'
+    );
 }
 
+$('guardarIdea')?.addEventListener('click', async () => {
+
+    if (!usuarioActual) return;
+
+    const titulo = $('titulo').value.trim();
+
+    const area = $('area').value.trim();
+
+    const descripcion = $('descripcion').value.trim();
+
+    const tipo = $('tipo').value;
+
+    if (!titulo || !area || !descripcion) {
+
+        alert('Debes completar Área, Título y Descripción.');
+
+        return;
+    }
+
+    const boton = $('guardarIdea');
+    const textoOriginal = boton.textContent;
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+
     try {
-        const { error } = await supabaseClient.from('ideas').insert([{
-            titulo,
-            area: area,
-            descripcion,
-            tipo,
-            estado: 'ABIERTO',
-            usuario_legajo: usuarioActual.legajo,
-            usuario_nombre: `${usuarioActual.nombre} ${usuarioActual.apellido || ''}`.trim()
-        }]);
+
+        const { error } = await supabaseClient
+            .from('ideas')
+            .insert([{
+
+                titulo,
+                area,
+                descripcion,
+                tipo,
+
+                estado: 'ABIERTO',
+
+                usuario_legajo: usuarioActual.legajo,
+
+                usuario_nombre:
+                    `${usuarioActual.nombre} ${usuarioActual.apellido || ''}`.trim()
+
+            }]);
 
         if (error) throw error;
 
         alert('¡Propuesta registrada con éxito!');
+
         cerrarModalRegistro();
-        cambiarPestana('tabIdeas', document.querySelectorAll('.bottom-nav .nav-item')[1]);
-    } catch (err) {
-        console.error(err);
+
+        cambiarPestana(
+            'tabIdeas',
+            document.querySelectorAll('.bottom-nav .nav-item')[1]
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
         alert('Error al registrar la propuesta.');
+
+    } finally {
+
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
     }
 });
 
-// --- GESTIÓN DE TAREAS / IDEAS ---
-function cambiarFiltroIdeas(filtro) {
-    filtroIdeasActual = filtro;
-    const slider = document.getElementById('filterSliderBg');
-    const btnMias = document.getElementById('tabMiasBtn');
-    const btnTodas = document.getElementById('tabTodasBtn');
+// ==========================================
+// CONSULTAS A SUPABASE
+// ==========================================
 
-    if (filtro === 'mias') {
-        slider.className = 'auth-slider-bg filter-slider left';
-        btnMias.classList.add('active');
-        btnTodas.classList.remove('active');
-    } else {
-        slider.className = 'auth-slider-bg filter-slider right';
-        btnTodas.classList.add('active');
-        btnMias.classList.remove('active');
+async function obtenerIdeas(columnas = '*', soloMias = false) {
+
+    let ideas = [];
+
+    const limite = 500;
+
+    let inicio = 0;
+
+    const legajo = usuarioActual?.legajo;
+
+    while (true) {
+
+        let consulta = supabaseClient
+            .from('ideas')
+            .select(columnas);
+
+        if (soloMias) {
+            consulta = consulta.eq('usuario_legajo', legajo);
+        }
+
+        const { data, error } = await consulta
+            .order('id', { ascending: true })
+            .range(inicio, inicio + limite - 1);
+
+        if (error) throw error;
+
+        ideas.push(...data);
+
+        if (data.length < limite) break;
+
+        inicio += limite;
     }
+
+    return ideas;
+}
+
+// ==========================================
+// FILTROS DE PROPUESTAS
+// ==========================================
+
+function cambiarFiltroIdeas(filtro) {
+
+    filtroIdeasActual = filtro;
+
+    const slider = $('filterSliderBg');
+
+    const btnMias = $('tabMiasBtn');
+
+    const btnTodas = $('tabTodasBtn');
+
+    const mias = filtro === 'mias';
+
+    slider.className =
+        'auth-slider-bg filter-slider ' +
+        (mias ? 'left' : 'right');
+
+    btnMias.classList.toggle('active', mias);
+
+    btnTodas.classList.toggle('active', !mias);
+
     cargarDatosTablero();
 }
 
 function filtrarPorEstado(estado) {
+
     filtroEstadoActual = estado;
+
+    document.querySelectorAll('.stat-card-clickable')
+        .forEach(card => {
+
+            card.classList.remove('filter-active');
+
+            const accion =
+                card.getAttribute('onclick') || '';
+
+            if (accion.includes(`'${estado}'`)) {
+
+                card.classList.add('filter-active');
+            }
+        });
+
     cargarDatosTablero();
 }
 
+// ==========================================
+// CARGAR TABLERO
+// ==========================================
+
+let solicitudTablero = 0;
+
 async function cargarDatosTablero() {
+
+    if (!usuarioActual) return;
+
+    const solicitud = ++solicitudTablero;
+
+    const sesion = usuarioActual;
+
+    const filtro = filtroIdeasActual;
+
+    const estado = filtroEstadoActual;
+
     try {
-        const { data, error } = await supabaseClient
-            .from('ideas')
-            .select('*')
-            .order('fecha_creacion', { ascending: false });
 
-        if (error) throw error;
-
-        const misKaizens =
-    data.filter(
-        k =>
-            String(k.usuario_legajo) ===
-            String(usuarioActual.legajo)
-    );
-
-const dataset =
-    filtroIdeasActual === 'mias'
-        ? misKaizens
-        : data;
-
-// Contadores dinámicos según el filtro seleccionado
-const totalMias =
-    dataset.length;
-
-const abiertasMias =
-    dataset.filter(
-        k => k.estado === 'ABIERTO'
-    ).length;
-
-const cerradasMias =
-    dataset.filter(
-        k => k.estado === 'CERRADO'
-    ).length;
-
-document.getElementById('countTotal').textContent =
-    totalMias;
-
-document.getElementById('countAbiertas').textContent =
-    abiertasMias;
-
-document.getElementById('countCerradas').textContent =
-    cerradasMias;
-
-// Lista a mostrar según filtro
-let listaFiltrada = dataset;
-
-if (filtroEstadoActual !== 'TODOS') {
-
-    listaFiltrada =
-        listaFiltrada.filter(
-            k => k.estado === filtroEstadoActual
+        const data = await obtenerIdeas(
+            '*',
+            filtro === 'mias'
         );
-}
 
-document.getElementById(
-    'tituloIndicador'
-).textContent =
-    filtroIdeasActual === 'mias'
-        ? 'MI PROGRESO'
-        : 'PROGRESO DE PLANTA';
+        if (
+            solicitud !== solicitudTablero ||
+            usuarioActual !== sesion
+        ) return;
 
-document.getElementById(
-    'iconoIndicador'
-).textContent =
-    filtroIdeasActual === 'mias'
-        ? '👋'
-        : '🏭';
-        
-renderizarListaIdeas(listaFiltrada);
-    } catch (err) {
-        console.error(err);
+        data.sort((a, b) =>
+
+            new Date(b.fecha_creacion || 0) -
+            new Date(a.fecha_creacion || 0)
+        );
+
+        const dataset = data;
+
+        const total = dataset.length;
+
+        const abiertas = dataset.filter(
+            k => k.estado === 'ABIERTO'
+        ).length;
+
+        const cerradas = dataset.filter(
+            k => k.estado === 'CERRADO'
+        ).length;
+
+        asignarTexto('countTotal', total);
+
+        asignarTexto('countAbiertas', abiertas);
+
+        asignarTexto('countCerradas', cerradas);
+
+        asignarTexto(
+            'tituloIndicador',
+            filtro === 'mias'
+                ? 'MI PROGRESO'
+                : 'PROGRESO DE PLANTA'
+        );
+
+        asignarTexto(
+            'iconoIndicador',
+            filtro === 'mias' ? '🏎️' : '🏭'
+        );
+
+        let listaFiltrada = dataset;
+
+        if (estado !== 'TODOS') {
+
+            listaFiltrada = dataset.filter(
+                k => k.estado === estado
+            );
+        }
+
+        renderizarListaIdeas(listaFiltrada);
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (
+            solicitud === solicitudTablero &&
+            usuarioActual === sesion
+        ) {
+
+            const contenedor = $('listaIdeas');
+
+            contenedor.replaceChildren(
+                crearElemento(
+                    'p',
+                    'empty-state',
+                    'No se pudieron cargar las propuestas.'
+                )
+            );
+        }
     }
 }
 
-function renderizarListaIdeas(kaizens) {
-    
-    console.log("Kaizens recibidos:", kaizens);
-    
-    const contenedor = document.getElementById('listaIdeas');
-    contenedor.innerHTML = '';
+// ==========================================
+// NUEVAS TARJETAS KAIZEN 2.0
+// ==========================================
 
-    if (kaizens.length === 0) {
-        contenedor.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">No hay propuestas registradas con este filtro.</p>`;
+function renderizarListaIdeas(kaizens) {
+
+    const contenedor = $('listaIdeas');
+
+    contenedor.replaceChildren();
+
+    if (!kaizens.length) {
+
+        contenedor.append(
+
+            crearElemento(
+                'p',
+                'empty-state',
+                'No hay propuestas con este filtro.'
+            )
+        );
+
         return;
     }
 
+    const admin = esAdministradorKaizen();
+
+    const fragmento = document.createDocumentFragment();
+
     kaizens.forEach(k => {
-        const esAdmin = (usuarioActual.legajo === '51000364' || usuarioActual.rol === 'admin');
-        const esPropio =
-    String(k.usuario_legajo) ===
-    String(usuarioActual.legajo);
-        const estadoClase = k.estado === 'CERRADO' ? 'status-cerrado' : 'status-abierto';
 
-       let htmlBotonesAccion = '';
+        const cerrado = k.estado === 'CERRADO';
 
-if (esAdmin) {
+        const propio =
+            String(k.usuario_legajo) ===
+            String(usuarioActual.legajo);
 
-    htmlBotonesAccion = `
-        <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+        const standard = k.tipo === 'Standard';
 
-            <button
-                onclick="abrirEdicion('${k.id}')"
-                style="background: var(--warning); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
-                Editar
-            </button>
+        // TARJETA PRINCIPAL
 
-            <button
-                onclick="cambiarEstadoKaizen('${k.id}', '${k.estado === 'ABIERTO' ? 'CERRADO' : 'ABIERTO'}')"
-                style="background: var(--primary-light); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
-                ${k.estado === 'ABIERTO' ? 'Marcar Cerrado' : 'Marcar Abierto'}
-            </button>
+        const card = crearElemento(
 
-            <button
-                onclick="eliminarKaizen('${k.id}')"
-                style="background: var(--danger); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
-                Eliminar
-            </button>
+            'article',
 
-        </div>
-    `;
+            'idea-card race-idea ' +
+            (cerrado ? 'is-closed' : 'is-open')
+        );
 
-}
-else if (esPropio) {
+        // CABECERA
 
-    htmlBotonesAccion = `
-        <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+        const top = crearElemento(
+            'div',
+            'idea-header-row'
+        );
 
-            <button
-                onclick="abrirEdicion('${k.id}')"
-                style="background: var(--warning); color:white; padding:6px 12px; font-size:11px; border-radius:8px; width:auto;">
-                Editar
-            </button>
+        const tags = crearElemento(
+            'div',
+            'badges-group'
+        );
 
-        </div>
-    `;
+        const estadoBadge = crearElemento(
 
-}
+            'span',
 
-        const card = document.createElement('div');
-        card.className = 'idea-card';
-        card.innerHTML = `
-            <div class="idea-header-row">
-                <div class="badges-group">
-                    <span class="status-badge ${estadoClase}">${k.estado}</span>
-                    <span class="status-badge badge-tipo">${k.tipo}</span>
-                    <span class="status-badge badge-tipo">${k.area}</span>
-                </div>
-            </div>
-            <h4 class="idea-title">${k.titulo}</h4>
-            <p class="idea-desc">${k.descripcion}</p>
-            <div class="idea-footer-row">
-                <span>Por: ${k.usuario_nombre || 'Piloto'}</span>
-                <span>${new Date(k.fecha_creacion).toLocaleDateString()}</span>
-            </div>
-            ${htmlBotonesAccion}
-        `;
-        contenedor.appendChild(card);
+            'status-badge ' +
+            (cerrado
+                ? 'status-cerrado'
+                : 'status-abierto'),
+
+            k.estado
+        );
+
+        const tipoBadge = crearElemento(
+
+            'span',
+
+            'status-badge ' +
+            (standard
+                ? 'type-standard'
+                : 'type-quick'),
+
+            k.tipo
+        );
+
+        tags.append(estadoBadge, tipoBadge);
+
+        top.append(tags);
+
+        // MENÚ ADMINISTRATIVO DE TRES PUNTOS
+
+        if (admin) {
+
+            const menu = crearElemento(
+                'details',
+                'idea-menu'
+            );
+
+            const summary = crearElemento(
+                'summary',
+                '',
+                '⋮'
+            );
+
+            summary.setAttribute(
+                'aria-label',
+                'Acciones de propuesta'
+            );
+
+            const panel = crearElemento(
+                'div',
+                'idea-menu-panel'
+            );
+
+            const editar = crearBoton(
+
+                '✎ Editar propuesta',
+
+                'menu-action',
+
+                () => {
+
+                    menu.open = false;
+
+                    abrirEdicion(k.id);
+                }
+            );
+
+            const eliminar = crearBoton(
+
+                'Eliminar propuesta',
+
+                'menu-action menu-danger',
+
+                () => {
+
+                    menu.open = false;
+
+                    eliminarKaizen(k.id);
+                }
+            );
+
+            panel.append(editar, eliminar);
+
+            menu.append(summary, panel);
+
+            top.append(menu);
+        }
+
+        // TÍTULO
+
+        const titulo = crearElemento(
+
+            'h4',
+
+            'idea-title',
+
+            k.titulo || 'Propuesta Kaizen'
+        );
+
+        // ÁREA Y PUNTOS
+
+        const meta = crearElemento(
+            'div',
+            'idea-meta'
+        );
+
+        const area = crearElemento(
+
+            'span',
+
+            '',
+
+            k.area || 'Sin área'
+        );
+
+        const puntos = crearElemento(
+
+            'span',
+
+            'idea-points',
+
+            obtenerPuntos(k) +
+            (cerrado
+                ? ' pts obtenidos'
+                : ' pts potenciales')
+        );
+
+        meta.append(area, puntos);
+
+        // DESCRIPCIÓN
+
+        const descripcion = crearElemento(
+
+            'p',
+
+            'idea-desc',
+
+            k.descripcion || ''
+        );
+
+        // AUTOR Y FECHA
+
+        const nombre = k.usuario_nombre || 'Piloto';
+
+        const footer = crearElemento(
+            'div',
+            'idea-footer-row'
+        );
+
+        const author = crearElemento(
+            'div',
+            'idea-author'
+        );
+
+        const avatar = crearElemento(
+
+            'span',
+
+            'idea-avatar',
+
+            obtenerIniciales(nombre)
+        );
+
+        const nombreAutor = crearElemento(
+            'span',
+            '',
+            nombre
+        );
+
+        author.append(avatar, nombreAutor);
+
+        const fecha = crearElemento(
+
+            'span',
+
+            'idea-date',
+
+            formatoFecha(k.fecha_creacion) ||
+            'Sin fecha'
+        );
+
+        footer.append(author, fecha);
+
+        card.append(
+            top,
+            titulo,
+            meta,
+            descripcion,
+            footer
+        );
+
+        // FECHA DE CIERRE
+
+        if (cerrado) {
+
+            const fechaCierre = crearElemento(
+
+                'div',
+
+                'idea-closed-date',
+
+                'Cierre: ' +
+                (
+                    formatoFecha(k.fecha_cierre) ||
+                    'Sin fecha registrada'
+                )
+            );
+
+            card.append(fechaCierre);
+        }
+
+        // BOTONES SEGÚN ROL
+
+        if (admin || propio) {
+
+            const acciones = crearElemento(
+                'div',
+                'idea-actions'
+            );
+
+            if (admin) {
+
+                const cambiarEstado = crearBoton(
+
+                    cerrado
+                        ? 'Reabrir propuesta'
+                        : '✓ Cerrar propuesta',
+
+                    cerrado
+                        ? 'race-secondary'
+                        : 'race-primary',
+
+                    () => cambiarEstadoKaizen(
+
+                        k.id,
+
+                        cerrado
+                            ? 'ABIERTO'
+                            : 'CERRADO'
+                    )
+                );
+
+                acciones.append(cambiarEstado);
+
+            } else {
+
+                const editar = crearBoton(
+
+                    '✎ Editar propuesta',
+
+                    'race-secondary',
+
+                    () => abrirEdicion(k.id)
+                );
+
+                acciones.append(editar);
+            }
+
+            card.append(acciones);
+        }
+
+        fragmento.append(card);
     });
+
+    contenedor.append(fragmento);
 }
+
+// ==========================================
+// CERRAR MENÚ AL HACER CLIC AFUERA
+// ==========================================
+
+document.addEventListener('click', evento => {
+
+    document.querySelectorAll('.idea-menu[open]')
+        .forEach(menu => {
+
+            if (!menu.contains(evento.target)) {
+
+                menu.open = false;
+            }
+        });
+});
+
+// ==========================================
+// ABRIR EDICIÓN
+// ==========================================
 
 async function abrirEdicion(id) {
 
+    if (!usuarioActual) return;
+
+    const sesion = usuarioActual;
+
     try {
 
-        const { data, error } =
-            await supabaseClient
-                .from('ideas')
-                .select('*')
-                .eq('id', id)
-                .single();
+        const { data, error } = await supabaseClient
+            .from('ideas')
+            .select('*')
+            .eq('id', id)
+            .single();
 
         if (error) throw error;
+
+        if (usuarioActual !== sesion) return;
+
+        const propio =
+            String(data.usuario_legajo) ===
+            String(usuarioActual.legajo);
+
+        if (!esAdministradorKaizen() && !propio) {
+
+            alert('No tienes permiso para editar esta propuesta.');
+
+            return;
+        }
 
         kaizenEditandoId = id;
 
-        document.getElementById(
-            'editTitulo'
-        ).value = data.titulo || '';
+        propietarioEdicion = data.usuario_legajo;
 
-        document.getElementById(
-            'editArea'
-        ).value = data.area || '';
+        $('editTitulo').value =
+            data.titulo || '';
 
-        document.getElementById(
-            'editTipo'
-        ).value = data.tipo || 'Quick';
+        $('editArea').value =
+            data.area || '';
 
-        document.getElementById(
-            'editDescripcion'
-        ).value = data.descripcion || '';
+        $('editTipo').value =
+            data.tipo || 'Quick';
 
-        document.getElementById(
-            'editModal'
-        ).classList.remove('hidden');
+        $('editDescripcion').value =
+            data.descripcion || '';
 
-    } catch (err) {
+        $('editModal').classList.remove('hidden');
 
-        console.error(err);
+    } catch (error) {
+
+        console.error(error);
 
         alert('No se pudo abrir la edición.');
-
     }
 }
 
+// ==========================================
+// GUARDAR EDICIÓN
+// ==========================================
+
 async function guardarEdicion() {
+
+    if (!usuarioActual || kaizenEditandoId === null) {
+
+        return;
+    }
+
+    const propio =
+        String(propietarioEdicion) ===
+        String(usuarioActual.legajo);
+
+    if (!esAdministradorKaizen() && !propio) {
+
+        alert('No tienes permiso para editar.');
+
+        return;
+    }
+
+    const titulo = $('editTitulo').value.trim();
+
+    const area = $('editArea').value.trim();
+
+    const tipo = $('editTipo').value;
+
+    const descripcion = $('editDescripcion').value.trim();
+
+    if (!titulo || !area || !descripcion) {
+
+        alert('Completa todos los campos.');
+
+        return;
+    }
+
+    const boton = $('guardarEdicion');
+
+    const textoOriginal = boton.textContent;
+
+    boton.disabled = true;
+
+    boton.textContent = 'Guardando...';
 
     try {
 
-        const { error } =
-            await supabaseClient
-                .from('ideas')
-                .update({
-                    titulo:
-                        document.getElementById('editTitulo').value,
+        let consulta = supabaseClient
+            .from('ideas')
+            .update({
 
-                    area:
-                        document.getElementById('editArea').value,
+                titulo,
+                area,
+                tipo,
+                descripcion
 
-                    tipo:
-                        document.getElementById('editTipo').value,
+            })
+            .eq('id', kaizenEditandoId);
 
-                    descripcion:
-                        document.getElementById('editDescripcion').value
-                })
-                .eq('id', kaizenEditandoId);
+        if (!esAdministradorKaizen()) {
+
+            consulta = consulta.eq(
+                'usuario_legajo',
+                usuarioActual.legajo
+            );
+        }
+
+        const { error } = await consulta;
 
         if (error) throw error;
 
-        document.getElementById(
-            'editModal'
-        ).classList.add('hidden');
+        cancelarEdicion();
 
         cargarDatosTablero();
 
-    } catch (err) {
+    } catch (error) {
 
-        console.error(err);
+        console.error(error);
 
         alert('No se pudo guardar.');
 
+    } finally {
+
+        boton.disabled = false;
+
+        boton.textContent = textoOriginal;
     }
 }
 
 function cancelarEdicion() {
 
-    document.getElementById(
-        'editModal'
-    ).classList.add('hidden');
+    $('editModal').classList.add('hidden');
+
+    kaizenEditandoId = null;
+
+    propietarioEdicion = null;
 }
 
-// --- ACCIONES DE MODIFICACIÓN DE TAREAS ---
+$('guardarEdicion')?.addEventListener(
+    'click',
+    guardarEdicion
+);
+
+$('cancelarEdicion')?.addEventListener(
+    'click',
+    cancelarEdicion
+);
+
+// ==========================================
+// CERRAR O REABRIR KAIZEN
+// ==========================================
+
+const estadosEnProceso = new Set();
 
 async function cambiarEstadoKaizen(id, nuevoEstado) {
+
+    if (!esAdministradorKaizen()) {
+
+        alert('Solo los administradores pueden cambiar el estado.');
+
+        return;
+    }
+
+    if (!['ABIERTO', 'CERRADO'].includes(nuevoEstado)) {
+
+        return;
+    }
+
+    if (estadosEnProceso.has(id)) return;
+
+    const mensaje = nuevoEstado === 'CERRADO'
+
+        ? '¿Confirmas que esta mejora fue implementada?'
+
+        : '¿Deseas reabrir esta propuesta? Se quitarán sus puntos y su fecha de cierre.';
+
+    if (!confirm(mensaje)) return;
+
+    estadosEnProceso.add(id);
+
     try {
+
+        const estadoAnterior =
+            nuevoEstado === 'CERRADO'
+                ? 'ABIERTO'
+                : 'CERRADO';
+
         const { error } = await supabaseClient
             .from('ideas')
             .update({
+
                 estado: nuevoEstado,
-                fecha_cierre: nuevoEstado === 'CERRADO'
-                    ? new Date().toISOString()
-                    : null
+
+                fecha_cierre:
+
+                    nuevoEstado === 'CERRADO'
+
+                        ? new Date().toISOString()
+
+                        : null
             })
-            .eq('id', id);
+            .eq('id', id)
+            .eq('estado', estadoAnterior);
 
         if (error) throw error;
 
         cargarDatosTablero();
 
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+
+        console.error(error);
+
         alert('No se pudo cambiar el estado.');
+
+    } finally {
+
+        estadosEnProceso.delete(id);
     }
 }
 
+// ==========================================
+// ELIMINAR KAIZEN
+// ==========================================
 
 async function eliminarKaizen(id) {
-    if (!confirm('¿Estás seguro de eliminar esta propuesta?')) return;
+
+    if (!esAdministradorKaizen()) {
+
+        alert('Solo los administradores pueden eliminar propuestas.');
+
+        return;
+    }
+
+    if (!confirm(
+
+        '¿Estás seguro de eliminar esta propuesta? Esta acción no se puede deshacer.'
+
+    )) return;
+
     try {
+
         const { error } = await supabaseClient
             .from('ideas')
             .delete()
             .eq('id', id);
 
         if (error) throw error;
+
         cargarDatosTablero();
-    } catch (err) {
-        console.error(err);
+
+    } catch (error) {
+
+        console.error(error);
+
         alert('No se pudo eliminar la propuesta.');
     }
 }
 
-// --- PESTAÑA PISTA / RANKING ---
+// ==========================================
+// CONSTRUIR RANKING
+// ==========================================
+
+function construirRanking(ideas, soloCerradas = false) {
+
+    const rankingMap = new Map();
+
+    ideas.forEach(k => {
+
+        if (!k.usuario_legajo) return;
+
+        if (soloCerradas && k.estado !== 'CERRADO') {
+
+            return;
+        }
+
+        const legajo = String(k.usuario_legajo);
+
+        if (!rankingMap.has(legajo)) {
+
+            rankingMap.set(legajo, {
+
+                nombre: k.usuario_nombre || 'Piloto',
+
+                legajo,
+
+                puntos: 0,
+
+                total: 0,
+
+                cerradas: 0
+            });
+        }
+
+        const piloto = rankingMap.get(legajo);
+
+        piloto.total++;
+
+        if (k.estado === 'CERRADO') {
+
+            piloto.cerradas++;
+
+            piloto.puntos += obtenerPuntos(k);
+        }
+    });
+
+    return Array.from(rankingMap.values())
+
+        .sort((a, b) =>
+
+            b.puntos - a.puntos ||
+
+            b.cerradas - a.cerradas ||
+
+            a.nombre.localeCompare(b.nombre, 'es')
+        );
+}
+
+// ==========================================
+// CARGAR PISTA DE CARRERAS
+// ==========================================
+
 async function cargarPistaCarreras() {
+
+    if (!usuarioActual) return;
+
+    const sesion = usuarioActual;
 
     try {
 
-        const { data, error } =
-            await supabaseClient
-                .from('ideas')
-                .select('*');
+        const data = await obtenerIdeas(
 
-        if (error) throw error;
+            'id,usuario_legajo,usuario_nombre,estado,tipo,area,fecha_creacion,fecha_cierre'
+        );
 
-        const rankingMap = {};
+        if (usuarioActual !== sesion) return;
 
-        data.forEach(k => {
+        const ranking = construirRanking(data);
 
-            if (!k.usuario_legajo) return;
+        const misDatos = ranking.find(
 
-            if (!rankingMap[k.usuario_legajo]) {
+            r => r.legajo === String(usuarioActual.legajo)
+        );
 
-                rankingMap[k.usuario_legajo] = {
-                    nombre: k.usuario_nombre || 'Piloto',
-                    legajo: k.usuario_legajo,
-                    puntos: 0,
-                    total: 0
-                };
-            }
+        const posicion = ranking.findIndex(
 
-            rankingMap[k.usuario_legajo].total++;
+            r => r.legajo === String(usuarioActual.legajo)
+        );
 
-            if (k.estado === 'CERRADO') {
+        asignarTexto(
 
-                const puntos =
-                    k.tipo === 'Standard'
-                        ? 3
-                        : 1;
+            'misKaizensCerradosNum',
 
-                rankingMap[k.usuario_legajo].puntos += puntos;
-            }
-        });
+            misDatos ? misDatos.puntos : 0
+        );
 
-        const rankingArray =
-            Object.values(rankingMap)
-                .sort((a, b) => b.puntos - a.puntos);
+        asignarTexto(
 
-        const misDatos =
-            rankingArray.find(
-                r => r.legajo === usuarioActual.legajo
-            );
+            'posicionTexto',
 
-        const misPuntos =
-            misDatos
-                ? misDatos.puntos
-                : 0;
+            posicion !== -1
 
-        document.getElementById(
-            'misKaizensCerradosNum'
-        ).textContent = misPuntos;
+                ? `#${posicion + 1}`
 
-        const miPosicionIndex =
-            rankingArray.findIndex(
-                r => r.legajo === usuarioActual.legajo
-            );
+                : '-'
+        );
 
-        document.getElementById(
-            'posicionTexto'
-        ).textContent =
-            miPosicionIndex !== -1
-                ? `#${miPosicionIndex + 1}`
-                : '-';
+        cargarDashboard(data);
 
-cargarDashboard(data);
-        
-        
-renderizarPistaPilotos(rankingArray);
+        renderizarPistaPilotos(ranking);
 
-ideasParaRankingMensual = data;
-actualizarRankingMensual(data);
+        ideasParaRankingMensual = data;
 
-    } catch (err) {
+        actualizarRankingMensual(data);
 
-        console.error(err);
+    } catch (error) {
 
+        console.error(error);
+
+        alert('No se pudieron cargar los informes.');
     }
 }
 
+// ==========================================
+// DASHBOARD KAIZEN
+// ==========================================
+
 function cargarDashboard(ideas) {
 
-    document.getElementById(
-        'dashTotal'
-    ).textContent =
-        ideas.length;
+    const total = ideas.length;
 
-    document.getElementById(
-        'dashAbiertas'
-    ).textContent =
-        ideas.filter(
-            i => i.estado === 'ABIERTO'
-        ).length;
+    const abiertas = ideas.filter(
 
-    document.getElementById(
-        'dashCerradas'
-    ).textContent =
-        ideas.filter(
-            i => i.estado === 'CERRADO'
-        ).length;
+        i => i.estado === 'ABIERTO'
 
-    document.getElementById(
-        'dashQuick'
-    ).textContent =
-        ideas.filter(
-            i => i.tipo === 'Quick'
-        ).length;
+    ).length;
 
-    document.getElementById(
-        'dashStandard'
-    ).textContent =
-        ideas.filter(
-            i => i.tipo === 'Standard'
-        ).length;
+    const cerradas = ideas.filter(
 
-    document.getElementById(
-        'dashParticipantes'
-    ).textContent =
-        new Set(
-            ideas.map(
-                i => i.usuario_legajo
-            )
-        ).size;
+        i => i.estado === 'CERRADO'
+
+    ).length;
+
+    const quick = ideas.filter(
+
+        i => i.tipo === 'Quick'
+
+    ).length;
+
+    const standard = ideas.filter(
+
+        i => i.tipo === 'Standard'
+
+    ).length;
+
+    const participantes = new Set(
+
+        ideas
+
+            .filter(i => i.usuario_legajo)
+
+            .map(i => String(i.usuario_legajo))
+
+    ).size;
+
+    asignarTexto('dashTotal', total);
+
+    asignarTexto('dashAbiertas', abiertas);
+
+    asignarTexto('dashCerradas', cerradas);
+
+    asignarTexto('dashQuick', quick);
+
+    asignarTexto('dashStandard', standard);
+
+    asignarTexto('dashParticipantes', participantes);
+
+    const tasaCierre = total
+
+        ? Math.round((cerradas / total) * 100)
+
+        : 0;
+
+    asignarTexto(
+
+        'dashTasaCierre',
+
+        tasaCierre + '%'
+    );
 }
+
+// ==========================================
+// DISEÑO DE TARJETAS DE RANKING
+// ==========================================
+
+function crearTarjetaPiloto(
+
+    piloto,
+
+    index,
+
+    maxPuntos,
+
+    mensual = false
+
+) {
+
+    const esMiCarro =
+
+        piloto.legajo === String(usuarioActual.legajo);
+
+    const porcentaje = Math.min(
+
+        85,
+
+        (piloto.puntos / maxPuntos) * 85
+    );
+
+    const card = crearElemento(
+
+        'div',
+
+        'racer-card'
+    );
+
+    if (esMiCarro) {
+
+        card.style.borderColor = 'var(--primary-light)';
+
+        card.style.background = '#f8fafc';
+    }
+
+    if (index === 0 && piloto.puntos > 0) {
+
+        card.classList.add('racer-first');
+    }
+
+    const info = crearElemento(
+
+        'div',
+
+        'racer-info'
+    );
+
+    const nombre = crearElemento(
+
+        'span',
+
+        '',
+
+        `#${index + 1} ${piloto.nombre}` +
+
+        (esMiCarro ? ' (Tú)' : '')
+    );
+
+    const datos = crearElemento(
+
+        'span',
+
+        'racer-points',
+
+        `${piloto.puntos} pts · ${piloto.total}` +
+
+        (mensual ? ' cerradas' : ' ideas')
+    );
+
+    datos.style.color = 'var(--success)';
+
+    info.append(nombre, datos);
+
+    const pista = crearElemento(
+
+        'div',
+
+        'racer-track-line'
+    );
+
+    const carro = crearElemento(
+
+        'div',
+
+        'racer-car-icon',
+
+        '🏎️'
+    );
+
+    carro.style.left = porcentaje + '%';
+
+    const bandera = crearElemento(
+
+        'div',
+
+        'racer-flag-icon',
+
+        '🏁'
+    );
+
+    pista.append(carro, bandera);
+
+    card.append(info, pista);
+
+    return card;
+}
+
+// ==========================================
+// RANKING GLOBAL
+// ==========================================
 
 function renderizarPistaPilotos(ranking) {
 
-    const contenedor =
-        document.getElementById(
-            'pistaPilotosContainer'
+    const contenedor = $('pistaPilotosContainer');
+
+    contenedor.replaceChildren();
+
+    if (!ranking.length) {
+
+        contenedor.append(
+
+            crearElemento(
+
+                'p',
+
+                'empty-state',
+
+                'Aún no hay actividad en la pista.'
+            )
         );
-
-    contenedor.innerHTML = '';
-
-    if (ranking.length === 0) {
-
-        contenedor.innerHTML =
-            '<p style="text-align:center;">Aún no hay actividad en la pista.</p>';
 
         return;
     }
 
-    const maxPuntos =
-        Math.max(
-            ...ranking.map(
-                r => r.puntos
-            ),
-            5
-        );
+    const maxPuntos = Math.max(
+
+        ranking[0].puntos,
+
+        5
+    );
+
+    const fragmento = document.createDocumentFragment();
 
     ranking.forEach((piloto, index) => {
 
-        let porcentaje =
-            (piloto.puntos / maxPuntos) * 85;
+        fragmento.append(
 
-        if (porcentaje > 88)
-            porcentaje = 88;
+            crearTarjetaPiloto(
 
-        const esMiCarro =
-            piloto.legajo === usuarioActual.legajo;
+                piloto,
 
-        const card =
-            document.createElement('div');
+                index,
 
-        card.className = 'racer-card';
+                maxPuntos,
 
-        card.style.borderColor =
-            esMiCarro
-                ? 'var(--primary-light)'
-                : 'var(--border-card)';
-
-        card.style.background =
-            esMiCarro
-                ? '#f8fafc'
-                : '#ffffff';
-
-        card.innerHTML = `
-            <div class="racer-info">
-                <span>
-                    #${index + 1}
-                    ${piloto.nombre}
-                    ${esMiCarro ? '(Tú)' : ''}
-                </span>
-
-                <span style="color: var(--success); font-weight:700;">
-    ${piloto.puntos} pts
-</span>
-
-<span style="color: var(--text-muted);">
-    • ${piloto.total} ideas
-</span>
-            </div>
-
-            <div class="racer-track-line">
-                <div
-                    class="racer-car-icon"
-                    style="left:${porcentaje}%;">
-                    🏎️
-                </div>
-
-                <div class="racer-flag-icon">
-                    🏁
-                </div>
-            </div>
-        `;
-
-        contenedor.appendChild(card);
-
+                false
+            )
+        );
     });
 
+    contenedor.append(fragmento);
 }
 
-document
-.getElementById('guardarEdicion')
-?.addEventListener(
-    'click',
-    guardarEdicion
-);
-
-document
-.getElementById('cancelarEdicion')
-?.addEventListener(
-    'click',
-    cancelarEdicion
-);
-
-/* ==========================================
-   RANKING MENSUAL KAIZEN
-   SEGÚN FECHA DE CIERRE
-========================================== */
+// ==========================================
+// RANKING MENSUAL
+// SEGÚN FECHA REAL DE CIERRE
+// ==========================================
 
 function cambiarMesRanking() {
+
     actualizarRankingMensual(ideasParaRankingMensual);
 }
 
 function actualizarRankingMensual(ideas) {
 
-    const selector = document.getElementById('mesRanking');
-    const ganador = document.getElementById('ganadorMensual');
-    const contenedor = document.getElementById('rankingMensualContainer');
+    const selector = $('mesRanking');
+
+    const ganador = $('ganadorMensual');
+
+    const contenedor = $('rankingMensualContainer');
 
     if (!selector || !ganador || !contenedor) return;
 
-    // Seleccionar el mes actual automáticamente
     if (!selector.value) {
-        const hoy = new Date();
 
-        selector.value =
-            hoy.getFullYear() + '-' +
-            String(hoy.getMonth() + 1).padStart(2, '0');
+        selector.value = fechaISOParaguay(
+
+            new Date()
+
+        ).slice(0, 7);
     }
 
     const mesSeleccionado = selector.value;
 
-    const rankingMap = {};
+    const ideasDelMes = ideas.filter(idea => {
 
-    ideas.forEach(idea => {
-
-        // Solo propuestas cerradas con fecha de cierre
         if (
+
             idea.estado !== 'CERRADO' ||
+
             !idea.fecha_cierre ||
+
             !idea.usuario_legajo
-        ) return;
 
-        const fecha = new Date(idea.fecha_cierre);
+        ) return false;
 
-        if (Number.isNaN(fecha.getTime())) return;
+        const mesIdea = fechaISOParaguay(
 
-        const mesIdea =
-            fecha.getFullYear() + '-' +
-            String(fecha.getMonth() + 1).padStart(2, '0');
+            idea.fecha_cierre
 
-        if (mesIdea !== mesSeleccionado) return;
+        ).slice(0, 7);
 
-        const legajo = String(idea.usuario_legajo);
-
-        if (!rankingMap[legajo]) {
-            rankingMap[legajo] = {
-                nombre: idea.usuario_nombre || 'Piloto',
-                legajo: legajo,
-                puntos: 0,
-                total: 0
-            };
-        }
-
-        rankingMap[legajo].total++;
-
-        rankingMap[legajo].puntos +=
-            idea.tipo === 'Standard' ? 3 : 1;
+        return mesIdea === mesSeleccionado;
     });
 
-    // Ordenar de mayor a menor puntuación
-    const ranking = Object.values(rankingMap)
-        .sort((a, b) =>
-            b.puntos - a.puntos ||
-            b.total - a.total ||
-            a.nombre.localeCompare(b.nombre, 'es')
-        );
+    const ranking = construirRanking(
 
-    ganador.innerHTML = '';
-    contenedor.innerHTML = '';
+        ideasDelMes,
 
-    // Si no hay propuestas cerradas en el mes
-    if (ranking.length === 0) {
+        true
+    );
+
+    ganador.replaceChildren();
+
+    contenedor.replaceChildren();
+
+    if (!ranking.length) {
+
         ganador.textContent =
+
             'Todavía no hay propuestas cerradas en este mes.';
+
         return;
     }
 
-    // Mostrar ganador del mes
     const primero = ranking[0];
 
-    const tituloGanador = document.createElement('strong');
+    const mesActual = fechaISOParaguay(
 
-    tituloGanador.textContent =
-        '🏆 Ganador del mes: ' +
+        new Date()
+
+    ).slice(0, 7);
+
+    const titulo = mesSeleccionado >= mesActual
+
+        ? '🏆 Líder del mes: '
+
+        : '🏆 Ganador del mes: ';
+
+    const tituloGanador = crearElemento(
+
+        'strong',
+
+        '',
+
+        titulo +
+
         primero.nombre +
+
         ' — ' +
+
         primero.puntos +
-        ' puntos';
 
-    ganador.appendChild(tituloGanador);
+        ' puntos'
+    );
 
-    // Dibujar pista mensual
-    const maxPuntos = ranking[0].puntos || 1;
+    ganador.append(tituloGanador);
+
+    const maxPuntos = primero.puntos || 1;
+
+    const fragmento = document.createDocumentFragment();
 
     ranking.forEach((piloto, index) => {
 
-        const porcentaje = Math.min(
-            85,
-            (piloto.puntos / maxPuntos) * 85
+        fragmento.append(
+
+            crearTarjetaPiloto(
+
+                piloto,
+
+                index,
+
+                maxPuntos,
+
+                true
+            )
         );
-
-        const esMiCarro =
-            piloto.legajo === String(usuarioActual.legajo);
-
-        const card = document.createElement('div');
-        card.className = 'racer-card';
-
-        if (esMiCarro) {
-            card.style.borderColor = 'var(--primary-light)';
-            card.style.background = '#f8fafc';
-        }
-
-        const info = document.createElement('div');
-        info.className = 'racer-info';
-
-        const nombre = document.createElement('span');
-        nombre.textContent =
-            '#' + (index + 1) + ' ' +
-            piloto.nombre +
-            (esMiCarro ? ' (Tú)' : '');
-
-        const puntos = document.createElement('span');
-        puntos.textContent =
-            piloto.puntos + ' pts · ' +
-            piloto.total + ' cerradas';
-
-        info.append(nombre, puntos);
-
-        const pista = document.createElement('div');
-        pista.className = 'racer-track-line';
-
-        const carro = document.createElement('div');
-        carro.className = 'racer-car-icon';
-        carro.style.left = porcentaje + '%';
-        carro.textContent = '🏎️';
-
-        const meta = document.createElement('div');
-        meta.className = 'racer-flag-icon';
-        meta.textContent = '🏁';
-
-        pista.append(carro, meta);
-        card.append(info, pista);
-
-        contenedor.appendChild(card);
     });
+
+    contenedor.append(fragmento);
 }
 
 // ==========================================
-// EXPORTAR BASE DE DATOS KAIZEN A EXCEL
+// EXPORTAR BASE DE DATOS A EXCEL
 // ==========================================
 
 async function exportarIdeasExcel() {
 
-    const esAdmin = usuarioActual && (
-        String(usuarioActual.legajo) === '51000364' ||
-        usuarioActual.rol === 'admin'
-    );
+    if (!esAdministradorKaizen()) {
 
-    if (!esAdmin) {
         alert('Solo los administradores pueden exportar.');
+
         return;
     }
 
     if (typeof XLSX === 'undefined') {
+
         alert('No se pudo cargar la librería de Excel.');
+
         return;
+    }
+
+    const boton = $('btnExportarExcel');
+
+    const textoOriginal = boton?.textContent;
+
+    const sesion = usuarioActual;
+
+    if (boton) {
+
+        boton.disabled = true;
+
+        boton.textContent = 'Generando Excel...';
     }
 
     try {
 
-        let ideas = [];
-        const limite = 500;
-        let inicio = 0;
+        const ideas = await obtenerIdeas('*');
 
-        // Obtener todas las propuestas de Supabase
-        while (true) {
+        if (
 
-            const { data, error } = await supabaseClient
-                .from('ideas')
-                .select('*')
-                .order('id', { ascending: true })
-                .range(inicio, inicio + limite - 1);
+            usuarioActual !== sesion ||
 
-            if (error) throw error;
+            !esAdministradorKaizen()
 
-            ideas.push(...data);
+        ) return;
 
-            if (data.length < limite) break;
+        if (!ideas.length) {
 
-            inicio += limite;
-        }
-
-        if (ideas.length === 0) {
             alert('No hay propuestas para exportar.');
+
             return;
         }
 
-        // Formato de fechas
-        function formatoFecha(valor) {
+        // COLUMNAS DE LA BASE DE DATOS
 
-            if (!valor) return '';
-
-            const fecha = new Date(valor);
-
-            if (Number.isNaN(fecha.getTime())) return '';
-
-            return fecha.toLocaleDateString('es-PY', {
-                timeZone: 'America/Asuncion'
-            });
-        }
-
-        // Preparar columnas del Excel
         const registros = ideas.map(idea => ({
 
-            'ID': idea.id,
+            'ID':
+
+                idea.id,
 
             'Colaborador':
+
                 idea.usuario_nombre || '',
 
             'Legajo':
+
                 String(idea.usuario_legajo || ''),
 
             'Área':
+
                 idea.area || '',
 
             'Título de la propuesta':
+
                 idea.titulo || '',
 
             'Descripción':
+
                 idea.descripcion || '',
 
             'Tipo de Kaizen':
+
                 idea.tipo || '',
 
             'Estado':
+
                 idea.estado || '',
 
             'Fecha de creación':
+
                 formatoFecha(idea.fecha_creacion),
 
             'Fecha de cierre':
+
                 formatoFecha(idea.fecha_cierre),
 
             'Puntos':
+
                 idea.estado === 'CERRADO'
-                    ? (
-                        idea.tipo === 'Standard'
-                            ? 3
-                            : 1
-                    )
+
+                    ? obtenerPuntos(idea)
+
                     : 0
 
         }));
 
         const abiertas = registros.filter(
+
             idea => idea.Estado === 'ABIERTO'
         );
 
         const cerradas = registros.filter(
+
             idea => idea.Estado === 'CERRADO'
         );
 
-        // Crear libro de Excel
         const libro = XLSX.utils.book_new();
 
         const columnas = Object.keys(registros[0]);
@@ -1075,28 +1924,41 @@ async function exportarIdeasExcel() {
         function crearHoja(datos) {
 
             const hoja = XLSX.utils.json_to_sheet(
+
                 datos,
+
                 { header: columnas }
             );
 
-            // Ancho de las columnas
             hoja['!cols'] = [
+
                 { wch: 38 },
+
                 { wch: 30 },
+
                 { wch: 15 },
+
                 { wch: 22 },
+
                 { wch: 45 },
+
                 { wch: 70 },
+
                 { wch: 18 },
+
                 { wch: 15 },
+
                 { wch: 20 },
+
                 { wch: 20 },
+
                 { wch: 12 }
             ];
 
-            // Activar filtros
             if (hoja['!ref']) {
+
                 hoja['!autofilter'] = {
+
                     ref: hoja['!ref']
                 };
             }
@@ -1104,72 +1966,92 @@ async function exportarIdeasExcel() {
             return hoja;
         }
 
-        // Agregar las tres hojas
+        // HOJA GENERAL
+
         XLSX.utils.book_append_sheet(
+
             libro,
+
             crearHoja(registros),
+
             'Base general'
         );
 
+        // HOJA ABIERTAS
+
         XLSX.utils.book_append_sheet(
+
             libro,
+
             crearHoja(abiertas),
+
             'Abiertas'
         );
 
+        // HOJA CERRADAS
+
         XLSX.utils.book_append_sheet(
+
             libro,
+
             crearHoja(cerradas),
+
             'Cerradas'
         );
 
-        // Nombre del archivo
-        const partes = new Intl.DateTimeFormat('en-CA', {
-            timeZone: 'America/Asuncion',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        }).formatToParts(new Date());
+        const fechaArchivo = fechaISOParaguay(
 
-        const obtenerParte = tipo =>
-            partes.find(p => p.type === tipo).value;
-
-        const fechaArchivo =
-            obtenerParte('year') + '-' +
-            obtenerParte('month') + '-' +
-            obtenerParte('day');
+            new Date()
+        );
 
         XLSX.writeFile(
+
             libro,
+
             `Kaizen_Race_${fechaArchivo}.xlsx`
         );
 
-    } catch (err) {
+    } catch (error) {
 
-        console.error(err);
+        console.error(error);
 
         alert(
+
             'No se pudo exportar la base de datos: ' +
-            err.message
+
+            error.message
         );
+
+    } finally {
+
+        if (boton) {
+
+            boton.disabled = false;
+
+            boton.textContent = textoOriginal;
+        }
     }
 }
 
-// MOSTRAR BOTÓN SOLO A ADMINISTRADORES
+// ==========================================
+// BOTÓN EXCEL SOLO PARA ADMINISTRADORES
+// ==========================================
 
 function actualizarBotonExportar() {
 
-    const boton = document.getElementById(
-        'btnExportarExcel'
-    );
+    const boton = $('btnExportarExcel');
 
     if (!boton) return;
 
-    const esAdmin = usuarioActual && (
-        String(usuarioActual.legajo) === '51000364' ||
-        usuarioActual.rol === 'admin'
-    );
+    boton.style.display =
 
-    boton.style.display = esAdmin ? 'flex' : 'none';
+        esAdministradorKaizen()
+
+            ? 'flex'
+
+            : 'none';
 }
 
+// ==========================================
+// FIN DE APP.JS - KAIZEN RACE 2.0
+// ==========================================
