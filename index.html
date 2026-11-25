@@ -1,3679 +1,2145 @@
+
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-    <meta name="theme-color" content="#142b55">
-
-    <title>Kaizen Race</title>
-
-    <!-- SUPABASE -->
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- TIPOGRAFÍA -->
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-
-    <style>
-
-        /* =====================================
-           VARIABLES GENERALES
-        ===================================== */
-
-        :root {
-
-            --primary: #142b55;
-            --primary-light: #2563eb;
-            --orange: #f59e0b;
-
-            --success: #15803d;
-            --danger: #dc2626;
-            --warning: #d97706;
-
-            --bg-dark: #0f1e3b;
-            --card-bg: #ffffff;
-            --app-bg: #f3f6fa;
-
-            --text-main: #17243b;
-            --text-muted: #64748b;
-
-            --border: #edf1f5;
-            --border-card: #e2e8f0;
-
-            --shadow:
-                0 4px 16px rgba(20,43,85,0.05);
-        }
-
-        * {
-
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-
-            font-family:
-                'Inter',
-                Arial,
-                sans-serif;
-        }
-
-        html,
-        body {
-
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-
-            background: #142b55;
-
-            color: var(--text-main);
-        }
-
-        body {
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            height: 100vh;
-            height: 100dvh;
-        }
-
-        .hidden {
-
-            display: none !important;
-        }
-
-        button,
-        input,
-        textarea,
-        select {
-
-            font: inherit;
-        }
-
-        button {
-
-            cursor: pointer;
-            border: none;
-            font-weight: 600;
-            transition:
-                background 0.2s,
-                opacity 0.2s;
-        }
-
-        button:disabled {
-
-            opacity: 0.55;
-            cursor: wait;
-        }
-
-        button:focus-visible,
-        summary:focus-visible {
-
-            outline: 3px solid #93c5fd;
-            outline-offset: 3px;
-        }
-
-        button:hover:not(:disabled) {
-
-            opacity: 0.92;
-        }
-
-        .btn-primary,
-        .btn-success,
-        .btn-secondary {
-
-            width: 100%;
-            min-height: 46px;
-            padding: 13px 16px;
-
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .btn-primary {
-
-            background: var(--primary-light);
-            color: white;
-        }
-
-        .btn-success {
-
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-secondary {
-
-            background: #edf2f7;
-            color: #475569;
-        }
-
-        /* =====================================
-           LOGIN Y REGISTRO
-        ===================================== */
-
-        .login-container {
-
-            width: 100%;
-            max-width: 440px;
-
-            padding: 24px;
-
-            max-height: 100dvh;
-            overflow-y: auto;
-        }
-
-        .login-brand {
-
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .brand-symbol {
-
-            width: 76px;
-            height: 76px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            margin: 0 auto 18px;
-
-            border-radius: 24px;
-
-            background: #ffffff;
-            color: var(--primary);
-
-            font-size: 38px;
-
-            box-shadow:
-                0 8px 24px rgba(0,0,0,0.18);
-        }
-
-        .login-brand h1 {
-
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .login-brand h1 span {
-
-            color: #fbbf24;
-        }
-
-        .login-brand p {
-
-            color: #cbd5e1;
-            font-size: 13px;
-            margin-top: 8px;
-            line-height: 1.6;
-        }
-
-        .login-card {
-
-            background: white;
-
-            padding: 26px;
-
-            border-radius: 24px;
-
-            box-shadow:
-                0 16px 40px rgba(0,0,0,0.15);
-        }
-
-        .login-header h2 {
-
-            font-size: 21px;
-            font-weight: 800;
-
-            margin-bottom: 6px;
-        }
-
-        .login-header p {
-
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
-
-            margin-bottom: 24px;
-        }
-
-        .auth-switch-container {
-
-            position: relative;
-
-            display: flex;
-
-            background: #eef2f7;
-
-            padding: 4px;
-
-            border-radius: 12px;
-
-            margin-bottom: 24px;
-        }
-
-        .auth-slider-bg {
-
-            position: absolute;
-
-            top: 4px;
-            bottom: 4px;
-            left: 4px;
-
-            width: calc(50% - 4px);
-
-            background: var(--primary-light);
-
-            border-radius: 9px;
-
-            transition: transform 0.25s ease;
-        }
-
-        .auth-slider-bg.left {
-
-            transform: translateX(0);
-        }
-
-        .auth-slider-bg.right {
-
-            transform: translateX(100%);
-        }
-
-        .auth-tab-btn {
-
-            position: relative;
-            z-index: 1;
-
-            flex: 1;
-
-            padding: 11px 4px;
-
-            background: transparent;
-
-            color: var(--text-muted);
-
-            font-size: 12px;
-        }
-
-        .auth-tab-btn.active {
-
-            color: white;
-        }
-
-        .auth-form-section {
-
-            display: none;
-        }
-
-        .auth-form-section.active {
-
-            display: block;
-        }
-
-        .form-group {
-
-            margin-bottom: 17px;
-        }
-
-        .form-group label {
-
-            display: block;
-
-            color: #475569;
-
-            font-size: 12px;
-            font-weight: 700;
-
-            margin-bottom: 8px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-
-            width: 100%;
-
-            min-height: 46px;
-
-            padding: 12px 14px;
-
-            background: #f8fafc;
-
-            border: 1px solid var(--border-card);
-
-            border-radius: 11px;
-
-            font-size: 16px;
-
-            color: var(--text-main);
-
-            outline: none;
-
-            transition:
-                border-color 0.2s,
-                box-shadow 0.2s;
-        }
-
-        .form-group textarea {
-
-            resize: vertical;
-
-            min-height: 100px;
-
-            line-height: 1.5;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-
-            border-color: var(--primary-light);
-
-            background: white;
-
-            box-shadow:
-                0 0 0 3px rgba(37,99,235,0.08);
-        }
-
-        .login-footer {
-
-            text-align: center;
-
-            margin-top: 22px;
-
-            color: #a9bad5;
-
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
-
-        /* =====================================
-           APLICACIÓN PRINCIPAL
-        ===================================== */
-
-        #appArea {
-
-            width: 100%;
-            max-width: 560px;
-
-            height: 95vh;
-            height: 95dvh;
-
-            display: flex;
-            flex-direction: column;
-
-            position: relative;
-
-            overflow: hidden;
-
-            background: var(--app-bg);
-
-            border-radius: 24px;
-
-            box-shadow:
-                0 20px 60px rgba(0,0,0,0.25);
-        }
-
-        /* =====================================
-           CABECERA
-        ===================================== */
-
-        .app-header {
-
-            background: var(--primary);
-
-            padding: 18px 18px 20px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 12px;
-
-            flex-shrink: 0;
-
-            border-bottom: 3px solid var(--orange);
-        }
-
-        .user-info {
-
-            display: flex;
-            align-items: center;
-
-            gap: 11px;
-
-            min-width: 0;
-        }
-
-        .app-brand-icon {
-
-            width: 43px;
-            height: 43px;
-
-            flex-shrink: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: rgba(255,255,255,0.12);
-
-            border: 1px solid rgba(255,255,255,0.15);
-
-            border-radius: 13px;
-
-            font-size: 23px;
-        }
-
-        .user-details {
-
-            min-width: 0;
-        }
-
-        .brand-name {
-
-            color: white;
-
-            font-size: 17px;
-            font-weight: 800;
-
-            letter-spacing: -0.4px;
-        }
-
-        .brand-name span {
-
-            color: #fbbf24;
-        }
-
-        .user-details h3 {
-
-            color: #dbeafe;
-
-            font-size: 9px;
-            font-weight: 700;
-
-            letter-spacing: 0.7px;
-
-            margin-top: 3px;
-        }
-
-        .user-subtext {
-
-            display: block;
-
-            color: #cbd5e1;
-
-            font-size: 10px;
-
-            margin-top: 3px;
-
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .header-actions {
-
-            display: flex;
-            align-items: center;
-
-            gap: 8px;
-
-            flex-shrink: 0;
-        }
-
-        .role-badge {
-
-            font-size: 9px;
-            font-weight: 800;
-
-            text-transform: uppercase;
-
-            padding: 6px 9px;
-
-            border: 1px solid var(--border-card);
-
-            border-radius: 7px;
-
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        .logout-header {
-
-            width: 36px;
-            height: 36px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: rgba(255,255,255,0.10);
-
-            border: 1px solid rgba(255,255,255,0.15);
-
-            border-radius: 10px;
-
-            color: white;
-        }
-
-        .logout-header svg {
-
-            width: 19px;
-            height: 19px;
-        }
-
-        /* =====================================
-           CONTENIDO DE PESTAÑAS
-        ===================================== */
-
-        .tab-content {
-
-            display: none;
-
-            flex: 1;
-            min-height: 0;
-
-            overflow-y: auto;
-            overscroll-behavior: contain;
-
-            padding: 18px;
-
-            scrollbar-width: thin;
-        }
-
-        .tab-content.active {
-
-            display: block;
-        }
-
-        .page-heading {
-
-            margin-bottom: 18px;
-        }
-
-        .page-heading h2 {
-
-            font-size: 24px;
-            font-weight: 800;
-
-            letter-spacing: -0.8px;
-
-            margin-bottom: 5px;
-        }
-
-        .page-heading p {
-
-            font-size: 13px;
-
-            color: var(--text-muted);
-
-            line-height: 1.5;
-        }
-
-        .section-label {
-
-            color: var(--text-muted);
-
-            font-size: 10px;
-            font-weight: 800;
-
-            text-transform: uppercase;
-
-            letter-spacing: 1.2px;
-        }
-
-        /* =====================================
-           PANTALLA NUEVA PROPUESTA
-        ===================================== */
-
-        .hero-card {
-
-            position: relative;
-
-            overflow: hidden;
-
-            background: linear-gradient(
-                145deg,
-                #142b55,
-                #244d94
-            );
-
-            color: white;
-
-            padding: 28px 24px;
-
-            border-radius: 22px;
-
-            margin-bottom: 20px;
-        }
-
-        .hero-card::after {
-
-            content: "";
-
-            position: absolute;
-
-            width: 180px;
-            height: 180px;
-
-            border: 28px solid rgba(255,255,255,0.04);
-
-            border-radius: 50%;
-
-            top: -65px;
-            right: -65px;
-
-            pointer-events: none;
-        }
-
-        .hero-label {
-
-            color: #fbbf24;
-
-            font-size: 10px;
-            font-weight: 800;
-
-            letter-spacing: 1.5px;
-        }
-
-        .hero-icon {
-
-            font-size: 52px;
-
-            margin: 20px 0;
-        }
-
-        .hero-card h2 {
-
-            font-size: 28px;
-            font-weight: 800;
-
-            line-height: 1.2;
-
-            letter-spacing: -0.8px;
-
-            margin-bottom: 12px;
-        }
-
-        .hero-card p {
-
-            color: #dbeafe;
-
-            font-size: 13px;
-
-            line-height: 1.7;
-
-            margin-bottom: 24px;
-        }
-
-        .hero-button {
-
-            width: 100%;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            gap: 10px;
-
-            background: #fbbf24;
-            color: #17243b;
-
-            padding: 15px;
-
-            border-radius: 12px;
-
-            font-size: 14px;
-            font-weight: 800;
-        }
-
-        .hero-button svg {
-
-            width: 20px;
-            height: 20px;
-        }
-
-        .home-types {
-
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 12px;
-
-            margin-top: 12px;
-            margin-bottom: 20px;
-        }
-
-        .home-type-card {
-
-            background: white;
-
-            border: 1px solid var(--border-card);
-
-            border-radius: 16px;
-
-            padding: 18px;
-
-            box-shadow: var(--shadow);
-        }
-
-        .home-type-icon {
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            width: 42px;
-            height: 42px;
-
-            border-radius: 12px;
-
-            font-size: 22px;
-
-            margin-bottom: 13px;
-        }
-
-        .quick-icon {
-
-            background: #fff4dd;
-            color: #b45309;
-        }
-
-        .standard-icon {
-
-            background: #eaf1ff;
-            color: #2563eb;
-        }
-
-        .home-type-card h3 {
-
-            font-size: 16px;
-            font-weight: 800;
-
-            margin-bottom: 6px;
-        }
-
-        .home-type-card p {
-
-            font-size: 11px;
-
-            color: var(--text-muted);
-
-            line-height: 1.5;
-        }
-
-        .home-points {
-
-            display: block;
-
-            margin-top: 14px;
-
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .quick-text {
-
-            color: #b45309;
-        }
-
-        .standard-text {
-
-            color: #2563eb;
-        }
-
-        .home-note {
-
-            display: flex;
-            align-items: flex-start;
-
-            gap: 12px;
-
-            padding: 16px;
-
-            background: #eaf0f8;
-
-            border-radius: 14px;
-
-            color: #475569;
-
-            font-size: 12px;
-
-            line-height: 1.6;
-        }
-
-        /* =====================================
-           INDICADORES Y DASHBOARD
-        ===================================== */
-
-        .progress-card-container {
-
-            background: white;
-
-            border: 1px solid var(--border-card);
-
-            border-radius: 18px;
-
-            padding: 18px;
-
-            margin-bottom: 18px;
-
-            box-shadow: var(--shadow);
-        }
-
-        .progress-title-row {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            margin-bottom: 8px;
-        }
-
-        .progress-title-row span {
-
-            font-size: 10px;
-            font-weight: 800;
-
-            color: var(--text-muted);
-
-            letter-spacing: 1px;
-        }
-
-        #iconoIndicador {
-
-            font-size: 23px;
-        }
-
-        .progress-heading {
-
-            font-size: 20px;
-            font-weight: 800;
-
-            letter-spacing: -0.5px;
-
-            margin-bottom: 18px;
-        }
-
-        .stats-grid-mini {
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(3, minmax(0,1fr));
-
-            gap: 9px;
-        }
-
-        .stat-card {
-
-            min-width: 0;
-
-            text-align: center;
-
-            padding: 16px 6px;
-
-            border-radius: 13px;
-
-            border: 1px solid transparent;
-        }
-
-        .stat-card-total {
-
-            background: #f1f5f9;
-
-            color: #334155;
-        }
-
-        .stat-card-abiertas {
-
-            background: #eaf1ff;
-
-            color: #1d4ed8;
-        }
-
-        .stat-card-cerradas {
-
-            background: #e8f7ee;
-
-            color: #15803d;
-        }
-
-        .stat-card-quick {
-
-            background: #fff5e3;
-
-            color: #b45309;
-        }
-
-        .stat-card-standard {
-
-            background: #eaf1ff;
-
-            color: #1d4ed8;
-        }
-
-        .stat-card h4,
-        #countTotal,
-        #countAbiertas,
-        #countCerradas {
-
-            display: block;
-
-            font-size: 29px;
-            font-weight: 800;
-
-            letter-spacing: -1px;
-
-            line-height: 1.2;
-
-            margin-bottom: 6px;
-
-            font-variant-numeric: tabular-nums;
-        }
-
-        .stat-card span {
-
-            font-size: 9px;
-            font-weight: 700;
-
-            text-transform: uppercase;
-
-            letter-spacing: 0.2px;
-
-            overflow-wrap: anywhere;
-        }
-
-        .stat-card-clickable {
-
-            cursor: pointer;
-
-            transition:
-                border-color 0.2s,
-                transform 0.2s;
-        }
-
-        .stat-card-clickable:hover {
-
-            transform: translateY(-2px);
-        }
-
-        .stat-card-clickable.filter-active {
-
-            border-color: currentColor;
-
-            box-shadow:
-                inset 0 0 0 1px currentColor;
-        }
-
-        /* =====================================
-           FILTROS DE PROPUESTAS
-        ===================================== */
-
-        .list-heading {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            flex-wrap: wrap;
-
-            gap: 12px;
-
-            margin: 22px 0 14px;
-        }
-
-        .list-heading h3 {
-
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .auth-switch-container.filter-switch {
-
-            width: 180px;
-
-            margin: 0;
-
-            padding: 3px;
-
-            border-radius: 10px;
-
-            background: #e3eaf3;
-        }
-
-        .filter-switch button {
-
-            position: relative;
-            z-index: 1;
-
-            flex: 1;
-
-            background: transparent;
-
-            padding: 8px 4px;
-
-            color: var(--text-muted);
-
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .filter-switch button.active {
-
-            color: white;
-        }
-
-        .auth-slider-bg.filter-slider {
-
-            top: 3px;
-            bottom: 3px;
-            left: 3px;
-
-            width: calc(50% - 3px);
-
-            border-radius: 8px;
-        }
-
-        /* =====================================
-           TARJETAS KAIZEN 2.0
-        ===================================== */
-
-        .idea-card {
-
-            position: relative;
-
-            background: white;
-
-            border: 1px solid var(--border-card);
-
-            border-left: 4px solid var(--primary-light);
-
-            border-radius: 16px;
-
-            padding: 17px;
-
-            margin-bottom: 14px;
-
-            box-shadow: var(--shadow);
-        }
-
-        .idea-card.is-open {
-
-            border-left-color: #2563eb;
-        }
-
-        .idea-card.is-closed {
-
-            border-left-color: #16a34a;
-        }
-
-        .idea-header-row {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 8px;
-
-            margin-bottom: 12px;
-        }
-
-        .badges-group {
-
-            display: flex;
-            align-items: center;
-
-            gap: 6px;
-
-            flex-wrap: wrap;
-        }
-
-        .status-badge {
-
-            display: inline-flex;
-            align-items: center;
-
-            padding: 5px 9px;
-
-            border-radius: 6px;
-
-            font-size: 9px;
-            font-weight: 800;
-
-            letter-spacing: 0.4px;
-
-            text-transform: uppercase;
-        }
-
-        .status-abierto {
-
-            background: #eaf1ff;
-            color: #1d4ed8;
-        }
-
-        .status-cerrado {
-
-            background: #e8f7ee;
-            color: #15803d;
-        }
-
-        .status-abierto::before,
-        .status-cerrado::before {
-
-            content: "";
-
-            width: 6px;
-            height: 6px;
-
-            border-radius: 50%;
-
-            background: currentColor;
-
-            margin-right: 6px;
-        }
-
-        .type-quick {
-
-            background: #fff3db;
-
-            color: #a16207;
-        }
-
-        .type-standard {
-
-            background: #e0e7ff;
-
-            color: #3730a3;
-        }
-
-        .badge-tipo {
-
-            background: #f1f5f9;
-
-            color: #475569;
-        }
-
-        .idea-title {
-
-            color: var(--text-main);
-
-            font-size: 17px;
-            font-weight: 800;
-
-            letter-spacing: -0.35px;
-
-            line-height: 1.4;
-
-            margin-bottom: 8px;
-
-            overflow-wrap: anywhere;
-        }
-
-        .idea-meta {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            flex-wrap: wrap;
-
-            gap: 8px;
-
-            color: var(--text-muted);
-
-            font-size: 11px;
-            font-weight: 600;
-
-            margin-bottom: 13px;
-        }
-
-        .idea-meta > span:first-child {
-
-            background: #f1f5f9;
-
-            padding: 5px 8px;
-
-            border-radius: 6px;
-        }
-
-        .idea-points {
-
-            color: #a16207;
-
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .is-closed .idea-points {
-
-            color: #15803d;
-        }
-
-        .idea-desc {
-
-            color: #526176;
-
-            font-size: 13px;
-
-            line-height: 1.7;
-
-            margin-bottom: 16px;
-
-            overflow-wrap: anywhere;
-
-            white-space: pre-wrap;
-        }
-
-        .idea-footer-row {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 10px;
-
-            padding-top: 13px;
-
-            border-top: 1px solid var(--border);
-
-            font-size: 11px;
-
-            color: var(--text-muted);
-        }
-
-        .idea-author {
-
-            display: flex;
-            align-items: center;
-
-            gap: 8px;
-
-            min-width: 0;
-
-            font-weight: 600;
-
-            color: #475569;
-        }
-
-        .idea-author > span:last-child {
-
-            overflow-wrap: anywhere;
-        }
-
-        .idea-avatar {
-
-            width: 33px;
-            height: 33px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            flex-shrink: 0;
-
-            background: #eaf1ff;
-
-            color: #1d4ed8;
-
-            border-radius: 50%;
-
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .idea-date {
-
-            font-size: 10px;
-
-            flex-shrink: 0;
-        }
-
-        .idea-closed-date {
-
-            margin-top: 12px;
-
-            padding: 9px 11px;
-
-            background: #f0fdf4;
-
-            border-radius: 8px;
-
-            color: #15803d;
-
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .idea-actions {
-
-            margin-top: 14px;
-        }
-
-        .race-primary,
-        .race-secondary {
-
-            width: 100%;
-
-            min-height: 40px;
-
-            padding: 10px 14px;
-
-            border-radius: 9px;
-
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .race-primary {
-
-            background: var(--primary-light);
-
-            color: white;
-        }
-
-        .race-secondary {
-
-            background: #f1f5f9;
-
-            border: 1px solid var(--border-card);
-
-            color: #334155;
-        }
-
-        /* =====================================
-           MENÚ ADMINISTRATIVO DE TRES PUNTOS
-        ===================================== */
-
-        .idea-menu {
-
-            position: relative;
-
-            flex-shrink: 0;
-        }
-
-        .idea-menu summary {
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            width: 34px;
-            height: 34px;
-
-            background: #f5f7fa;
-
-            border: 1px solid var(--border-card);
-
-            border-radius: 9px;
-
-            color: #64748b;
-
-            font-size: 23px;
-
-            cursor: pointer;
-
-            list-style: none;
-        }
-
-        .idea-menu summary::-webkit-details-marker {
-
-            display: none;
-        }
-
-        .idea-menu summary::marker {
-
-            content: "";
-        }
-
-        .idea-menu[open] summary {
-
-            background: #eaf1ff;
-
-            color: var(--primary-light);
-        }
-
-        .idea-menu-panel {
-
-            position: absolute;
-
-            top: 42px;
-            right: 0;
-
-            width: 185px;
-
-            padding: 5px;
-
-            z-index: 20;
-
-            background: white;
-
-            border: 1px solid var(--border-card);
-
-            border-radius: 12px;
-
-            box-shadow:
-                0 8px 30px rgba(15,23,42,0.15);
-        }
-
-        .menu-action {
-
-            display: block;
-
-            width: 100%;
-
-            text-align: left;
-
-            padding: 12px 10px;
-
-            background: transparent;
-
-            border-radius: 7px;
-
-            font-size: 12px;
-            font-weight: 600;
-
-            color: #334155;
-        }
-
-        .menu-action:hover {
-
-            background: #f1f5f9;
-        }
-
-        .menu-danger {
-
-            color: var(--danger);
-        }
-
-        .menu-danger:hover {
-
-            background: #fef2f2;
-        }
-
-        .empty-state {
-
-            text-align: center;
-
-            background: white;
-
-            border: 1px dashed #cbd5e1;
-
-            border-radius: 14px;
-
-            padding: 28px 16px;
-
-            color: var(--text-muted);
-
-            font-size: 13px;
-
-            line-height: 1.6;
-        }
-
-        /* =====================================
-           INFORMES Y RANKINGS
-        ===================================== */
-
-        .report-summary {
-
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 12px;
-
-            margin-bottom: 18px;
-        }
-
-        .report-metric {
-
-            background: var(--primary);
-
-            color: white;
-
-            padding: 20px 16px;
-
-            border-radius: 16px;
-        }
-
-        .report-metric.points-metric {
-
-            background: #e8f7ee;
-
-            color: #15803d;
-        }
-
-        .report-metric .metric-icon {
-
-            font-size: 22px;
-
-            margin-bottom: 12px;
-        }
-
-        .report-metric h4 {
-
-            font-size: 34px;
-            font-weight: 800;
-
-            letter-spacing: -1px;
-
-            margin-bottom: 6px;
-        }
-
-        .report-metric span {
-
-            font-size: 10px;
-            font-weight: 700;
-
-            letter-spacing: 0.7px;
-        }
-
-        .section-heading {
-
-            display: flex;
-            align-items: center;
-
-            gap: 10px;
-
-            margin-bottom: 16px;
-        }
-
-        .section-heading-icon {
-
-            width: 36px;
-            height: 36px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: #edf2f8;
-
-            border-radius: 10px;
-
-            font-size: 18px;
-
-            flex-shrink: 0;
-        }
-
-        .section-heading h3 {
-
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .section-heading p {
-
-            color: var(--text-muted);
-
-            font-size: 11px;
-
-            margin-top: 3px;
-        }
-
-        .monthly-winner {
-
-            background: #fff8e6;
-
-            border: 1px solid #f5dca1;
-
-            border-radius: 12px;
-
-            padding: 16px;
-
-            margin-bottom: 18px;
-
-            color: #92400e;
-
-            font-size: 13px;
-
-            line-height: 1.6;
-
-            text-align: center;
-        }
-
-        .monthly-winner:empty {
-
-            display: none;
-        }
-
-        .racer-card {
-
-            background: white;
-
-            border: 1px solid var(--border-card);
-
-            border-radius: 12px;
-
-            padding: 14px 12px 18px;
-
-            margin-bottom: 10px;
-        }
-
-        .racer-first {
-
-            border-color: #f4ce78;
-
-            background: #fffdf7;
-        }
-
-        .racer-info {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 8px;
-
-            font-size: 12px;
-            font-weight: 700;
-
-            margin-bottom: 20px;
-        }
-
-        .racer-info > span:first-child {
-
-            min-width: 0;
-
-            overflow-wrap: anywhere;
-        }
-
-        .racer-points {
-
-            text-align: right;
-
-            font-size: 10px;
-            font-weight: 700;
-
-            flex-shrink: 0;
-        }
-
-        .racer-track-line {
-
-            position: relative;
-
-            height: 20px;
-
-            background: #dce3ec;
-
-            border-top: 2px solid #cbd5e1;
-            border-bottom: 2px solid #cbd5e1;
-
-            border-radius: 5px;
-        }
-
-        .racer-track-line::before {
-
-            content: "";
-
-            position: absolute;
-
-            top: 7px;
-            left: 5px;
-            right: 5px;
-
-            border-top: 2px dashed white;
-        }
-
-        .racer-car-icon {
-
-            position: absolute;
-
-            top: -7px;
-
-            font-size: 25px;
-
-            line-height: 1;
-
-            z-index: 1;
-
-            transform: scaleX(-1);
-
-            transition: left 0.4s ease;
-        }
-
-        .racer-flag-icon {
-
-            position: absolute;
-
-            right: 3px;
-            top: -5px;
-
-            font-size: 20px;
-
-            line-height: 1;
-        }
-
-        .report-note {
-
-            font-size: 11px;
-
-            color: var(--text-muted);
-
-            line-height: 1.6;
-
-            margin-top: 12px;
-        }
-
-        .export-button {
-
-            width: 100%;
-
-            min-height: 46px;
-
-            display: none;
-            align-items: center;
-            justify-content: center;
-
-            gap: 10px;
-
-            padding: 13px;
-
-            margin-bottom: 18px;
-
-            background: #15803d;
-
-            color: white;
-
-            border-radius: 12px;
-
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .export-button svg {
-
-            width: 19px;
-            height: 19px;
-        }
-
-        .closure-summary {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 12px;
-
-            background: #f0fdf4;
-
-            padding: 15px;
-
-            border-radius: 12px;
-
-            margin-top: 12px;
-        }
-
-        .closure-summary span {
-
-            font-size: 12px;
-
-            color: #15803d;
-
-            font-weight: 600;
-        }
-
-        .closure-summary strong {
-
-            font-size: 23px;
-            font-weight: 800;
-
-            color: #15803d;
-        }
-
-        /* =====================================
-           NAVEGACIÓN INFERIOR
-        ===================================== */
-
-        .bottom-nav {
-
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-
-            gap: 8px;
-
-            background: white;
-
-            border-top: 1px solid var(--border-card);
-
-            padding: 9px 12px;
-
-            padding-bottom:
-                max(9px, env(safe-area-inset-bottom));
-
-            flex-shrink: 0;
-
-            z-index: 30;
-        }
-
-        .nav-item {
-
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-
-            gap: 5px;
-
-            flex: 1;
-
-            min-width: 0;
-
-            min-height: 52px;
-
-            background: transparent;
-
-            border-radius: 12px;
-
-            color: var(--text-muted);
-
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .nav-item.active {
-
-            background: #eaf1ff;
-
-            color: var(--primary-light);
-
-            font-weight: 800;
-        }
-
-        .nav-icon {
-
-            width: 23px;
-            height: 23px;
-        }
-
-        /* =====================================
-           MODALES
-        ===================================== */
-
-        .modal-overlay {
-
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 1000;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 18px;
-
-            background: rgba(10,22,43,0.65);
-        }
-
-        .modal-card {
-
-            width: 100%;
-            max-width: 440px;
-
-            max-height: 90vh;
-            max-height: 90dvh;
-
-            overflow-y: auto;
-
-            background: white;
-
-            padding: 24px;
-
-            border-radius: 22px;
-
-            box-shadow:
-                0 20px 50px rgba(0,0,0,0.20);
-        }
-
-        .modal-header {
-
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-
-            gap: 12px;
-
-            margin-bottom: 24px;
-        }
-
-        .modal-header h3 {
-
-            font-size: 20px;
-            font-weight: 800;
-
-            letter-spacing: -0.5px;
-
-            margin-bottom: 5px;
-        }
-
-        .modal-header p {
-
-            font-size: 12px;
-
-            color: var(--text-muted);
-
-            line-height: 1.5;
-        }
-
-        .modal-close {
-
-            width: 32px;
-            height: 32px;
-
-            flex-shrink: 0;
-
-            background: #f1f5f9;
-
-            border-radius: 9px;
-
-            color: #64748b;
-
-            font-size: 16px;
-        }
-
-        .modal-actions {
-
-            display: flex;
-
-            gap: 10px;
-
-            margin-top: 24px;
-        }
-
-        .modal-actions button {
-
-            flex: 1;
-        }
-
-        /* =====================================
-           SELECCIÓN QUICK / STANDARD
-        ===================================== */
-
-        .kaizen-type-container {
-
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 12px;
-        }
-
-        .kaizen-type-card {
-
-            position: relative;
-
-            background: #f8fafc;
-
-            border: 2px solid var(--border-card);
-
-            border-radius: 14px;
-
-            padding: 15px;
-
-            cursor: pointer;
-
-            text-align: left;
-        }
-
-        .kaizen-type-card .icon {
-
-            font-size: 25px;
-
-            margin-bottom: 10px;
-        }
-
-        .kaizen-type-card .title {
-
-            color: var(--text-main);
-
-            font-size: 14px;
-            font-weight: 800;
-
-            margin-bottom: 5px;
-        }
-
-        .kaizen-type-card .desc {
-
-            font-size: 11px;
-
-            color: var(--text-muted);
-
-            line-height: 1.5;
-        }
-
-        .kaizen-type-card .type-points {
-
-            display: block;
-
-            font-size: 11px;
-            font-weight: 800;
-
-            margin-top: 12px;
-        }
-
-        #cardQuick.selected {
-
-            background: #fff8e9;
-
-            border-color: #f59e0b;
-        }
-
-        #cardStandard.selected {
-
-            background: #eff6ff;
-
-            border-color: #2563eb;
-        }
-
-        .kaizen-type-card.selected::after {
-
-            content: "✓";
-
-            position: absolute;
-
-            top: 10px;
-            right: 10px;
-
-            width: 19px;
-            height: 19px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: var(--primary-light);
-
-            color: white;
-
-            border-radius: 50%;
-
-            font-size: 11px;
-        }
-
-        #cardQuick.selected::after {
-
-            background: #d97706;
-        }
-
-        /* =====================================
-           ADAPTACIÓN A CELULARES
-        ===================================== */
-
-        @media (max-width: 600px) {
-
-            #appArea {
-
-                width: 100%;
-                max-width: none;
-
-                height: 100vh;
-                height: 100dvh;
-
-                border-radius: 0;
-
-                box-shadow: none;
-            }
-
-            .app-header {
-
-                padding-top:
-                    max(16px, env(safe-area-inset-top));
-            }
-
-            .tab-content {
-
-                padding: 16px;
-            }
-        }
-
-        @media (max-width: 360px) {
-
-            .app-header {
-
-                padding-left: 12px;
-                padding-right: 12px;
-
-                gap: 7px;
-            }
-
-            .app-brand-icon {
-
-                width: 35px;
-                height: 35px;
-            }
-
-            .header-actions {
-
-                gap: 5px;
-            }
-
-            .tab-content {
-
-                padding: 12px;
-            }
-
-            .idea-card {
-
-                padding: 13px;
-            }
-
-            .stat-card h4,
-            #countTotal,
-            #countAbiertas,
-            #countCerradas {
-
-                font-size: 24px;
-            }
-
-            .stat-card span {
-
-                font-size: 8px;
-            }
-
-            .home-type-card {
-
-                padding: 13px;
-            }
-
-            .modal-card {
-
-                padding: 18px;
-            }
-
-            .login-container {
-
-                padding: 16px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-
-                transition: none !important;
-                animation: none !important;
-            }
-        }
-
-    </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#142b55">
+<title>Kaizen Race 2.1</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary: #142b55;
+    --primary-light: #2563eb;
+    --accent: #f59e0b;
+    --success: #15803d;
+    --danger: #dc2626;
+    --text: #172b4d;
+    --text-muted: #64748b;
+    --border-card: #e2e8f0;
+    --background: #f1f5f9;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+button, input, select, textarea {
+    font: inherit;
+}
+
+button, a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.app-shell {
+    max-width: 560px;
+    min-height: 100dvh;
+    margin: auto;
+    background: #f8fafc;
+    position: relative;
+}
+
+.login-screen {
+    min-height: 100dvh;
+    background: linear-gradient(155deg,#142b55,#1e40af);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 28px 22px;
+}
+
+.brand {
+    text-align: center;
+    color: white;
+    margin-bottom: 28px;
+}
+
+.brand-icon {
+    font-size: 52px;
+    margin-bottom: 10px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 35px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+.brand p {
+    font-size: 13px;
+    color: #bfdbfe;
+    margin: 8px 0;
+}
+
+.version {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 1px;
+    border: 1px solid #ffffff40;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+}
+
+.auth-card {
+    background: white;
+    padding: 24px;
+    border-radius: 22px;
+    box-shadow: 0 18px 40px #0002;
+}
+
+.auth-tabs {
+    display: flex;
+    position: relative;
+    background: #eaf0f7;
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.auth-slider-bg {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: calc(50% - 4px);
+    background: white;
+    border-radius: 9px;
+    box-shadow: 0 2px 5px #0001;
+    transition: transform .2s;
+    left: 4px;
+}
+
+.auth-slider-bg.right {
+    transform: translateX(100%);
+}
+
+.auth-tabs button {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 12px 5px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.auth-tabs button.active {
+    color: var(--primary);
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+.field {
+    margin-bottom: 16px;
+}
+
+.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    outline: none;
+    font-size: 14px;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px #2563eb15;
+}
+
+input[readonly] {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+textarea {
+    min-height: 115px;
+    resize: vertical;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-whatsapp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border: none;
+    border-radius: 11px;
+    padding: 13px 16px;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.btn-primary {
+    color: white;
+    background: var(--primary-light);
+}
+
+.btn-secondary {
+    color: var(--text);
+    background: #eaf0f7;
+}
+
+.btn-whatsapp {
+    background: #15803d;
+    color: white;
+}
+
+.login-footer {
+    color: #bfdbfe;
+    text-align: center;
+    font-size: 11px;
+    margin-top: 26px;
+}
+
+.app-header {
+    padding: 24px 20px 22px;
+    background: var(--primary);
+    color: white;
+    border-radius: 0 0 24px 24px;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.header-brand {
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -.8px;
+}
+
+.logout-btn {
+    border: 1px solid #ffffff35;
+    background: #ffffff12;
+    color: white;
+    padding: 9px 12px;
+    border-radius: 9px;
+    font-size: 12px;
+}
+
+.user-info {
+    margin-top: 23px;
+}
+
+.user-info small {
+    color: #93c5fd;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+.user-line {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.user-line strong {
+    font-size: 15px;
+}
+
+.role-badge {
+    font-size: 10px;
+    padding: 4px 9px;
+    border: 1px solid;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.main-content {
+    padding: 20px 16px 100px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.section-title {
+    margin: 0 0 5px;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.6px;
+}
+
+.section-subtitle {
+    margin: 0 0 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.hero-card {
+    background: linear-gradient(135deg,#142b55,#2563eb);
+    color: white;
+    padding: 25px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-card h2 {
+    font-size: 25px;
+    line-height: 1.25;
+    margin: 10px 0;
+    letter-spacing: -.6px;
+}
+
+.hero-card p {
+    color: #dbeafe;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.hero-label {
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    font-weight: 700;
+    color: #bfdbfe;
+}
+
+.hero-button {
+    border: none;
+    background: white;
+    color: var(--primary);
+    padding: 14px;
+    border-radius: 11px;
+    width: 100%;
+    font-weight: 800;
+    margin-top: 12px;
+}
+
+.type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.type-info {
+    background: white;
+    border: 1px solid var(--border-card);
+    border-radius: 15px;
+    padding: 17px;
+}
+
+.type-info.quick {
+    border-top: 4px solid #f59e0b;
+}
+
+.type-info.standard {
+    border-top: 4px solid #2563eb;
+}
+
+.type-info h3 {
+    margin: 10px 0 6px;
+    font-size: 16px;
+}
+
+.type-info p {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.type-icon {
+    font-size: 25px;
+}
+
+.type-score {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.quick .type-score {
+    color: #b45309;
+}
+
+.standard .type-score {
+    color: #1d4ed8;
+}
+
+.info-panel {
+    background: white;
+    border: 1px solid var(--border-card);
+    border-radius: 15px;
+    padding: 17px;
+    margin-bottom: 16px;
+}
+
+.info-panel h3 {
+    font-size: 14px;
+    margin: 0 0 10px;
+}
+
+.info-panel p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin: 0;
+}
+
+.indicator-heading {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    margin: 20px 0 10px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 9px;
+    margin-bottom: 17px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid var(--border-card);
+    border-radius: 13px;
+    padding: 15px 5px;
+    text-align: center;
+    color: var(--text);
+}
+
+.stat-card strong {
+    display: block;
+    font-size: 25px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.stat-card span {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.stat-card.open strong {
+    color: #d97706;
+}
+
+.stat-card.closed strong {
+    color: #15803d;
+}
+
+.stat-card.filter-active {
+    border: 2px solid var(--primary-light);
+    background: #eff6ff;
+    padding: 14px 4px;
+}
+
+.filter-box {
+    background: white;
+    border: 1px solid var(--border-card);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.filter-box label {
+    font-size: 11px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 7px;
+}
+
+.filter-box select {
+    padding: 10px;
+    font-size: 12px;
+}
+
+.idea-list {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.idea-card {
+    background: white;
+    border: 1px solid var(--border-card);
+    border-radius: 15px;
+    padding: 16px;
+    box-shadow: 0 3px 8px #142b5505;
+    position: relative;
+    border-left: 4px solid #2563eb;
+}
+
+.idea-card.is-closed {
+    border-left-color: #16a34a;
+}
+
+.idea-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.badges-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+}
+
+.status-badge {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 5px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: .2px;
+}
+
+.status-abierto {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.status-cerrado {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.type-quick {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.type-standard {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.pilar-badge {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.idea-menu {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.idea-menu summary {
+    list-style: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: #f1f5f9;
+    color: #475569;
+    text-align: center;
+    font-size: 23px;
+    line-height: 25px;
+    font-weight: 800;
+}
+
+.idea-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.idea-menu-panel {
+    position: absolute;
+    right: 0;
+    top: 34px;
+    width: 205px;
+    z-index: 20;
+    background: white;
+    border: 1px solid var(--border-card);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px #142b5525;
+    padding: 5px;
+}
+
+.menu-action {
+    width: 100%;
+    border: none;
+    background: white;
+    color: var(--text);
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px 9px;
+    border-radius: 7px;
+}
+
+.menu-action:hover {
+    background: #f1f5f9;
+}
+
+.menu-danger {
+    color: var(--danger);
+    border-top: 1px solid #f1f5f9;
+}
+
+.idea-title {
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 800;
+    margin: 0 0 9px;
+    overflow-wrap: anywhere;
+}
+
+.idea-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.idea-points {
+    color: #1d4ed8;
+    font-weight: 700;
+    text-align: right;
+}
+
+.is-closed .idea-points {
+    color: #15803d;
+}
+
+.idea-desc {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #475569;
+    margin: 13px 0 15px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.idea-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+}
+
+.idea-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.idea-avatar {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e0e7ff;
+    color: #3730a3;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.idea-date {
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.idea-assignment {
+    margin-top: 13px;
+    padding: 11px 12px;
+    border-radius: 9px;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.idea-assignment.assigned {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    color: #1e40af;
+}
+
+.idea-assignment.assigned strong {
+    font-size: 12px;
+}
+
+.idea-assignment.unassigned {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
+}
+
+.idea-closed-date {
+    font-size: 11px;
+    color: #15803d;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.idea-actions {
+    margin-top: 14px;
+}
+
+.race-primary,
+.race-secondary {
+    width: 100%;
+    border-radius: 9px;
+    padding: 11px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.race-primary {
+    border: none;
+    background: var(--primary-light);
+    color: white;
+}
+
+.race-secondary {
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: var(--primary);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 28px 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: white;
+    border: 1px dashed var(--border-card);
+    border-radius: 12px;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 560px;
+    width: 100%;
+    background: white;
+    display: flex;
+    border-top: 1px solid var(--border-card);
+    padding: 9px 12px calc(9px + env(safe-area-inset-bottom));
+    z-index: 40;
+    box-shadow: 0 -4px 20px #142b5508;
+}
+
+.nav-item {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    padding: 7px 3px;
+    border-radius: 11px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-icon {
+    font-size: 21px;
+}
+
+.nav-item.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.report-card {
+    background: white;
+    border: 1px solid var(--border-card);
+    border-radius: 16px;
+    padding: 17px;
+    margin-bottom: 17px;
+}
+
+.report-card h3 {
+    font-size: 15px;
+    margin: 0 0 12px;
+    font-weight: 800;
+}
+
+.report-caption {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0 0 14px;
+}
+
+.ranking-winner {
+    padding: 15px;
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    border-radius: 11px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 14px 0;
+}
+
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.racer-card {
+    padding: 12px;
+    border: 1px solid var(--border-card);
+    border-radius: 11px;
+    background: white;
+}
+
+.racer-first {
+    border-color: #fbbf24;
+    background: #fffbeb;
+}
+
+.racer-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.racer-points {
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.racer-track-line {
+    height: 31px;
+    background: #334155;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.racer-track-line::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    border-top: 2px dashed #ffffff60;
+}
+
+.racer-car-icon {
+    position: absolute;
+    top: 2px;
+    font-size: 23px;
+    z-index: 2;
+    transition: left .4s;
+}
+
+.racer-flag-icon {
+    position: absolute;
+    right: 3px;
+    top: 4px;
+    font-size: 19px;
+}
+
+.personal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.personal-stat {
+    padding: 17px;
+    border-radius: 13px;
+    background: var(--primary);
+    color: white;
+    text-align: center;
+}
+
+.personal-stat strong {
+    display: block;
+    font-size: 29px;
+    margin-bottom: 5px;
+}
+
+.personal-stat span {
+    font-size: 11px;
+    color: #bfdbfe;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.dashboard-item {
+    padding: 15px 12px;
+    background: #f8fafc;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+}
+
+.dashboard-item strong {
+    display: block;
+    font-size: 23px;
+    margin-bottom: 6px;
+    color: var(--primary);
+}
+
+.dashboard-item span {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.dashboard-item.full {
+    grid-column: 1 / -1;
+}
+
+.export-btn {
+    margin-top: 17px;
+    display: none;
+    background: #15803d;
+    color: white;
+    border: none;
+    padding: 13px;
+    width: 100%;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 12px;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #0f172a99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(3px);
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 470px;
+    max-height: 92dvh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 20px 60px #0003;
+}
+
+.modal-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.modal-heading h2 {
+    font-size: 18px;
+    margin: 0;
+    letter-spacing: -.5px;
+}
+
+.close-modal {
+    border: none;
+    background: #f1f5f9;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    color: #64748b;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.type-select {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 17px;
+}
+
+.type-option {
+    background: white;
+    border: 2px solid var(--border-card);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    color: var(--text);
+}
+
+.type-option strong {
+    display: block;
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+.type-option small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.type-option.quick.selected {
+    background: #fffbeb;
+    border-color: #f59e0b;
+}
+
+.type-option.standard.selected {
+    background: #eff6ff;
+    border-color: #2563eb;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 20px;
+}
+
+.assignment-proposal {
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 13px;
+    margin-bottom: 18px;
+}
+
+.assignment-proposal small {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.assignment-proposal strong {
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.helper-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 7px 0 0;
+}
+
+.whatsapp-ready {
+    margin-top: 5px;
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    color: #166534;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    display: block;
+}
+
+.whatsapp-ready small {
+    display: block;
+    font-weight: 400;
+    margin-top: 6px;
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+@media (min-width: 600px) {
+    .app-shell {
+        box-shadow: 0 0 45px #142b5510;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+</style>
 </head>
 
 <body>
 
-    <!-- =====================================
-         INICIO DE SESIÓN Y REGISTRO
-    ====================================== -->
+<div class="app-shell">
 
-    <div id="loginArea" class="login-container">
+<!-- =========================================
+     LOGIN Y REGISTRO
+========================================= -->
 
-        <div class="login-brand">
+<section id="loginArea" class="login-screen">
 
-            <div class="brand-symbol">
-                🏎️
+    <div class="brand">
+        <div class="brand-icon">🏁</div>
+        <h1>KAIZEN RACE</h1>
+        <p>Cada mejora nos acerca a la meta.</p>
+        <span class="version">TIGRE PY · VERSIÓN 2.1</span>
+    </div>
+
+    <div class="auth-card">
+
+        <div class="auth-tabs">
+
+            <div id="authSliderBg"
+                 class="auth-slider-bg left">
             </div>
 
-            <h1>
-                KAIZEN <span>RACE</span>
-            </h1>
-
-            <p>
-                Pequeñas mejoras. Grandes resultados.
-            </p>
-
-        </div>
-
-        <div class="login-card">
-
-            <div class="login-header">
-
-                <h2>Bienvenido, piloto</h2>
-
-                <p>
-                    Sé parte de la carrera hacia
-                    la mejora continua.
-                </p>
-
-            </div>
-
-            <div class="auth-switch-container">
-
-                <div
-                    id="authSliderBg"
-                    class="auth-slider-bg left">
-                </div>
-
-                <button
+            <button id="tabLoginBtn"
+                    class="active"
                     type="button"
-                    id="tabLoginBtn"
-                    class="auth-tab-btn active"
                     onclick="cambiarModoAuth('login')">
+                Iniciar sesión
+            </button>
 
-                    Iniciar sesión
-
-                </button>
-
-                <button
+            <button id="tabRegisterBtn"
                     type="button"
-                    id="tabRegisterBtn"
-                    class="auth-tab-btn"
                     onclick="cambiarModoAuth('register')">
-
-                    Registrarse
-
-                </button>
-
-            </div>
-
-            <!-- LOGIN -->
-
-            <div
-                id="formLogin"
-                class="auth-form-section active">
-
-                <div class="form-group">
-
-                    <label for="legajoInput">
-                        Número de legajo
-                    </label>
-
-                    <input
-                        type="text"
-                        id="legajoInput"
-                        inputmode="numeric"
-                        autocomplete="username"
-                        placeholder="Ingresa tu legajo">
-
-                </div>
-
-                <button
-                    id="loginBtn"
-                    class="btn-primary">
-
-                    Ingresar a Kaizen Race
-
-                </button>
-
-            </div>
-
-            <!-- REGISTRO -->
-
-            <div
-                id="formRegister"
-                class="auth-form-section">
-
-                <div class="form-group">
-
-                    <label for="nombreInput">
-                        Nombre
-                    </label>
-
-                    <input
-                        type="text"
-                        id="nombreInput"
-                        autocomplete="given-name"
-                        placeholder="Tu nombre">
-
-                </div>
-
-                <div class="form-group">
-
-                    <label for="apellidoInput">
-                        Apellido
-                    </label>
-
-                    <input
-                        type="text"
-                        id="apellidoInput"
-                        autocomplete="family-name"
-                        placeholder="Tu apellido">
-
-                </div>
-
-                <div class="form-group">
-
-                    <label for="legajoRegistroInput">
-                        Número de legajo
-                    </label>
-
-                    <input
-                        type="text"
-                        id="legajoRegistroInput"
-                        inputmode="numeric"
-                        placeholder="Tu legajo">
-
-                </div>
-
-                <button
-                    id="registerBtn"
-                    class="btn-primary">
-
-                    Registrar piloto
-
-                </button>
-
-            </div>
+                Registrarme
+            </button>
 
         </div>
 
-        <div class="login-footer">
+        <div id="formLogin" class="auth-form active">
 
-            MEJORA CONTINUA · TIGRE PY
+            <div class="field">
+                <label for="legajoInput">
+                    Número de legajo
+                </label>
+
+                <input id="legajoInput"
+                       type="text"
+                       inputmode="numeric"
+                       autocomplete="username"
+                       placeholder="Ingresa tu legajo">
+            </div>
+
+            <button id="loginBtn"
+                    type="button"
+                    class="btn-primary">
+                Ingresar a Kaizen Race
+            </button>
+
+        </div>
+
+        <div id="formRegister" class="auth-form">
+
+            <div class="field">
+                <label for="nombreInput">Nombre</label>
+                <input id="nombreInput"
+                       type="text"
+                       placeholder="Tu nombre">
+            </div>
+
+            <div class="field">
+                <label for="apellidoInput">Apellido</label>
+                <input id="apellidoInput"
+                       type="text"
+                       placeholder="Tu apellido">
+            </div>
+
+            <div class="field">
+                <label for="legajoRegistroInput">
+                    Número de legajo
+                </label>
+                <input id="legajoRegistroInput"
+                       type="text"
+                       inputmode="numeric"
+                       placeholder="Tu legajo">
+            </div>
+
+            <button id="registerBtn"
+                    type="button"
+                    class="btn-primary">
+                Crear mi cuenta
+            </button>
 
         </div>
 
     </div>
 
-    <!-- =====================================
-         APLICACIÓN PRINCIPAL
-    ====================================== -->
+    <div class="login-footer">
+        Mejora Continua · Tigre Paraguay
+    </div>
 
-    <div id="appArea" class="hidden">
+</section>
 
-        <!-- CABECERA -->
+<!-- =========================================
+     APLICACIÓN PRINCIPAL
+========================================= -->
 
-        <header class="app-header">
+<section id="appArea" class="hidden">
 
-            <div class="user-info">
+    <header class="app-header">
 
-                <div class="app-brand-icon">
-                    🏎️
-                </div>
+        <div class="header-top">
 
-                <div class="user-details">
-
-                    <div class="brand-name">
-
-                        KAIZEN <span>RACE</span>
-
-                    </div>
-
-                    <h3 id="tituloPrincipalRol">
-
-                        PILOTO DE MEJORA
-
-                    </h3>
-
-                    <span
-                        id="usuarioActual"
-                        class="user-subtext">
-
-                        Cargando...
-
-                    </span>
-
-                </div>
-
+            <div class="header-brand">
+                🏁 Kaizen Race
             </div>
 
-            <div class="header-actions">
+            <button type="button"
+                    class="logout-btn"
+                    onclick="cerrarSesion()">
+                Salir
+            </button>
 
-                <div
-                    id="roleBadge"
-                    class="role-badge">
+        </div>
 
+        <div class="user-info">
+
+            <small id="tituloPrincipalRol">
+                PILOTO DE MEJORA
+            </small>
+
+            <div class="user-line">
+
+                <strong id="usuarioActual"></strong>
+
+                <span id="roleBadge"
+                      class="role-badge">
                     Usuario
-
-                </div>
-
-                <button
-                    class="logout-header"
-                    onclick="cerrarSesion()"
-                    title="Cerrar sesión"
-                    aria-label="Cerrar sesión">
-
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round">
-
-                        <path
-                            d="M10 17L15 12L10 7"/>
-
-                        <path
-                            d="M15 12H3"/>
-
-                        <path
-                            d="M14 3H19A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H14"/>
-
-                    </svg>
-
-                </button>
+                </span>
 
             </div>
 
-        </header>
+        </div>
+
+    </header>
+
+    <main class="main-content">
 
         <!-- =================================
              PESTAÑA NUEVA PROPUESTA
-        ================================== -->
+        ================================= -->
 
-        <div
-            id="tabRegistrar"
-            class="tab-content active">
+        <section id="tabRegistrar"
+                 class="tab-content active">
 
-            <div class="page-heading">
+            <div class="hero-card">
 
-                <h2>Zona de partida</h2>
+                <span class="hero-label">
+                    MEJORA CONTINUA
+                </span>
+
+                <h2>
+                    Las grandes mejoras comienzan
+                    con una idea.
+                </h2>
 
                 <p>
-                    Cada mejora cuenta.
+                    Identifica oportunidades, comparte
+                    tus propuestas y suma puntos
+                    en Kaizen Race.
+                </p>
+
+                <button type="button"
+                        class="hero-button"
+                        onclick="abrirModalRegistro()">
+                    + Registrar propuesta
+                </button>
+
+            </div>
+
+            <h2 class="section-title">
+                Tipos de Kaizen
+            </h2>
+
+            <p class="section-subtitle">
+                Cada mejora implementada suma puntos.
+            </p>
+
+            <div class="type-grid">
+
+                <article class="type-info quick">
+
+                    <div class="type-icon">⚡</div>
+
+                    <h3>Quick Kaizen</h3>
+
+                    <span class="type-score">
+                        +1 punto
+                    </span>
+
+                    <p>
+                        Mejoras simples y rápidas
+                        de implementar.
+                    </p>
+
+                </article>
+
+                <article class="type-info standard">
+
+                    <div class="type-icon">🏆</div>
+
+                    <h3>Standard Kaizen</h3>
+
+                    <span class="type-score">
+                        +3 puntos
+                    </span>
+
+                    <p>
+                        Mejoras que requieren mayor
+                        análisis y planificación.
+                    </p>
+
+                </article>
+
+            </div>
+
+            <div class="info-panel">
+
+                <h3>¿Cómo participar?</h3>
+
+                <p>
+                    Registra tu propuesta indicando
+                    el área, el tipo de Kaizen y
+                    una descripción de la mejora.
+                    Una vez implementada y cerrada,
+                    sumará puntos a tu ranking.
                 </p>
 
             </div>
 
-            <div class="hero-card">
+        </section>
 
-                <div class="hero-label">
+        <!-- =================================
+             PESTAÑA PROPUESTAS
+        ================================= -->
 
-                    TU PRÓXIMO DESAFÍO
+        <section id="tabIdeas" class="tab-content">
 
+            <h2 class="section-title">
+                Propuestas Kaizen
+            </h2>
+
+            <p class="section-subtitle">
+                Consulta el avance de las mejoras.
+            </p>
+
+            <div class="auth-tabs">
+
+                <div id="filterSliderBg"
+                     class="auth-slider-bg filter-slider left">
                 </div>
 
-                <div class="hero-icon">
+                <button id="tabMiasBtn"
+                        type="button"
+                        class="active"
+                        onclick="cambiarFiltroIdeas('mias')">
+                    Mis propuestas
+                </button>
 
-                    🏎️
+                <button id="tabTodasBtn"
+                        type="button"
+                        onclick="cambiarFiltroIdeas('todas')">
+                    Todas
+                </button>
 
-                </div>
+            </div>
 
-                <h2>
+            <div class="indicator-heading">
 
-                    ¿Listo para tu<br>
-                    próxima mejora?
+                <span id="iconoIndicador">🏎️</span>
 
-                </h2>
+                <span id="tituloIndicador">
+                    MI PROGRESO
+                </span>
 
-                <p>
+            </div>
 
-                    Transforma tus ideas en acciones,
-                    mejora tu área de trabajo y suma
-                    puntos en la carrera Kaizen.
+            <div class="stats-grid">
 
-                </p>
+                <button type="button"
+                        class="stat-card stat-card-clickable filter-active"
+                        onclick="filtrarPorEstado('TODOS')">
 
-                <button
-                    class="hero-button"
-                    onclick="abrirModalRegistro()">
+                    <strong id="countTotal">0</strong>
+                    <span>Total</span>
 
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round">
+                </button>
 
-                        <path d="M12 5V19M5 12H19"/>
+                <button type="button"
+                        class="stat-card stat-card-clickable open"
+                        onclick="filtrarPorEstado('ABIERTO')">
 
-                    </svg>
+                    <strong id="countAbiertas">0</strong>
+                    <span>Abiertas</span>
 
-                    Registrar nueva propuesta
+                </button>
+
+                <button type="button"
+                        class="stat-card stat-card-clickable closed"
+                        onclick="filtrarPorEstado('CERRADO')">
+
+                    <strong id="countCerradas">0</strong>
+                    <span>Cerradas</span>
 
                 </button>
 
             </div>
 
-            <div class="section-label">
+            <!-- NUEVO FILTRO POR PILAR -->
 
-                Tipos de mejora
+            <div class="filter-box">
 
-            </div>
+                <label for="filtroPilar">
+                    Filtrar por pilar
+                </label>
 
-            <div class="home-types">
+                <select id="filtroPilar"
+                        onchange="cambiarFiltroPilar(this.value)">
 
-                <div class="home-type-card">
+                    <option value="TODOS">
+                        Todos los pilares
+                    </option>
 
-                    <div
-                        class="home-type-icon quick-icon">
+                    <option value="SIN_ASIGNAR">
+                        Pendientes de asignación
+                    </option>
 
-                        ⚡
+                    <option value="SSMA">
+                        SSMA - Seguridad
+                    </option>
 
-                    </div>
+                    <option value="GA">
+                        GA - Gestión Autónoma
+                    </option>
 
-                    <h3>Quick</h3>
+                    <option value="QA">
+                        QA - Calidad
+                    </option>
 
-                    <p>
+                    <option value="MP">
+                        MP - Mantenimiento
+                    </option>
 
-                        Mejoras rápidas y simples
-                        de implementación.
+                    <option value="LOG">
+                        LOG - Logística
+                    </option>
 
-                    </p>
-
-                    <span
-                        class="home-points quick-text">
-
-                        +1 punto al cerrar
-
-                    </span>
-
-                </div>
-
-                <div class="home-type-card">
-
-                    <div
-                        class="home-type-icon standard-icon">
-
-                        📋
-
-                    </div>
-
-                    <h3>Standard</h3>
-
-                    <p>
-
-                        Mejoras que requieren
-                        análisis y desarrollo.
-
-                    </p>
-
-                    <span
-                        class="home-points standard-text">
-
-                        +3 puntos al cerrar
-
-                    </span>
-
-                </div>
+                </select>
 
             </div>
 
-            <div class="home-note">
-
-                <span style="font-size:23px;">
-
-                    🏁
-
-                </span>
-
-                <div>
-
-                    <strong>
-                        La meta es mejorar juntos.
-                    </strong>
-
-                    <br>
-
-                    Cada propuesta implementada
-                    contribuye al progreso de
-                    nuestra planta.
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- =================================
-             PESTAÑA PROPUESTAS
-        ================================== -->
-
-        <div
-            id="tabIdeas"
-            class="tab-content">
-
-            <div class="page-heading">
-
-                <h2>Propuestas</h2>
-
-                <p>
-
-                    Gestiona y consulta
-                    las mejoras Kaizen.
-
-                </p>
-
-            </div>
-
-            <div class="progress-card-container">
-
-                <div class="progress-title-row">
-
-                    <span id="tituloIndicador">
-
-                        MI PROGRESO
-
-                    </span>
-
-                    <span id="iconoIndicador">
-
-                        🏎️
-
-                    </span>
-
-                </div>
-
-                <h2 class="progress-heading">
-
-                    Seguimiento Kaizen
-
-                </h2>
-
-                <div class="stats-grid-mini">
-
-                    <button
-                        class="stat-card stat-card-total stat-card-clickable filter-active"
-                        onclick="filtrarPorEstado('TODOS')">
-
-                        <span id="countTotal">
-
-                            0
-
-                        </span>
-
-                        <span>Total</span>
-
-                    </button>
-
-                    <button
-                        class="stat-card stat-card-abiertas stat-card-clickable"
-                        onclick="filtrarPorEstado('ABIERTO')">
-
-                        <span id="countAbiertas">
-
-                            0
-
-                        </span>
-
-                        <span>Abiertas</span>
-
-                    </button>
-
-                    <button
-                        class="stat-card stat-card-cerradas stat-card-clickable"
-                        onclick="filtrarPorEstado('CERRADO')">
-
-                        <span id="countCerradas">
-
-                            0
-
-                        </span>
-
-                        <span>Cerradas</span>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-            <!-- FILTROS -->
-
-            <div class="list-heading">
-
-                <h3>Listado de mejoras</h3>
-
-                <div
-                    class="auth-switch-container filter-switch">
-
-                    <div
-                        id="filterSliderBg"
-                        class="auth-slider-bg filter-slider left">
-
-                    </div>
-
-                    <button
-                        id="tabMiasBtn"
-                        type="button"
-                        class="active"
-                        onclick="cambiarFiltroIdeas('mias')">
-
-                        Mis acciones
-
-                    </button>
-
-                    <button
-                        id="tabTodasBtn"
-                        type="button"
-                        onclick="cambiarFiltroIdeas('todas')">
-
-                        Todas
-
-                    </button>
-
-                </div>
-
-            </div>
-
-            <!-- LISTADO DINÁMICO -->
-
-            <div id="listaIdeas">
+            <div id="listaIdeas" class="idea-list">
 
                 <p class="empty-state">
-
                     Cargando propuestas...
-
                 </p>
 
             </div>
 
-        </div>
+        </section>
 
         <!-- =================================
-             PESTAÑA INFORMES
-        ================================== -->
+             PESTAÑA INFORMES Y RANKING
+        ================================= -->
 
-        <div
-            id="tabPista"
-            class="tab-content">
+        <section id="tabPista" class="tab-content">
 
-            <div class="page-heading">
+            <h2 class="section-title">
+                Pista de campeones
+            </h2>
 
-                <h2>Informes y rankings</h2>
+            <p class="section-subtitle">
+                Cada mejora implementada cuenta.
+            </p>
 
-                <p>
+            <div class="personal-stats">
 
-                    Descubre tu posición
-                    en la carrera Kaizen.
+                <div class="personal-stat">
 
-                </p>
-
-            </div>
-
-            <!-- RESUMEN PERSONAL -->
-
-            <div class="report-summary">
-
-                <div class="report-metric">
-
-                    <div class="metric-icon">
-
-                        🏁
-
-                    </div>
-
-                    <h4 id="posicionTexto">
-
-                        -
-
-                    </h4>
-
-                    <span>
-
-                        TU POSICIÓN GLOBAL
-
-                    </span>
-
-                </div>
-
-                <div
-                    class="report-metric points-metric">
-
-                    <div class="metric-icon">
-
-                        ⚡
-
-                    </div>
-
-                    <h4 id="misKaizensCerradosNum">
-
+                    <strong id="misKaizensCerradosNum">
                         0
+                    </strong>
 
-                    </h4>
+                    <span>Mis puntos acumulados</span>
 
-                    <span>
+                </div>
 
-                        PUNTOS ACUMULADOS
+                <div class="personal-stat">
 
-                    </span>
+                    <strong id="posicionTexto">
+                        -
+                    </strong>
+
+                    <span>Posición global</span>
 
                 </div>
 
             </div>
-
-            <!-- EXPORTACIÓN ADMIN -->
-
-            <button
-                id="btnExportarExcel"
-                class="export-button"
-                onclick="exportarIdeasExcel()">
-
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round">
-
-                    <path d="M12 3V15"/>
-
-                    <path d="M7 10L12 15L17 10"/>
-
-                    <path d="M4 16V20H20V16"/>
-
-                </svg>
-
-                Exportar base de datos a Excel
-
-            </button>
 
             <!-- RANKING MENSUAL -->
 
-            <div class="progress-card-container">
+            <div class="report-card">
 
-                <div class="section-heading">
+                <h3>🏆 Ranking mensual</h3>
 
-                    <div class="section-heading-icon">
+                <p class="report-caption">
+                    Puntuación según la fecha
+                    de cierre de cada propuesta.
+                </p>
 
-                        🏆
-
-                    </div>
-
-                    <div>
-
-                        <h3>Ranking mensual</h3>
-
-                        <p>
-                            Competición del mes
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="form-group">
+                <div class="field">
 
                     <label for="mesRanking">
-
-                        Seleccionar mes y año
-
+                        Seleccionar mes
                     </label>
 
-                    <input
-                        type="month"
-                        id="mesRanking"
-                        onchange="cambiarMesRanking()">
+                    <input id="mesRanking"
+                           type="month"
+                           onchange="cambiarMesRanking()">
 
                 </div>
 
-                <div
-                    id="ganadorMensual"
-                    class="monthly-winner">
+                <div id="ganadorMensual"
+                     class="ranking-winner">
+
+                    Cargando ranking...
 
                 </div>
 
-                <div id="rankingMensualContainer">
-
+                <div id="rankingMensualContainer"
+                     class="ranking-list">
                 </div>
-
-                <p class="report-note">
-
-                    Se consideran únicamente las
-                    propuestas cerradas durante
-                    el mes seleccionado.
-
-                </p>
 
             </div>
 
             <!-- RANKING GLOBAL -->
 
-            <div class="progress-card-container">
+            <div class="report-card">
 
-                <div class="section-heading">
+                <h3>🏁 Ranking global</h3>
 
-                    <div class="section-heading-icon">
+                <p class="report-caption">
+                    Puntos acumulados de todas
+                    las mejoras cerradas.
+                </p>
 
-                        🏎️
-
-                    </div>
-
-                    <div>
-
-                        <h3>Ranking global</h3>
-
-                        <p>
-                            Clasificación histórica
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div id="pistaPilotosContainer">
-
+                <div id="pistaPilotosContainer"
+                     class="ranking-list">
                 </div>
 
             </div>
 
             <!-- DASHBOARD GENERAL -->
 
-            <div class="progress-card-container">
+            <div class="report-card">
 
-                <div class="section-heading">
+                <h3>Indicadores generales</h3>
 
-                    <div class="section-heading-icon">
+                <div class="dashboard-grid">
 
-                        📊
+                    <div class="dashboard-item">
 
-                    </div>
-
-                    <div>
-
-                        <h3>Dashboard Kaizen</h3>
-
-                        <p>
-                            Resultados generales de planta
-                        </p>
+                        <strong id="dashTotal">0</strong>
+                        <span>Total de propuestas</span>
 
                     </div>
 
-                </div>
+                    <div class="dashboard-item">
 
-                <div class="stats-grid-mini">
-
-                    <div
-                        class="stat-card stat-card-total">
-
-                        <h4 id="dashTotal">
-
-                            0
-
-                        </h4>
-
-                        <span>Total</span>
-
-                    </div>
-
-                    <div
-                        class="stat-card stat-card-abiertas">
-
-                        <h4 id="dashAbiertas">
-
-                            0
-
-                        </h4>
-
-                        <span>Abiertas</span>
-
-                    </div>
-
-                    <div
-                        class="stat-card stat-card-cerradas">
-
-                        <h4 id="dashCerradas">
-
-                            0
-
-                        </h4>
-
-                        <span>Cerradas</span>
-
-                    </div>
-
-                    <div
-                        class="stat-card stat-card-quick">
-
-                        <h4 id="dashQuick">
-
-                            0
-
-                        </h4>
-
-                        <span>Quick</span>
-
-                    </div>
-
-                    <div
-                        class="stat-card stat-card-standard">
-
-                        <h4 id="dashStandard">
-
-                            0
-
-                        </h4>
-
-                        <span>Standard</span>
-
-                    </div>
-
-                    <div
-                        class="stat-card stat-card-total">
-
-                        <h4 id="dashParticipantes">
-
-                            0
-
-                        </h4>
-
+                        <strong id="dashParticipantes">0</strong>
                         <span>Participantes</span>
 
                     </div>
 
-                </div>
+                    <div class="dashboard-item">
 
-                <div class="closure-summary">
+                        <strong id="dashAbiertas">0</strong>
+                        <span>Abiertas</span>
 
-                    <span>
+                    </div>
 
-                        Tasa de cierre de propuestas
+                    <div class="dashboard-item">
 
-                    </span>
+                        <strong id="dashCerradas">0</strong>
+                        <span>Cerradas</span>
 
-                    <strong id="dashTasaCierre">
+                    </div>
 
-                        0%
+                    <div class="dashboard-item">
 
-                    </strong>
+                        <strong id="dashQuick">0</strong>
+                        <span>Quick Kaizen</span>
 
-                </div>
+                    </div>
 
-            </div>
+                    <div class="dashboard-item">
 
-        </div>
+                        <strong id="dashStandard">0</strong>
+                        <span>Standard Kaizen</span>
 
-        <!-- =================================
-             NAVEGACIÓN INFERIOR
-        ================================== -->
+                    </div>
 
-        <nav
-            class="bottom-nav"
-            aria-label="Navegación principal">
+                    <div class="dashboard-item full">
 
-            <!-- NUEVA PROPUESTA -->
+                        <strong id="dashTasaCierre">0%</strong>
+                        <span>Tasa de cierre</span>
 
-            <button
-                class="nav-item active"
-                onclick="cambiarPestana('tabRegistrar', this)">
-
-                <svg
-                    class="nav-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round">
-
-                    <rect
-                        x="3"
-                        y="3"
-                        width="18"
-                        height="18"
-                        rx="5"/>
-
-                    <path d="M12 8V16M8 12H16"/>
-
-                </svg>
-
-                <span>Nueva</span>
-
-            </button>
-
-            <!-- PROPUESTAS -->
-
-            <button
-                class="nav-item"
-                onclick="cambiarPestana('tabIdeas', this)">
-
-                <svg
-                    class="nav-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round">
-
-                    <rect
-                        x="5"
-                        y="4"
-                        width="14"
-                        height="17"
-                        rx="2"/>
-
-                    <path
-                        d="M9 4V2H15V4"/>
-
-                    <path
-                        d="M9 9H15M9 13H15M9 17H13"/>
-
-                </svg>
-
-                <span>Propuestas</span>
-
-            </button>
-
-            <!-- INFORMES -->
-
-            <button
-                class="nav-item"
-                onclick="cambiarPestana('tabPista', this)">
-
-                <svg
-                    class="nav-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round">
-
-                    <path d="M3 3V21H21"/>
-
-                    <rect
-                        x="7"
-                        y="12"
-                        width="3"
-                        height="5"
-                        rx="0.5"/>
-
-                    <rect
-                        x="12"
-                        y="8"
-                        width="3"
-                        height="9"
-                        rx="0.5"/>
-
-                    <rect
-                        x="17"
-                        y="4"
-                        width="3"
-                        height="13"
-                        rx="0.5"/>
-
-                </svg>
-
-                <span>Informes</span>
-
-            </button>
-
-        </nav>
-
-    </div>
-
-    <!-- =====================================
-         MODAL NUEVA PROPUESTA
-    ====================================== -->
-
-    <div
-        id="modalRegistro"
-        class="modal-overlay hidden"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="tituloModalRegistro">
-
-        <div class="modal-card">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h3 id="tituloModalRegistro">
-
-                        Nueva propuesta
-
-                    </h3>
-
-                    <p>
-
-                        Registra tu próxima mejora Kaizen.
-
-                    </p>
+                    </div>
 
                 </div>
 
-                <button
-                    class="modal-close"
-                    onclick="cerrarModalRegistro()"
-                    aria-label="Cerrar">
+                <button id="btnExportarExcel"
+                        type="button"
+                        class="export-btn"
+                        onclick="exportarIdeasExcel()">
 
-                    ✕
+                    ↓ Exportar base a Excel
 
                 </button>
 
             </div>
 
-            <!-- TIPO DE KAIZEN -->
+        </section>
 
-            <div class="form-group">
+    </main>
 
-                <label>
+    <!-- =====================================
+         NAVEGACIÓN INFERIOR
+    ===================================== -->
 
-                    Tipo de Kaizen
+    <nav class="bottom-nav">
 
-                </label>
+        <button type="button"
+                class="nav-item active"
+                onclick="cambiarPestana('tabRegistrar',this)">
 
-                <div class="kaizen-type-container">
+            <span class="nav-icon">＋</span>
+            <span>Nueva</span>
 
-                    <button
+        </button>
+
+        <button type="button"
+                class="nav-item"
+                onclick="cambiarPestana('tabIdeas',this)">
+
+            <span class="nav-icon">▤</span>
+            <span>Propuestas</span>
+
+        </button>
+
+        <button type="button"
+                class="nav-item"
+                onclick="cambiarPestana('tabPista',this)">
+
+            <span class="nav-icon">🏆</span>
+            <span>Informes</span>
+
+        </button>
+
+    </nav>
+
+</section>
+
+</div>
+
+<!-- =========================================
+     MODAL REGISTRAR PROPUESTA
+========================================= -->
+
+<div id="modalRegistro"
+     class="modal-overlay hidden">
+
+    <div class="modal-card"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="registroHeading">
+
+        <div class="modal-heading">
+
+            <h2 id="registroHeading">
+                Nueva propuesta
+            </h2>
+
+            <button type="button"
+                    class="close-modal"
+                    aria-label="Cerrar"
+                    onclick="cerrarModalRegistro()">
+                ×
+            </button>
+
+        </div>
+
+        <div class="field">
+
+            <label for="titulo">
+                Título de la propuesta
+            </label>
+
+            <input id="titulo"
+                   type="text"
+                   placeholder="Ej.: Mejora de cabezal">
+
+        </div>
+
+        <div class="field">
+
+            <label for="area">
+                Área
+            </label>
+
+            <select id="area">
+
+                <option value="">
+                    Seleccionar área
+                </option>
+
+                <option value="Extrusión">Extrusión</option>
+                <option value="PMP">PMP</option>
+                <option value="Piezas Especiales">Piezas Especiales</option>
+                <option value="Almacén">Almacén</option>
+                <option value="Logística">Logística</option>
+                <option value="Admin">Admin</option>
+                <option value="Calidad">Calidad</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+
+            </select>
+
+        </div>
+
+        <div class="field">
+
+            <label>
+                Tipo de Kaizen
+            </label>
+
+            <input id="tipo"
+                   type="hidden"
+                   value="Quick">
+
+            <div class="type-select">
+
+                <button id="cardQuick"
                         type="button"
-                        id="cardQuick"
-                        class="kaizen-type-card selected"
+                        class="type-option quick selected"
                         onclick="seleccionarTipoKaizen('Quick')">
 
-                        <div class="icon">
+                    <span class="type-icon">⚡</span>
+                    <strong>Quick</strong>
+                    <small>+1 punto</small>
 
-                            ⚡
+                </button>
 
-                        </div>
-
-                        <div class="title">
-
-                            Quick
-
-                        </div>
-
-                        <div class="desc">
-
-                            Mejora rápida
-
-                        </div>
-
-                        <span
-                            class="type-points quick-text">
-
-                            +1 punto
-
-                        </span>
-
-                    </button>
-
-                    <button
+                <button id="cardStandard"
                         type="button"
-                        id="cardStandard"
-                        class="kaizen-type-card"
+                        class="type-option standard"
                         onclick="seleccionarTipoKaizen('Standard')">
 
-                        <div class="icon">
+                    <span class="type-icon">🏆</span>
+                    <strong>Standard</strong>
+                    <small>+3 puntos</small>
 
-                            📋
-
-                        </div>
-
-                        <div class="title">
-
-                            Standard
-
-                        </div>
-
-                        <div class="desc">
-
-                            Mejora con análisis
-
-                        </div>
-
-                        <span
-                            class="type-points standard-text">
-
-                            +3 puntos
-
-                        </span>
-
-                    </button>
-
-                </div>
-
-                <input
-                    type="hidden"
-                    id="tipo"
-                    value="Quick">
+                </button>
 
             </div>
 
-            <!-- TÍTULO -->
+        </div>
 
-            <div class="form-group">
+        <div class="field">
 
-                <label for="titulo">
+            <label for="descripcion">
+                Descripción de la mejora
+            </label>
 
-                    Título de la propuesta
+            <textarea id="descripcion"
+                      placeholder="Describe la oportunidad de mejora y la solución propuesta."></textarea>
 
-                </label>
+        </div>
 
-                <input
-                    type="text"
-                    id="titulo"
-                    placeholder="Ej: Reubicación de herramientas">
+        <div class="modal-actions">
 
-            </div>
+            <button id="guardarIdea"
+                    type="button"
+                    class="btn-primary">
 
-            <!-- ÁREA -->
+                Registrar propuesta
 
-            <div class="form-group">
+            </button>
 
-                <label for="area">
-
-                    Área
-
-                </label>
-
-                <select id="area">
-
-                    <option value="">
-
-                        Selecciona un área
-
-                    </option>
-
-                    <option value="Extrusión">
-
-                        Extrusión
-
-                    </option>
-
-                    <option value="PMP">
-
-                        PMP
-
-                    </option>
-
-                    <option value="Piezas Especiales">
-
-                        Piezas Especiales
-
-                    </option>
-
-                    <option value="Almacén">
-
-                        Almacén
-
-                    </option>
-
-                    <option value="Logística">
-
-                        Logística
-
-                    </option>
-
-                    <option value="Admin">
-
-                        Admin
-
-                    </option>
-
-                    <option value="Calidad">
-
-                        Calidad
-
-                    </option>
-
-                    <option value="Mantenimiento">
-
-                        Mantenimiento
-
-                    </option>
-
-                </select>
-
-            </div>
-
-            <!-- DESCRIPCIÓN -->
-
-            <div class="form-group">
-
-                <label for="descripcion">
-
-                    Descripción de la mejora
-
-                </label>
-
-                <textarea
-                    id="descripcion"
-                    rows="4"
-                    placeholder="Describe la situación actual y la mejora propuesta..."></textarea>
-
-            </div>
-
-            <!-- ACCIONES -->
-
-            <div class="modal-actions">
-
-                <button
+            <button type="button"
                     class="btn-secondary"
                     onclick="cerrarModalRegistro()">
 
-                    Cancelar
+                Cancelar
 
-                </button>
-
-                <button
-                    id="guardarIdea"
-                    class="btn-primary">
-
-                    Registrar
-
-                </button>
-
-            </div>
+            </button>
 
         </div>
 
     </div>
 
-    <!-- =====================================
-         MODAL EDITAR PROPUESTA
-    ====================================== -->
+</div>
 
-    <div
-        id="editModal"
-        class="modal-overlay hidden"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="tituloModalEdicion">
+<!-- =========================================
+     MODAL EDITAR PROPUESTA
+========================================= -->
 
-        <div class="modal-card">
+<div id="editModal"
+     class="modal-overlay hidden">
 
-            <div class="modal-header">
+    <div class="modal-card"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="editHeading">
 
-                <div>
+        <div class="modal-heading">
 
-                    <h3 id="tituloModalEdicion">
+            <h2 id="editHeading">
+                Editar propuesta
+            </h2>
 
-                        Editar propuesta
+            <button type="button"
+                    class="close-modal"
+                    aria-label="Cerrar"
+                    onclick="cancelarEdicion()">
+                ×
+            </button>
 
-                    </h3>
+        </div>
 
-                    <p>
+        <div class="field">
 
-                        Actualiza los datos de la mejora.
+            <label for="editTitulo">
+                Título
+            </label>
 
-                    </p>
+            <input id="editTitulo"
+                   type="text">
 
-                </div>
+        </div>
 
-                <button
-                    class="modal-close"
-                    onclick="cancelarEdicion()"
-                    aria-label="Cerrar">
+        <div class="field">
 
-                    ✕
+            <label for="editArea">
+                Área
+            </label>
 
-                </button>
+            <select id="editArea">
 
-            </div>
+                <option value="">Seleccionar área</option>
+                <option value="Extrusión">Extrusión</option>
+                <option value="PMP">PMP</option>
+                <option value="Piezas Especiales">Piezas Especiales</option>
+                <option value="Almacén">Almacén</option>
+                <option value="Logística">Logística</option>
+                <option value="Admin">Admin</option>
+                <option value="Calidad">Calidad</option>
+                <option value="Mantenimiento">Mantenimiento</option>
 
-            <!-- TÍTULO -->
+            </select>
 
-            <div class="form-group">
+        </div>
 
-                <label for="editTitulo">
+        <div class="field">
 
-                    Título de la propuesta
+            <label for="editTipo">
+                Tipo de Kaizen
+            </label>
 
-                </label>
+            <select id="editTipo">
 
-                <input
-                    type="text"
-                    id="editTitulo">
+                <option value="Quick">
+                    Quick Kaizen (+1 punto)
+                </option>
 
-            </div>
+                <option value="Standard">
+                    Standard Kaizen (+3 puntos)
+                </option>
 
-            <!-- ÁREA -->
+            </select>
 
-            <div class="form-group">
+        </div>
 
-                <label for="editArea">
+        <div class="field">
 
-                    Área
+            <label for="editDescripcion">
+                Descripción
+            </label>
 
-                </label>
+            <textarea id="editDescripcion"></textarea>
 
-                <select id="editArea">
+        </div>
 
-                    <option value="">
+        <div class="modal-actions">
 
-                        Selecciona un área
+            <button id="guardarEdicion"
+                    type="button"
+                    class="btn-primary">
 
-                    </option>
+                Guardar cambios
 
-                    <option value="Extrusión">
+            </button>
 
-                        Extrusión
-
-                    </option>
-
-                    <option value="PMP">
-
-                        PMP
-
-                    </option>
-
-                    <option value="Piezas Especiales">
-
-                        Piezas Especiales
-
-                    </option>
-
-                    <option value="Almacén">
-
-                        Almacén
-
-                    </option>
-
-                    <option value="Logística">
-
-                        Logística
-
-                    </option>
-
-                    <option value="Admin">
-
-                        Admin
-
-                    </option>
-
-                    <option value="Calidad">
-
-                        Calidad
-
-                    </option>
-
-                    <option value="Mantenimiento">
-
-                        Mantenimiento
-
-                    </option>
-
-                </select>
-
-            </div>
-
-            <!-- TIPO -->
-
-            <div class="form-group">
-
-                <label for="editTipo">
-
-                    Tipo de Kaizen
-
-                </label>
-
-                <select id="editTipo">
-
-                    <option value="Quick">
-
-                        Quick — 1 punto
-
-                    </option>
-
-                    <option value="Standard">
-
-                        Standard — 3 puntos
-
-                    </option>
-
-                </select>
-
-            </div>
-
-            <!-- DESCRIPCIÓN -->
-
-            <div class="form-group">
-
-                <label for="editDescripcion">
-
-                    Descripción de la mejora
-
-                </label>
-
-                <textarea
-                    id="editDescripcion"
-                    rows="4"></textarea>
-
-            </div>
-
-            <!-- ACCIONES -->
-
-            <div class="modal-actions">
-
-                <button
-                    id="cancelarEdicion"
+            <button id="cancelarEdicion"
+                    type="button"
                     class="btn-secondary">
 
-                    Cancelar
+                Cancelar
 
-                </button>
-
-                <button
-                    id="guardarEdicion"
-                    class="btn-primary">
-
-                    Guardar cambios
-
-                </button>
-
-            </div>
+            </button>
 
         </div>
 
     </div>
 
-    <!-- =====================================
-         LIBRERÍA DE EXPORTACIÓN EXCEL
-    ====================================== -->
+</div>
 
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<!-- =========================================
+     NUEVO MODAL DE ASIGNACIÓN DE PILARES
+========================================= -->
 
-    <!-- =====================================
-         JAVASCRIPT PRINCIPAL
-    ====================================== -->
+<div id="modalAsignacion"
+     class="modal-overlay hidden">
 
-    <script src="app.js"></script>
+    <div class="modal-card"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="asignacionHeading">
+
+        <div class="modal-heading">
+
+            <h2 id="asignacionHeading">
+                Asignar pilar y líder
+            </h2>
+
+            <button type="button"
+                    class="close-modal"
+                    aria-label="Cerrar"
+                    onclick="cerrarAsignacion()">
+                ×
+            </button>
+
+        </div>
+
+        <div class="assignment-proposal">
+
+            <small>PROPUESTA KAIZEN</small>
+
+            <strong id="asignacionTitulo"></strong>
+
+        </div>
+
+        <!-- SELECCIÓN DEL PILAR -->
+
+        <div class="field">
+
+            <label for="asignacionPilar">
+                Pilar responsable
+            </label>
+
+            <select id="asignacionPilar"
+                    onchange="actualizarLider()">
+
+                <option value="">
+                    Seleccionar pilar
+                </option>
+
+                <option value="SSMA">
+                    SSMA - Seguridad
+                </option>
+
+                <option value="GA">
+                    GA - Gestión Autónoma
+                </option>
+
+                <option value="QA">
+                    QA - Calidad
+                </option>
+
+                <option value="MP">
+                    MP - Mantenimiento
+                </option>
+
+                <option value="LOG">
+                    LOG - Logística
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- LÍDER AUTOMÁTICO -->
+
+        <div class="field">
+
+            <label for="asignacionLider">
+                Líder responsable
+            </label>
+
+            <input id="asignacionLider"
+                   type="text"
+                   readonly
+                   placeholder="Se asignará automáticamente">
+
+            <p class="helper-text">
+                El líder se determina según
+                el pilar seleccionado.
+            </p>
+
+        </div>
+
+        <!-- TELÉFONO PARA WHATSAPP -->
+
+        <div class="field">
+
+            <label for="asignacionTelefono">
+                WhatsApp del colaborador (opcional)
+            </label>
+
+            <input id="asignacionTelefono"
+                   type="tel"
+                   inputmode="tel"
+                   autocomplete="off"
+                   placeholder="09XX XXX XXX">
+
+            <p class="helper-text">
+                Introduce el número únicamente
+                si deseas notificar al colaborador.
+                No se guardará en la base de datos.
+            </p>
+
+        </div>
+
+        <!-- ACCIONES DE ASIGNACIÓN -->
+
+        <div class="modal-actions">
+
+            <button id="guardarAsignacionBtn"
+                    type="button"
+                    class="btn-primary"
+                    onclick="guardarAsignacion(false)">
+
+                Guardar asignación
+
+            </button>
+
+            <button id="notificarAsignacionBtn"
+                    type="button"
+                    class="btn-whatsapp"
+                    onclick="guardarAsignacion(true)">
+
+                Guardar y notificar por WhatsApp
+
+            </button>
+
+            <!-- ENLACE GENERADO DESPUÉS DE GUARDAR -->
+
+            <a id="asignacionWhatsApp"
+               class="whatsapp-ready hidden"
+               target="_blank"
+               rel="noopener noreferrer">
+
+                ✓ Asignación guardada. Abrir WhatsApp
+
+                <small>
+                    Revisa el mensaje y presiona
+                    enviar en WhatsApp.
+                </small>
+
+            </a>
+
+            <button type="button"
+                    class="btn-secondary"
+                    onclick="cerrarAsignacion()">
+
+                Cerrar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================================
+     LIBRERÍAS Y JAVASCRIPT
+========================================= -->
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<script src="app.js"></script>
 
 </body>
-
 </html>
